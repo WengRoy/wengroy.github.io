@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>藥師少女的獨語 - いのちの灯火 (鋼琴譜)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Serif+TC:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1a1a1a;
+            --accent: #8b2500;
+            --bg: #e8e4da;
+            --paper: #fffef8;
+            --muted: #888;
+            --border: #d4c9a8;
+            /* A4 aspect: 210mm x 297mm */
+            --page-w: 794px;   /* ~210mm at 96dpi */
+            --page-h: 1123px;  /* ~297mm at 96dpi */
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Cormorant Garamond", "Noto Serif TC", "Noto Serif JP", serif;
+            background-color: var(--bg);
+            color: var(--ink);
+            padding: 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* ── Each .sheet = one printed A4 page ── */
+        .sheet {
+            width: var(--page-w);
+            min-height: var(--page-h);
+            background: var(--paper);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            padding: 40px 44px 36px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ── Logo ── */
+        .logo-wrap { text-align: center; margin-bottom: 10px; }
+        .logo-wrap svg { display: inline-block; }
+
+        /* ── Header ── */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1.5px solid var(--accent);
+        }
+        .header h1 {
+            font-family: "Noto Serif JP", "Noto Serif TC", serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--accent);
+            letter-spacing: 0.06em;
+            margin-bottom: 2px;
+        }
+        .header .subtitle {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--ink);
+        }
+        .header .meta {
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* ── Score ── */
+        .score-container {
+            padding: 8px 4px;
+        }
+        .score-container svg { width: 100% !important; }
+        .section-label {
+            font-family: "Cormorant Garamond", serif;
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--accent);
+            margin: 14px 0 3px 4px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* ── Page number ── */
+        .page-num {
+            position: absolute;
+            bottom: 14px;
+            right: 20px;
+            font-size: 0.72rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .footer-text {
+            position: absolute;
+            bottom: 14px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 820px) {
+            .sheet {
+                width: 100%;
+                min-height: auto;
+                padding: 24px 16px 20px;
+                border-radius: 0;
+                box-shadow: none;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        /* ═══════════════════════════════════════════
+           Print: A4 portrait, one .sheet per page
+           ═══════════════════════════════════════════ */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+            html, body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                gap: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .sheet {
+                width: 100% !important;
+                min-height: auto !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 6mm 8mm !important;
+                margin: 0 !important;
+                page-break-after: always;
+                break-after: page;
+            }
+            .sheet:last-child {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            .score-container {
+                overflow: visible !important;
+            }
+            .score-container svg {
+                width: 100% !important;
+                display: block !important;
+                visibility: visible !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════ PAGE 1: Title + Prelude + Verse 1 ═══════ -->
+<div class="sheet">
+    <div class="logo-wrap">
+        <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="32" cy="32" r="30" fill="none" stroke="#8b2500" stroke-width="2.2"/>
+            <circle cx="32" cy="32" r="26" fill="none" stroke="#d4c9a8" stroke-width="0.7"/>
+            <text x="32" y="32" text-anchor="middle" dominant-baseline="central"
+                  font-family="Noto Serif TC, Noto Serif JP, serif"
+                  font-size="28" font-weight="900" fill="#8b2500">藥</text>
+        </svg>
+    </div>
+    <div class="header">
+        <h1>いのちの灯火 (Light of Life)</h1>
+        <div class="subtitle">藥師少女的獨語 — 鋼琴伴奏譜</div>
+        <div class="meta">Key: G major &nbsp;|&nbsp; Composer: Alisa Okehazama &nbsp;|&nbsp; Vocal: Rimu Miyake</div>
+    </div>
+    <div class="section-label">Prelude</div>
+    <div id="s-prelude" class="score-container"></div>
+    <div class="section-label">Verse 1</div>
+    <div id="s-verse1" class="score-container"></div>
+    <span class="page-num">1</span>
+</div>
+
+<!-- ═══════ PAGE 2: Pre-Chorus + Interlude ═══════ -->
+<div class="sheet">
+    <div class="section-label">Pre-Chorus</div>
+    <div id="s-prechorus" class="score-container"></div>
+    <div class="section-label">Interlude</div>
+    <div id="s-interlude" class="score-container"></div>
+    <span class="page-num">2</span>
+</div>
+
+<!-- ═══════ PAGE 3: Chorus ═══════ -->
+<div class="sheet">
+    <div class="section-label">Chorus</div>
+    <div id="s-chorus" class="score-container"></div>
+    <span class="page-num">3</span>
+</div>
+
+<!-- ═══════ PAGE 4: Post-Chorus ═══════ -->
+<div class="sheet">
+    <div class="section-label">Post-Chorus</div>
+    <div id="s-postchorus" class="score-container"></div>
+    <span class="page-num">4</span>
+</div>
+
+<!-- ═══════ PAGE 5: Ending ═══════ -->
+<div class="sheet">
+    <div class="section-label">Ending</div>
+    <div id="s-ending" class="score-container"></div>
+    <div class="footer-text">Piano arrangement — rendered with ABCjs</div>
+    <span class="page-num">5</span>
+</div>
+
+<script>
+const R = {
+    responsive: 'resize',
+    paddingbottom: 16,
+    paddingtop: 10,
+    staffwidth: 680,
+    wrap: { minSpacing: 1.4, maxSpacing: 2.6, preferredMeasuresPerLine: 4 },
+    staffsep: 36,
+    gchordfont: 'Cormorant Garamond 12 italic',
+    vocalfont: 'Cormorant Garamond 11',
+    titlefont: '',
+};
+
+const H = (unit='1/4') => `X:1
+T:
+M:4/4
+L:${unit}
+Q:1/4=72
+K:G
+%%score {V1 | V2}
+V:V1 clef=treble name="R.H."
+V:V2 clef=bass name="L.H."
+`;
+
+// ── PRELUDE (4 bars) ──
+const prelude = H('1/8') +
+`[V:V1] A2 d2 f2 e2 | B2 A2 d2 GF | A2 d2 f2 e2 | B2 A2 d2 AG |
+[V:V2] [D,A,]4 [D,A,]4 | [G,,D,]4 [G,,D,]4 | [D,A,]4 [D,A,]4 | [G,,D,]4 [G,,D,]4 |
+`;
+
+// ── VERSE 1 (8 bars) ──
+const verse1 = H() +
+`[V:V1] "G"G4 | "D/F#"F4 | "Em"E4 | "D"D4 |
+w: meguri | meguru | inochi | moyasu |
+"G"G2 G2 | "D/F#"F2 F2 | "Em"E2 E E | "D"D D D D |
+w: mune no | oku no | itame sae | kate ni shite |
+[V:V2] [G,,B,,D,]4 | [F,,A,,D,]4 | [E,,G,,B,,]4 | [D,,A,,D,]4 |
+[G,,B,,D,]2 [G,,B,,D,]2 | [F,,A,,D,]2 [F,,A,,D,]2 | [E,,G,,B,,]2 [E,,G,,B,,]2 | [D,,A,,D,]2 [D,,A,,D,]2 |
+`;
+
+// ── PRE-CHORUS (16 bars) ──
+const prechorus = H() +
+`[V:V1] "Bm"B2 B B | B2 B2 | "D/F#"F4 | "G"G4 |
+w: shizumiyuku taiyou ga | warau nara | (anata | o) |
+G2 G G | G4 | "A"A2 A2 | "Bm"B4 |
+w: dare yori mo | umaku | waratte miseru | (omotte) |
+B2 B B | B4 | "D/F#"F2 F2 | "G"G4 |
+w: nakikata wa mou | wakaranai | keredo (kimeta | no) |
+G2 G G | G2 G G | "Bm"B4 | "A"A2 A2 |
+w: kono butai no | okareta basho de | saite | chiru wa |
+[V:V2] [B,,D,F,]2 [B,,D,F,]2 | [B,,D,F,]2 [B,,D,F,]2 | [F,,A,,D,]4 | [G,,B,,D,]4 |
+[G,,B,,D,]2 [G,,B,,D,]2 | [G,,B,,D,]4 | [A,,^C,E,]2 [A,,^C,E,]2 | [B,,D,F,]4 |
+[B,,D,F,]2 [B,,D,F,]2 | [B,,D,F,]4 | [F,,A,,D,]2 [F,,A,,D,]2 | [G,,B,,D,]4 |
+[G,,B,,D,]2 [G,,B,,D,]2 | [G,,B,,D,]2 [G,,B,,D,]2 | [B,,D,F,]4 | [A,,^C,E,]2 [A,,^C,E,]2 |
+`;
+
+// ── INTERLUDE (3 bars) ──
+const interlude = H('1/8') +
+`[V:V1] A2 d2 f2 e2 | B2 A2 d2 GF | a8 |
+[V:V2] [D,A,]4 [D,A,]4 | [G,,D,]4 [G,,D,]4 | [D,A,]8 |
+`;
+
+// ── CHORUS (20 bars) ──
+const chorus = H() +
+`[V:V1] "Bm"B4 | "D/F#"F4 | "G"G2 G2 | "A"A4 |
+w: moeagare | inochi | no tomoshibi | yo |
+"A#m#5"^A2 ^A ^A | "Bm"B2 B2 | "D/F#"F4 | z4 |
+w: kono yoru ni | owari o | soete | _ |
+"G"G4 | z4 | "A"A4 | "A#m#5"z4 |
+w: irodori | _ | mashou | _ |
+"Bm"B4 | "D/F#"F4 | "G"G2 G2 | "A"A "A#m#5"^A "Bm"B B/2 B/2 |
+w: negaigoto | tsuki | ni kakushi | ima o odorinuku wa |
+"D/F#"F2 F2 | "G"G2 G G | z4 | z4 |
+w: mada minu | sora e to | _ | _ |
+[V:V2] [B,,D,F,]4 | [F,,A,,D,]4 | [G,,B,,D,]2 [G,,B,,D,]2 | [A,,^C,E,]4 |
+[^A,,^C,F,]2 [^A,,^C,F,]2 | [B,,D,F,]2 [B,,D,F,]2 | [F,,A,,D,]4 | [F,,A,,D,]4 |
+[G,,B,,D,]4 | [G,,B,,D,]4 | [A,,^C,E,]4 | [^A,,^C,F,]4 |
+[B,,D,F,]4 | [F,,A,,D,]4 | [G,,B,,D,]2 [G,,B,,D,]2 | [A,,^C,E,] [^A,,^C,F,] [B,,D,F,]2 |
+[F,,A,,D,]2 [F,,A,,D,]2 | [G,,B,,D,]2 [G,,B,,D,]2 | z4 | z4 |
+`;
+
+// ── POST-CHORUS (dual lyrics) ──
+const postchorus = H() +
+`[V:V1] "A"A4 | "Bm"B2 B B | B B B B | "A"A A A A |
+w: hikari | _ _ _ | _ _ _ _ | todoku _ _ _ |
+w: _ | (fuyu o kosenai | inochi mo yagate wa) | (megumi to naru no |
+"G"G2 G G | "A"A4 | z4 | z4 |
+w: made _ _ | _ | _ | _ |
+w: kibou ni kawaru | yo) | _ | _ |
+"Bm"B2 B2 | B B B B | "A"A2 A A | "G"G2 G G |
+w: sou _ | _ _ _ _ | mayoi _ _ | naku _ _ |
+w: (dakara waratte | watashi wa heiki yo) | (moetsukiyou to mamoreru | mono ga aru |
+"A"A4 | z4 | z4 | z4 |
+w: _ | _ | _ | _ |
+w: no) | _ | _ | _ |
+[V:V2] [A,,^C,E,]4 | [B,,D,F,]2 [B,,D,F,]2 | [B,,D,F,]2 [B,,D,F,]2 | [A,,^C,E,]2 [A,,^C,E,]2 |
+[G,,B,,D,]2 [G,,B,,D,]2 | [A,,^C,E,]4 | z4 | z4 |
+[B,,D,F,]2 [B,,D,F,]2 | [B,,D,F,]2 [B,,D,F,]2 | [A,,^C,E,]2 [A,,^C,E,]2 | [G,,B,,D,]2 [G,,B,,D,]2 |
+[A,,^C,E,]4 | z4 | z4 | z4 |
+`;
+
+// ── ENDING (12 bars) ──
+const ending = H() +
+`[V:V1] "Bm"B2 B2 | B2 B2 | "A"A2 A2 | A4 |
+w: saa na | mo naki | yoake ga | matteru |
+"G"G2 G2 | G4 | "A"A4 | "A#m#5"z2 "Bm"z2 |
+w: arata na | michi | terasou | _ |
+"A"A4 | A4 | "G"G2 G2 | G2 G2 |]
+w: furuete | naiteru | anata ga | waraeru made |
+[V:V2] [B,,D,F,]2 [B,,D,F,]2 | [B,,D,F,]2 [B,,D,F,]2 | [A,,^C,E,]2 [A,,^C,E,]2 | [A,,^C,E,]4 |
+[G,,B,,D,]2 [G,,B,,D,]2 | [G,,B,,D,]4 | [A,,^C,E,]4 | [^A,,^C,F,]2 [B,,D,F,]2 |
+[A,,^C,E,]4 | [A,,^C,E,]4 | [G,,B,,D,]2 [G,,B,,D,]2 | [G,,B,,D,]4 |]
+`;
+
+ABCJS.renderAbc("s-prelude", prelude, R);
+ABCJS.renderAbc("s-verse1", verse1, R);
+ABCJS.renderAbc("s-prechorus", prechorus, R);
+ABCJS.renderAbc("s-interlude", interlude, R);
+ABCJS.renderAbc("s-chorus", chorus, R);
+ABCJS.renderAbc("s-postchorus", postchorus, R);
+ABCJS.renderAbc("s-ending", ending, R);
+</script>
+</body>
+</html>
