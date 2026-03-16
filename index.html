@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roy's Lab 羅伊的實驗室</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐻</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* === RESET & BASE === */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --comic-black: #1a1a1a;
+            --comic-white: #fdf6e3;
+            --warm-cream: #fff8eb;
+            --warm-orange: #e8713a;
+            --warm-brown: #6b4226;
+            --warm-gold: #d4a853;
+            --warm-red: #c0392b;
+            --warm-blue: #2e86ab;
+            --warm-green: #27ae60;
+            --panel-shadow: 4px 4px 0px var(--comic-black);
+            --border-thick: 3px solid var(--comic-black);
+            --border-thicker: 5px solid var(--comic-black);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Baloo 2', sans-serif;
+            background: var(--warm-cream);
+            color: var(--comic-black);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* === HALFTONE DOT PATTERN === */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
+            background-size: 12px 12px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* === COMIC HEADER / NAV === */
+        .comic-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: var(--warm-cream);
+            border-bottom: var(--border-thicker);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--warm-brown);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-title span {
+            color: var(--warm-orange);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--comic-black);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border: 2px solid var(--comic-black);
+            border-radius: 20px;
+            background: var(--comic-white);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            background: var(--warm-orange);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 2px 2px 0px var(--comic-black);
+        }
+
+        /* === HERO SECTION (COMIC PANEL) === */
+        .hero {
+            position: relative;
+            margin-top: 60px;
+            padding: 40px 24px 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            min-height: calc(100vh - 60px);
+            flex-wrap: wrap;
+        }
+
+        .hero-panel {
+            position: relative;
+            border: var(--border-thicker);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 8px 8px 0px var(--comic-black);
+            max-width: 420px;
+            background: white;
+            transform: rotate(-1.5deg);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-panel:hover {
+            transform: rotate(0deg) scale(1.02);
+        }
+
+        .hero-panel img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* SPEECH BUBBLE */
+        .speech-bubble {
+            position: relative;
+            background: white;
+            border: var(--border-thick);
+            border-radius: 24px;
+            padding: 20px 28px;
+            max-width: 420px;
+            box-shadow: var(--panel-shadow);
+            transform: rotate(1deg);
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 40px;
+            border: 12px solid transparent;
+            border-right: 20px solid var(--comic-black);
+        }
+
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            left: -14px;
+            top: 42px;
+            border: 10px solid transparent;
+            border-right: 17px solid white;
+            z-index: 1;
+        }
+
+        .speech-bubble h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--warm-brown);
+            margin-bottom: 8px;
+        }
+
+        .speech-bubble h1 span {
+            color: var(--warm-orange);
+        }
+
+        .speech-bubble p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .speech-bubble .subtitle {
+            display: inline-block;
+            background: var(--warm-orange);
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            border: 2px solid var(--comic-black);
+        }
+
+        /* === SPEED LINES (decorative) === */
+        .speed-lines {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.04;
+            background: repeating-conic-gradient(
+                var(--comic-black) 0deg 1deg,
+                transparent 1deg 10deg
+            );
+        }
+
+        /* === SECTION TITLE === */
+        .section-title {
+            text-align: center;
+            font-family: 'Baloo 2', cursive;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--warm-brown);
+            margin-bottom: 12px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-header p {
+            font-size: 1rem;
+            color: #777;
+            font-weight: 500;
+        }
+
+        /* === ACTION WORD (漫畫狀聲詞) === */
+        .action-word {
+            display: inline-block;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--warm-red);
+            transform: rotate(-5deg);
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        /* === PROJECT CARDS === */
+        .projects {
+            position: relative;
+            padding: 60px 24px 80px;
+            z-index: 1;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .project-card {
+            position: relative;
+            background: white;
+            border: var(--border-thicker);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 6px 6px 0px var(--comic-black);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .project-card:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0px var(--comic-black);
+        }
+
+        .project-card:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--comic-black);
+        }
+
+        .card-banner {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-banner-1 {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .card-banner-2 {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+        }
+
+        .card-banner svg {
+            width: 80px;
+            height: 80px;
+            opacity: 0.9;
+        }
+
+        /* Halftone overlay on card banners */
+        .card-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 6px 6px;
+            pointer-events: none;
+        }
+
+        .card-body {
+            padding: 20px 24px 24px;
+        }
+
+        .card-tag {
+            display: inline-block;
+            background: var(--warm-gold);
+            color: var(--comic-black);
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            border: 2px solid var(--comic-black);
+            margin-bottom: 10px;
+        }
+
+        .card-body h3 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--warm-brown);
+        }
+
+        .card-body p {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .card-arrow {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            background: var(--warm-orange);
+            border: 2px solid var(--comic-black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+        .project-card:hover .card-arrow {
+            transform: translate(3px, 0);
+        }
+
+        .card-arrow svg {
+            width: 18px;
+            height: 18px;
+            stroke: white;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        /* === FOOTER === */
+        .comic-footer {
+            position: relative;
+            border-top: var(--border-thicker);
+            padding: 32px 24px;
+            text-align: center;
+            background: var(--comic-white);
+        }
+
+        .footer-text {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--warm-brown);
+        }
+
+        .footer-text a {
+            color: var(--warm-orange);
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* === DECORATIVE ELEMENTS === */
+        .deco-star {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.12;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* === ENTRANCE ANIMATIONS === */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .fade-up.delay-1 { transition-delay: 0.15s; }
+        .fade-up.delay-2 { transition-delay: 0.3s; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column;
+                padding: 30px 16px 40px;
+                gap: 24px;
+            }
+
+            .hero-panel {
+                max-width: 280px;
+                transform: rotate(0deg);
+            }
+
+            .speech-bubble {
+                transform: rotate(0deg);
+                max-width: 100%;
+            }
+
+            .speech-bubble::after,
+            .speech-bubble::before {
+                left: 40px;
+                top: -22px;
+                border: 12px solid transparent;
+                border-bottom: 20px solid var(--comic-black);
+                border-right: none;
+            }
+
+            .speech-bubble::before {
+                left: 42px;
+                top: -16px;
+                border: 10px solid transparent;
+                border-bottom: 17px solid white;
+                border-right: none;
+            }
+
+            .speech-bubble h1 { font-size: 1.8rem; }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .nav-links { display: none; }
+        }
+
+        /* === REDUCED MOTION === */
+        @media (prefers-reduced-motion: reduce) {
+            .fade-up {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+            .hero-panel, .project-card {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="comic-nav">
+        <div class="nav-title">Roy's <span>Lab</span></div>
+        <div class="nav-links">
+            <a href="#projects">作品集</a>
+            <a href="https://github.com/WengRoy" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="speed-lines"></div>
+
+        <div class="hero-panel fade-up">
+            <img src="botroy.jpeg" alt="波特人羅伊 Botroy — 台灣黑熊大叔，戴著墨鏡、豹紋圍巾，叼著煙斗" width="420" height="420">
+        </div>
+
+        <div class="speech-bubble fade-up delay-1">
+            <span class="subtitle">台灣黑熊大叔</span>
+            <h1>嘿！我是<span>波特人羅伊</span></h1>
+            <p>
+                歡迎來到羅伊的實驗室！<br>
+                這裡放著我用 AI 做的各種小工具和作品。<br>
+                進來逛逛吧，讚啦！
+            </p>
+        </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="projects" id="projects">
+        <div class="section-header fade-up">
+            <span class="action-word">BAM!</span>
+            <h2 class="section-title">作品展示</h2>
+            <p>用 AI 打造的實用小工具</p>
+        </div>
+
+        <div class="projects-grid">
+
+            <!-- Card 1: 一弦三音 -->
+            <a href="guitar-fretboard-3nps.html" class="project-card fade-up delay-1">
+                <div class="card-banner card-banner-1">
+                    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="36" y="8" width="8" height="64" rx="4" fill="#e8713a"/>
+                        <rect x="8" y="20" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <rect x="8" y="30" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <rect x="8" y="40" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <rect x="8" y="50" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <rect x="8" y="60" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <circle cx="24" cy="30" r="5" fill="#27ae60"/>
+                        <circle cx="48" cy="40" r="5" fill="#2e86ab"/>
+                        <circle cx="60" cy="50" r="5" fill="#c0392b"/>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <span class="card-tag">吉他工具</span>
+                    <h3>一弦三音音階指板</h3>
+                    <p>五聲音階全指板視覺化顯示，幫助吉他手快速掌握 3-Notes-Per-String 指型。</p>
+                </div>
+                <div class="card-arrow">
+                    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </a>
+
+            <!-- Card 2: 調式音階 -->
+            <a href="guitar-modes.html" class="project-card fade-up delay-2">
+                <div class="card-banner card-banner-2">
+                    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="36" y="8" width="8" height="64" rx="4" fill="#2e86ab"/>
+                        <rect x="8" y="20" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <rect x="8" y="30" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <rect x="8" y="40" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <rect x="8" y="50" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <rect x="8" y="60" width="64" height="3" rx="1.5" fill="#d4a853" opacity="0.7"/>
+                        <circle cx="20" cy="20" r="4" fill="#e8713a"/>
+                        <circle cx="32" cy="30" r="4" fill="#27ae60"/>
+                        <circle cx="48" cy="40" r="4" fill="#d4a853"/>
+                        <circle cx="56" cy="50" r="4" fill="#c0392b"/>
+                        <circle cx="24" cy="60" r="4" fill="#9b59b6"/>
+                        <circle cx="44" cy="20" r="4" fill="#2e86ab"/>
+                        <circle cx="64" cy="60" r="4" fill="#e8713a"/>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <span class="card-tag">吉他工具</span>
+                    <h3>調式音階 & 七和弦</h3>
+                    <p>七種調式音階與七和弦內音的互動式指板，支援任意調性切換。</p>
+                </div>
+                <div class="card-arrow">
+                    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="comic-footer">
+        <p class="footer-text">
+            Roy's Lab 羅伊的實驗室 — Built with AI by
+            <a href="https://github.com/WengRoy" target="_blank" rel="noopener noreferrer">Roy</a>
+            & 波特人羅伊 🐻
+        </p>
+    </footer>
+
+    <!-- INTERSECTION OBSERVER FOR ANIMATIONS -->
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    </script>
+
+</body>
+</html>

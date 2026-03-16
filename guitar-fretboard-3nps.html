@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>吉他指板 — 一弦三音音階</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎸</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        #app {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+        #controls {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        .control-group:last-of-type {
+            margin-bottom: 0;
+        }
+        .control-group label {
+            display: block;
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: #0f3460;
+            color: #ccc;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .btn:hover {
+            background: #1a5276;
+            border-color: #3498db;
+        }
+        .btn.active {
+            background: #e94560;
+            border-color: #e94560;
+            color: white;
+            font-weight: bold;
+        }
+        #scale-info {
+            margin-top: 15px;
+            padding: 12px 16px;
+            background: #0f3460;
+            border-radius: 8px;
+            text-align: center;
+        }
+        #scale-info .scale-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #e94560;
+        }
+        #scale-info .scale-notes {
+            font-size: 1.05em;
+            color: #aaa;
+            margin-top: 4px;
+            letter-spacing: 3px;
+        }
+        #scale-info .fret-range {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 4px;
+        }
+        #fretboard-container {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 15px 10px;
+            overflow-x: auto;
+        }
+        #fretboard {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        #legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 15px;
+            padding: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85em;
+            color: #999;
+        }
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>🎸 吉他指板 — 一弦三音 (3NPS) 音階</h1>
+        <div id="controls">
+            <div class="control-group">
+                <label>調性 Key</label>
+                <div id="key-buttons" class="btn-group"></div>
+            </div>
+            <div class="control-group">
+                <label>音階類型</label>
+                <div id="scale-buttons" class="btn-group"></div>
+            </div>
+            <div id="scale-info">
+                <div class="scale-name"></div>
+                <div class="scale-notes"></div>
+                <div class="fret-range"></div>
+            </div>
+        </div>
+        <div id="fretboard-container">
+            <svg id="fretboard"></svg>
+        </div>
+        <div id="legend"></div>
+        <div style="text-align:center;margin-top:16px">
+            <a href="guitar-modes.html" style="color:#555;font-size:0.85em;text-decoration:none"
+               onmouseover="this.style.color='#3498db'" onmouseout="this.style.color='#555'">
+                → 調式音階 & 七和弦內音指板
+            </a>
+        </div>
+    </div>
+
+<script>
+// ===== 音樂理論資料 =====
+const KEYS = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+const KEY_DISPLAY = {
+    'C': 'C', 'C#': 'C#', 'D': 'D', 'Eb': 'Eb', 'E': 'E', 'F': 'F',
+    'F#': 'F#', 'G': 'G', 'Ab': 'Ab', 'A': 'A', 'Bb': 'Bb', 'B': 'B'
+};
+
+const MAJOR_INTERVALS = [0, 2, 4, 5, 7, 9, 11];
+const MINOR_INTERVALS = [0, 2, 3, 5, 7, 8, 10];
+const MAJOR_PENTA_INTERVALS = [0, 2, 4, 7, 9];
+const MINOR_PENTA_INTERVALS = [0, 3, 5, 7, 10];
+
+// 各調音階的正確音名拼寫
+const SCALE_NOTE_NAMES = {
+    'C':  { major: ['C','D','E','F','G','A','B'],       minor: ['C','D','Eb','F','G','Ab','Bb'] },
+    'C#': { major: ['C#','D#','E#','F#','G#','A#','B#'], minor: ['C#','D#','E','F#','G#','A','B'] },
+    'D':  { major: ['D','E','F#','G','A','B','C#'],      minor: ['D','E','F','G','A','Bb','C'] },
+    'Eb': { major: ['Eb','F','G','Ab','Bb','C','D'],     minor: ['Eb','F','Gb','Ab','Bb','Cb','Db'] },
+    'E':  { major: ['E','F#','G#','A','B','C#','D#'],    minor: ['E','F#','G','A','B','C','D'] },
+    'F':  { major: ['F','G','A','Bb','C','D','E'],       minor: ['F','G','Ab','Bb','C','Db','Eb'] },
+    'F#': { major: ['F#','G#','A#','B','C#','D#','E#'],  minor: ['F#','G#','A','B','C#','D','E'] },
+    'G':  { major: ['G','A','B','C','D','E','F#'],       minor: ['G','A','Bb','C','D','Eb','F'] },
+    'Ab': { major: ['Ab','Bb','C','Db','Eb','F','G'],    minor: ['Ab','Bb','Cb','Db','Eb','Fb','Gb'] },
+    'A':  { major: ['A','B','C#','D','E','F#','G#'],     minor: ['A','B','C','D','E','F','G'] },
+    'Bb': { major: ['Bb','C','D','Eb','F','G','A'],      minor: ['Bb','C','Db','Eb','F','Gb','Ab'] },
+    'B':  { major: ['B','C#','D#','E','F#','G#','A#'],   minor: ['B','C#','D','E','F#','G','A'] },
+};
+
+const SCALE_TYPES = [
+    { id: 'major', name: '大調 Major' },
+    { id: 'minor', name: '小調 Minor' },
+    { id: 'majorPenta', name: '大調五聲 Major Penta' },
+    { id: 'minorPenta', name: '小調五聲 Minor Penta' },
+];
+
+// 音階級數顏色 (7音)
+const DEGREE_COLORS_7 = [
+    '#e74c3c', // 1 根音 (紅)
+    '#e67e22', // 2 (橘)
+    '#f1c40f', // 3 (黃)
+    '#2ecc71', // 4 (綠)
+    '#3498db', // 5 (藍)
+    '#9b59b6', // 6 (紫)
+    '#1abc9c', // 7 (青)
+];
+const DEGREE_LABELS_7 = ['1 根音', '2', '3', '4', '5', '6', '7'];
+
+// 音階級數顏色 (5音五聲)
+const DEGREE_COLORS_5 = [
+    '#e74c3c', // 1 根音 (紅)
+    '#e67e22', // 2/b3 (橘)
+    '#2ecc71', // 3/4 (綠)
+    '#3498db', // 5 (藍)
+    '#9b59b6', // 6/b7 (紫)
+];
+const DEGREE_LABELS_5_MAJOR = ['1 根音', '2', '3', '5', '6'];
+const DEGREE_LABELS_5_MINOR = ['1 根音', 'b3', '4', '5', 'b7'];
+
+// 吉他弦的 MIDI 音高 (6弦→1弦: E2 A2 D3 G3 B3 E4)
+const STRING_MIDI = [40, 45, 50, 55, 59, 64];
+const STRING_NAMES = ['6E', '5A', '4D', '3G', '2B', '1E'];
+
+// ===== SVG 繪圖常數 =====
+const MARGIN_LEFT = 70;
+const MARGIN_TOP = 38;
+const FRET_WIDTH = 58;
+const STRING_GAP = 36;
+const NUM_FRETS = 16; // 顯示 0~15 格
+const NOTE_RADIUS = 15;
+const SVG_W = MARGIN_LEFT + NUM_FRETS * FRET_WIDTH + 30;
+const SVG_H = MARGIN_TOP + 5 * STRING_GAP + 50;
+
+// 指板記號 (Inlay dots)
+const INLAY_FRETS = [3, 5, 7, 9, 15];
+const DOUBLE_INLAY = [12];
+
+// ===== 狀態 =====
+let currentKey = 'C';
+let currentScale = 'major';
+
+// ===== 工具函式 =====
+function noteNameToSemitone(name) {
+    const base = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+    let semi = base[name[0]];
+    for (let i = 1; i < name.length; i++) {
+        if (name[i] === '#') semi++;
+        if (name[i] === 'b') semi--;
+    }
+    return ((semi % 12) + 12) % 12;
+}
+
+// 取得音階資訊
+function getScaleInfo(key, scaleType) {
+    if (scaleType === 'majorPenta') {
+        const parent = SCALE_NOTE_NAMES[key].major;
+        return {
+            noteNames: [parent[0], parent[1], parent[2], parent[4], parent[5]],
+            intervals: MAJOR_PENTA_INTERVALS,
+            isPenta: true,
+            displayName: `${key} 大調五聲`,
+            degreeColors: DEGREE_COLORS_5,
+            degreeLabels: DEGREE_LABELS_5_MAJOR,
+        };
+    }
+    if (scaleType === 'minorPenta') {
+        const parent = SCALE_NOTE_NAMES[key].minor;
+        return {
+            noteNames: [parent[0], parent[2], parent[3], parent[4], parent[6]],
+            intervals: MINOR_PENTA_INTERVALS,
+            isPenta: true,
+            displayName: `${key} 小調五聲`,
+            degreeColors: DEGREE_COLORS_5,
+            degreeLabels: DEGREE_LABELS_5_MINOR,
+        };
+    }
+    const typeName = scaleType === 'major' ? '大調' : '小調';
+    return {
+        noteNames: SCALE_NOTE_NAMES[key][scaleType],
+        intervals: scaleType === 'major' ? MAJOR_INTERVALS : MINOR_INTERVALS,
+        isPenta: false,
+        displayName: `${key} ${typeName}`,
+        degreeColors: DEGREE_COLORS_7,
+        degreeLabels: DEGREE_LABELS_7,
+    };
+}
+
+// 計算全指板音階位置 (用於五聲音階)
+function calculateAllPositions(key, scaleType) {
+    const info = getScaleInfo(key, scaleType);
+    const scaleSemitones = info.intervals.map(i => (noteNameToSemitone(key) + i) % 12);
+    const positions = [];
+
+    for (let s = 0; s < 6; s++) {
+        const openSemitone = STRING_MIDI[s] % 12;
+        for (let fret = 0; fret <= NUM_FRETS; fret++) {
+            const noteSemitone = (openSemitone + fret) % 12;
+            const degreeIdx = scaleSemitones.indexOf(noteSemitone);
+            if (degreeIdx !== -1) {
+                positions.push({
+                    string: s,
+                    fret,
+                    name: info.noteNames[degreeIdx],
+                    degree: degreeIdx,
+                    isRoot: degreeIdx === 0,
+                });
+            }
+        }
+    }
+    return positions;
+}
+
+// 計算一弦三音位置
+function calculate3NPS(key, scaleType) {
+    const noteNames = SCALE_NOTE_NAMES[key][scaleType];
+    const intervals = scaleType === 'major' ? MAJOR_INTERVALS : MINOR_INTERVALS;
+    const rootSemitone = noteNameToSemitone(key);
+
+    // 根音在第六弦的琶位
+    const rootFretOn6 = ((rootSemitone - 4) % 12 + 12) % 12; // 4 = E
+    const rootMidi = STRING_MIDI[0] + rootFretOn6;
+
+    // 產生 18 個升序音階音 (6弦 × 3音)
+    const sequence = [];
+    for (let i = 0; i < 18; i++) {
+        const degree = i % 7;
+        const octave = Math.floor(i / 7);
+        const midi = rootMidi + intervals[degree] + octave * 12;
+        sequence.push({ midi, name: noteNames[degree], degree });
+    }
+
+    // 分配到六條弦上，計算琶位
+    const positions = [];
+    for (let s = 0; s < 6; s++) {
+        for (let n = 0; n < 3; n++) {
+            const note = sequence[s * 3 + n];
+            const fret = note.midi - STRING_MIDI[s];
+            positions.push({
+                string: s,
+                fret,
+                name: note.name,
+                degree: note.degree,
+                isRoot: note.degree === 0,
+            });
+        }
+    }
+    return positions;
+}
+
+// ===== SVG 繪製 =====
+function getNoteX(fret) {
+    if (fret === 0) return MARGIN_LEFT - 22;
+    return MARGIN_LEFT + (fret - 0.5) * FRET_WIDTH;
+}
+function getStringY(s) {
+    return MARGIN_TOP + (5 - s) * STRING_GAP;
+}
+
+function renderFretboard() {
+    const info = getScaleInfo(currentKey, currentScale);
+    const positions = info.isPenta
+        ? calculateAllPositions(currentKey, currentScale)
+        : calculate3NPS(currentKey, currentScale);
+    const degreeColors = info.degreeColors;
+
+    // 更新資訊欄
+    document.querySelector('.scale-name').textContent = info.displayName;
+    document.querySelector('.scale-notes').textContent = info.noteNames.join('  ');
+    if (info.isPenta) {
+        document.querySelector('.fret-range').textContent = '全指板顯示 Fret 0 – 15';
+    } else {
+        const frets = positions.map(p => p.fret);
+        const minF = Math.min(...frets);
+        const maxF = Math.max(...frets);
+        document.querySelector('.fret-range').textContent = `把位範圍 Fret ${minF} – ${maxF}`;
+    }
+
+    // 更新圖例
+    const legendEl = document.getElementById('legend');
+    legendEl.innerHTML = '';
+    info.degreeLabels.forEach((label, i) => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `<span class="legend-dot" style="background:${info.degreeColors[i]}"></span>${label}`;
+        legendEl.appendChild(item);
+    });
+
+    // 建構 SVG
+    let svg = '';
+
+    // --- 指板底色 (木紋色) ---
+    svg += `<rect x="${MARGIN_LEFT}" y="${MARGIN_TOP - 16}"
+            width="${NUM_FRETS * FRET_WIDTH}" height="${5 * STRING_GAP + 32}"
+            rx="4" fill="#3e2723" opacity="0.5"/>`;
+
+    // --- Inlay 記號 ---
+    const midY = MARGIN_TOP + 2.5 * STRING_GAP;
+    INLAY_FRETS.forEach(f => {
+        if (f <= NUM_FRETS) {
+            const cx = MARGIN_LEFT + (f - 0.5) * FRET_WIDTH;
+            svg += `<circle cx="${cx}" cy="${midY}" r="6" fill="#555" opacity="0.5"/>`;
+        }
+    });
+    DOUBLE_INLAY.forEach(f => {
+        if (f <= NUM_FRETS) {
+            const cx = MARGIN_LEFT + (f - 0.5) * FRET_WIDTH;
+            svg += `<circle cx="${cx}" cy="${midY - 40}" r="6" fill="#555" opacity="0.5"/>`;
+            svg += `<circle cx="${cx}" cy="${midY + 40}" r="6" fill="#555" opacity="0.5"/>`;
+        }
+    });
+
+    // --- 琶格線 (Fret wires) ---
+    // 上弦枕 (Nut) — 較粗
+    svg += `<line x1="${MARGIN_LEFT}" y1="${MARGIN_TOP - 16}"
+            x2="${MARGIN_LEFT}" y2="${MARGIN_TOP + 5 * STRING_GAP + 16}"
+            stroke="#ddd" stroke-width="5"/>`;
+    // 其餘琶格
+    for (let f = 1; f <= NUM_FRETS; f++) {
+        const x = MARGIN_LEFT + f * FRET_WIDTH;
+        svg += `<line x1="${x}" y1="${MARGIN_TOP - 16}"
+                x2="${x}" y2="${MARGIN_TOP + 5 * STRING_GAP + 16}"
+                stroke="#888" stroke-width="2"/>`;
+    }
+
+    // --- 弦 ---
+    for (let s = 0; s < 6; s++) {
+        const y = getStringY(s);
+        const thickness = 1.5 + (5 - s) * 0.5; // 6弦粗、1弦細
+        svg += `<line x1="${MARGIN_LEFT - 30}" y1="${y}"
+                x2="${MARGIN_LEFT + NUM_FRETS * FRET_WIDTH}" y2="${y}"
+                stroke="#bbb" stroke-width="${thickness}" opacity="0.7"/>`;
+        // 弦名標籤
+        svg += `<text x="${MARGIN_LEFT - 50}" y="${y + 5}"
+                text-anchor="middle" fill="#888" font-size="13" font-family="monospace">
+                ${STRING_NAMES[s]}</text>`;
+    }
+
+    // --- 琶格編號 ---
+    for (let f = 0; f <= NUM_FRETS; f++) {
+        const x = f === 0 ? MARGIN_LEFT - 22 : MARGIN_LEFT + (f - 0.5) * FRET_WIDTH;
+        const y = MARGIN_TOP + 5 * STRING_GAP + 40;
+        svg += `<text x="${x}" y="${y}" text-anchor="middle" fill="#666" font-size="11">
+                ${f}</text>`;
+    }
+
+    // --- 音符圓圈 ---
+    positions.forEach(p => {
+        if (p.fret < 0 || p.fret > NUM_FRETS) return;
+        const cx = getNoteX(p.fret);
+        const cy = getStringY(p.string);
+        const color = degreeColors[p.degree];
+        const r = p.isRoot ? NOTE_RADIUS + 2 : NOTE_RADIUS;
+
+        // 外圈光暈
+        svg += `<circle cx="${cx}" cy="${cy}" r="${r + 3}" fill="${color}" opacity="0.2"/>`;
+        // 主圓
+        svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"
+                stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`;
+        // 音名文字
+        const fontSize = p.name.length > 2 ? 10 : (p.name.length > 1 ? 11 : 13);
+        const textColor = color === '#f1c40f' ? '#333' : '#fff'; // 黃色底用深色字
+        svg += `<text x="${cx}" y="${cy + 4.5}" text-anchor="middle"
+                fill="${textColor}" font-size="${fontSize}" font-weight="bold"
+                font-family="-apple-system, sans-serif">${p.name}</text>`;
+    });
+
+    const svgEl = document.getElementById('fretboard');
+    svgEl.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
+    svgEl.innerHTML = svg;
+}
+
+// ===== UI 初始化 =====
+function initUI() {
+    // 調性按鈕
+    const keyContainer = document.getElementById('key-buttons');
+    KEYS.forEach(key => {
+        const btn = document.createElement('button');
+        btn.className = 'btn' + (key === currentKey ? ' active' : '');
+        btn.textContent = KEY_DISPLAY[key];
+        btn.onclick = () => {
+            currentKey = key;
+            document.querySelectorAll('#key-buttons .btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderFretboard();
+        };
+        keyContainer.appendChild(btn);
+    });
+
+    // 音階按鈕
+    const scaleContainer = document.getElementById('scale-buttons');
+    SCALE_TYPES.forEach(st => {
+        const btn = document.createElement('button');
+        btn.className = 'btn' + (st.id === currentScale ? ' active' : '');
+        btn.textContent = st.name;
+        btn.onclick = () => {
+            currentScale = st.id;
+            document.querySelectorAll('#scale-buttons .btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderFretboard();
+        };
+        scaleContainer.appendChild(btn);
+    });
+
+}
+
+// ===== 啟動 =====
+initUI();
+renderFretboard();
+</script>
+</body>
+</html>
