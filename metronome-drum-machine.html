@@ -725,10 +725,12 @@ function initSynths() {
         noise: { type: 'white' },
         envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 }
     }).connect(masterVol);
-    synths.hihat = new Tone.MetalSynth({
-        frequency: 400, envelope: { attack: 0.001, decay: 0.06, release: 0.01 },
-        harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
+    // 鈸 — 用高頻短促 Synth 模擬（MetalSynth 有 routing 問題）
+    synths.hihat = new Tone.Synth({
+        oscillator: { type: 'square' },
+        envelope: { attack: 0.001, decay: 0.06, sustain: 0, release: 0.03 }
     }).connect(masterVol);
+    synths.hihat._note = 'C7';
     synths.woodblock = new Tone.MembraneSynth({
         pitchDecay: 0.01, octaves: 2, oscillator: { type: 'sine' },
         envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.01 }
@@ -738,10 +740,12 @@ function initSynths() {
         noise: { type: 'white' },
         envelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.08 }
     }).connect(clapFilter);
-    synths.gong = new Tone.MetalSynth({
-        frequency: 120, envelope: { attack: 0.01, decay: 0.8, release: 0.3 },
-        harmonicity: 3.1, modulationIndex: 16, resonance: 800, octaves: 1
+    // 鑼 — 用低頻長衰減 Synth 模擬
+    synths.gong = new Tone.Synth({
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.01, decay: 0.8, sustain: 0.1, release: 0.5 }
     }).connect(masterVol);
+    synths.gong._note = 'C2';
     synths._master = masterVol;
 }
 
@@ -750,10 +754,10 @@ function triggerDrum(id, time) {
     if (!s) return;
     if (id === 'kick')      s.triggerAttackRelease('C1', '8n', time);
     else if (id === 'snare') s.triggerAttackRelease('8n', time);
-    else if (id === 'hihat') s.triggerAttackRelease('16n', time, 0.3);
+    else if (id === 'hihat') s.triggerAttackRelease('C7', '16n', time);
     else if (id === 'woodblock') s.triggerAttackRelease('G4', '16n', time);
     else if (id === 'clap')  s.triggerAttackRelease('16n', time);
-    else if (id === 'gong')  s.triggerAttackRelease('32n', time, 0.5);
+    else if (id === 'gong')  s.triggerAttackRelease('C2', '4n', time);
 }
 
 function setBpm(val) {
