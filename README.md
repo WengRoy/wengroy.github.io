@@ -12,6 +12,7 @@
 | 🎸 調式音階 & 七和弦 | 七種調式音階互動式指板 | [guitar-modes.html](https://wengroy.github.io/guitar-modes.html) |
 | 🎹 いのちの灯火 | 藥師少女的獨語 — 鋼琴譜 | [piano-inochi-no-tomoshibi.html](https://wengroy.github.io/piano-inochi-no-tomoshibi.html) |
 | 🥁 節拍器 & 鼓機 | BPM 控制 + 6 種音色鼓機 | [metronome-drum-machine.html](https://wengroy.github.io/metronome-drum-machine.html) |
+| 🎸 吉他和弦大師 | 16 種和弦 × 12 調 + 和弦進行編排 | [chord-master.html](https://wengroy.github.io/chord-master.html) |
 
 ## 技術
 
