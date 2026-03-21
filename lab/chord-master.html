@@ -279,6 +279,10 @@
             <button class="action-btn btn-play" onclick="playProgression()"><i data-lucide="play"></i> 播放</button>
             <button class="action-btn btn-stop" onclick="stopProgression()"><i data-lucide="square"></i> 停止</button>
             <button class="action-btn btn-clear" onclick="clearProgression()"><i data-lucide="trash-2"></i> 清空</button>
+            <div class="mode-toggle" id="loopToggle">
+                <button class="active" onclick="setLoop(false)">單次</button>
+                <button onclick="setLoop(true)">循環</button>
+            </div>
         </div>
         <div class="actions-row" style="margin-top:8px;">
             <button class="action-btn btn-download" onclick="copyProgression()"><i data-lucide="clipboard-copy"></i> 複製</button>
@@ -334,6 +338,7 @@ let progression = []; // [{name, tab, notes:[{midi}]}]
 let isProgressionPlaying = false;
 let progressionTimeout = null;
 let playMode = 'strum'; // 'strum' | 'arpeggio'
+let loopPlay = false;
 
 // === AUDIO ===
 let pluckSynth = null;
@@ -621,6 +626,13 @@ function setPlayMode(mode) {
     });
 }
 
+function setLoop(on) {
+    loopPlay = on;
+    document.querySelectorAll('#loopToggle button').forEach(b => {
+        b.classList.toggle('active', b.textContent.includes(on ? '循環' : '單次'));
+    });
+}
+
 // === 和弦圖 SVG 生成 ===
 function generateChordDiagramSVG(selected) {
     // 計算格數範圍
@@ -764,33 +776,33 @@ async function playProgression() {
     initAudio();
     isProgressionPlaying = true;
 
-    const cards = document.querySelectorAll('.tab-card');
+    do {
+        const cards = document.querySelectorAll('.tab-card');
 
-    for (let i = 0; i < progression.length; i++) {
-        if (!isProgressionPlaying) break;
+        for (let i = 0; i < progression.length; i++) {
+            if (!isProgressionPlaying) break;
 
-        // 高亮當前卡片
-        cards.forEach((c, ci) => {
-            c.style.outline = ci === i ? '3px solid var(--warm-orange)' : 'none';
-            c.style.outlineOffset = ci === i ? '2px' : '0';
-        });
+            cards.forEach((c, ci) => {
+                c.style.outline = ci === i ? '3px solid var(--warm-orange)' : 'none';
+                c.style.outlineOffset = ci === i ? '2px' : '0';
+            });
 
-        const midis = progression[i].notes.map(n => n.midi);
-        let waitTime;
-        if (playMode === 'arpeggio') {
-            const duration = playArpeggio(midis);
-            waitTime = Math.max(duration * 1000 + 200, 1200);
-        } else {
-            playNotes(midis);
-            waitTime = 1200;
+            const midis = progression[i].notes.map(n => n.midi);
+            let waitTime;
+            if (playMode === 'arpeggio') {
+                const duration = playArpeggio(midis);
+                waitTime = Math.max(duration * 1000 + 200, 1200);
+            } else {
+                playNotes(midis);
+                waitTime = 1200;
+            }
+
+            await new Promise(r => {
+                progressionTimeout = setTimeout(r, waitTime);
+            });
         }
+    } while (loopPlay && isProgressionPlaying);
 
-        await new Promise(r => {
-            progressionTimeout = setTimeout(r, waitTime);
-        });
-    }
-
-    // 清除高亮
     document.querySelectorAll('.tab-card').forEach(c => {
         c.style.outline = 'none';
     });
