@@ -230,13 +230,31 @@
         </div>
     </div>
 
-    <!-- 和弦選擇 -->
+    <!-- 和弦 / 音階選擇 -->
     <div class="panel">
-        <div class="panel-title"><i data-lucide="music"></i> 和弦選擇</div>
+        <div class="panel-title"><i data-lucide="music"></i> 和弦 / 音階選擇</div>
+
+        <!-- Tab 切換：和弦 vs 音階 -->
+        <div class="mode-toggle" id="mainTab" style="margin-bottom:12px; width:fit-content;">
+            <button class="active" onclick="switchTab('chord')">和弦 Chord</button>
+            <button onclick="switchTab('scale')">音階 Scale</button>
+        </div>
+
         <div class="sel-label"><i data-lucide="key-round"></i> 根音 Key</div>
         <div class="sel-row" id="keyRow"></div>
-        <div class="sel-label" style="margin-top:8px;"><i data-lucide="layers"></i> 和弦種類</div>
-        <div class="sel-row" id="typeRow"></div>
+
+        <!-- 和弦種類（和弦模式） -->
+        <div id="chordSection">
+            <div class="sel-label" style="margin-top:8px;"><i data-lucide="layers"></i> 和弦種類</div>
+            <div class="sel-row" id="typeRow"></div>
+        </div>
+
+        <!-- 音階種類（音階模式） -->
+        <div id="scaleSection" style="display:none;">
+            <div class="sel-label" style="margin-top:8px;"><i data-lucide="waves"></i> 音階種類</div>
+            <div class="sel-row" id="scaleRow"></div>
+        </div>
+
         <div class="chord-info" id="chordInfo">
             <span class="chord-name" id="chordName">C</span>
             <span class="chord-notes" id="chordNotes">C E G</span>
@@ -314,6 +332,8 @@ const MARKERS = [3, 5, 7, 9, 12, 15];
 const CHORD_TYPES = [
     { name: 'Major',  suffix: '',     intervals: [0,4,7],       formula: '1-3-5' },
     { name: 'Minor',  suffix: 'm',    intervals: [0,3,7],       formula: '1-b3-5' },
+    { name: '6',      suffix: '6',    intervals: [0,4,7,9],     formula: '1-3-5-6' },
+    { name: 'm6',     suffix: 'm6',   intervals: [0,3,7,9],     formula: '1-b3-5-6' },
     { name: 'Dim',    suffix: 'dim',  intervals: [0,3,6],       formula: '1-b3-b5' },
     { name: 'Aug',    suffix: 'aug',  intervals: [0,4,8],       formula: '1-3-#5' },
     { name: '7',      suffix: '7',    intervals: [0,4,7,10],    formula: '1-3-5-b7' },
@@ -330,9 +350,44 @@ const CHORD_TYPES = [
     { name: 'Add9',   suffix: 'add9', intervals: [0,4,7,14],    formula: '1-3-5-9' },
 ];
 
+// 音階種類
+const SCALE_TYPES = [
+    // 七種調式音階
+    { name: 'Ionian（大調）',    category: '調式',   intervals: [0,2,4,5,7,9,11],    formula: '1-2-3-4-5-6-7' },
+    { name: 'Dorian',           category: '調式',   intervals: [0,2,3,5,7,9,10],    formula: '1-2-b3-4-5-6-b7' },
+    { name: 'Phrygian',         category: '調式',   intervals: [0,1,3,5,7,8,10],    formula: '1-b2-b3-4-5-b6-b7' },
+    { name: 'Lydian',           category: '調式',   intervals: [0,2,4,6,7,9,11],    formula: '1-2-3-#4-5-6-7' },
+    { name: 'Mixolydian',       category: '調式',   intervals: [0,2,4,5,7,9,10],    formula: '1-2-3-4-5-6-b7' },
+    { name: 'Aeolian（小調）',   category: '調式',   intervals: [0,2,3,5,7,8,10],    formula: '1-2-b3-4-5-b6-b7' },
+    { name: 'Locrian',          category: '調式',   intervals: [0,1,3,5,6,8,10],    formula: '1-b2-b3-4-b5-b6-b7' },
+    // 五聲音階
+    { name: '大調五聲',          category: '五聲',   intervals: [0,2,4,7,9],          formula: '1-2-3-5-6' },
+    { name: '小調五聲',          category: '五聲',   intervals: [0,3,5,7,10],         formula: '1-b3-4-5-b7' },
+    // 藍調
+    { name: '藍調音階',          category: '藍調',   intervals: [0,3,5,6,7,10],       formula: '1-b3-4-b5-5-b7' },
+    { name: '大調藍調',          category: '藍調',   intervals: [0,2,3,4,7,9],        formula: '1-2-b3-3-5-6' },
+    // 日本 / 異國
+    { name: '日本小調（陰音階）', category: '異國',   intervals: [0,1,5,7,8],          formula: '1-b2-4-5-b6' },
+    { name: '琉球音階',          category: '異國',   intervals: [0,4,5,7,11],         formula: '1-3-4-5-7' },
+    { name: '平調子',            category: '異國',   intervals: [0,2,3,7,8],          formula: '1-2-b3-5-b6' },
+    { name: 'Phrygian Dominant', category: '異國',   intervals: [0,1,4,5,7,8,10],    formula: '1-b2-3-4-5-b6-b7' },
+    { name: 'Hungarian Minor',   category: '異國',   intervals: [0,2,3,6,7,8,11],    formula: '1-2-b3-#4-5-b6-7' },
+    // 其他常用
+    { name: '和聲小調',          category: '其他',   intervals: [0,2,3,5,7,8,11],    formula: '1-2-b3-4-5-b6-7' },
+    { name: '旋律小調',          category: '其他',   intervals: [0,2,3,5,7,9,11],    formula: '1-2-b3-4-5-6-7' },
+    { name: '半全減音階',        category: '其他',   intervals: [0,1,3,4,6,7,9,10],  formula: '1-b2-b3-3-b5-5-6-b7' },
+    { name: '全音音階',          category: '其他',   intervals: [0,2,4,6,8,10],       formula: '1-2-3-#4-#5-b7' },
+    { name: '半音階',            category: '其他',   intervals: [0,1,2,3,4,5,6,7,8,9,10,11], formula: '所有半音' },
+];
+
+// 音階用的顏色（依音階度數循環）
+const SCALE_COLORS = ['#c0392b','#e8713a','#d4a853','#27ae60','#2e86ab','#8e44ad','#1abc9c','#e74c3c','#f39c12','#3498db','#9b59b6','#16a085'];
+
 // === STATE ===
 let currentKey = 0; // index into NOTES
 let currentType = 0; // index into CHORD_TYPES
+let currentTab = 'chord'; // 'chord' | 'scale'
+let currentScale = 0; // index into SCALE_TYPES
 let selectedNotes = []; // [{string, fret, note, midi}]
 let progression = []; // [{name, tab, notes:[{midi}]}]
 let isProgressionPlaying = false;
@@ -400,6 +455,59 @@ function getNoteRole(noteIdx, keyIdx, typeIdx) {
     return null;
 }
 
+// === TAB 切換 ===
+function switchTab(tab) {
+    currentTab = tab;
+    selectedNotes = [];
+    document.getElementById('chordSection').style.display = tab === 'chord' ? '' : 'none';
+    document.getElementById('scaleSection').style.display = tab === 'scale' ? '' : 'none';
+    document.querySelectorAll('#mainTab button').forEach(b => {
+        b.classList.toggle('active', b.textContent.includes(tab === 'chord' ? '和弦' : '音階'));
+    });
+    update();
+}
+
+// === 取得當前顯示的音符（和弦或音階） ===
+function getCurrentIntervals() {
+    if (currentTab === 'chord') {
+        return CHORD_TYPES[currentType].intervals;
+    } else {
+        return SCALE_TYPES[currentScale].intervals;
+    }
+}
+
+function getCurrentNoteIndices() {
+    const intervals = getCurrentIntervals();
+    return intervals.map(i => (currentKey + i) % 12);
+}
+
+function getCurrentDisplayName() {
+    if (currentTab === 'chord') {
+        return NOTES[currentKey] + CHORD_TYPES[currentType].suffix;
+    } else {
+        return NOTES[currentKey] + ' ' + SCALE_TYPES[currentScale].name;
+    }
+}
+
+function getCurrentFormula() {
+    if (currentTab === 'chord') {
+        return CHORD_TYPES[currentType].formula;
+    } else {
+        return SCALE_TYPES[currentScale].formula;
+    }
+}
+
+// 音階模式下的音符角色（用於上色）
+function getScaleNoteRole(noteIdx) {
+    const scale = SCALE_TYPES[currentScale];
+    const semitones = (noteIdx - currentKey + 12) % 12;
+    const degIdx = scale.intervals.indexOf(semitones);
+    if (degIdx < 0) return null;
+    if (semitones === 0) return 'root';
+    // 用度數索引循環分配顏色
+    return 'scale-' + degIdx;
+}
+
 // === BUILD UI ===
 function buildSelectors() {
     const keyRow = document.getElementById('keyRow');
@@ -419,6 +527,17 @@ function buildSelectors() {
         btn.onclick = () => { currentType = i; selectedNotes = []; update(); };
         typeRow.appendChild(btn);
     });
+
+    // 音階選擇器
+    const scaleRow = document.getElementById('scaleRow');
+    SCALE_TYPES.forEach((s, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'sel-btn' + (i === currentScale ? ' active' : '');
+        btn.textContent = s.name;
+        btn.title = s.category;
+        btn.onclick = () => { currentScale = i; selectedNotes = []; update(); };
+        scaleRow.appendChild(btn);
+    });
 }
 
 function updateSelectors() {
@@ -426,14 +545,17 @@ function updateSelectors() {
         b.classList.toggle('active', i === currentKey));
     document.querySelectorAll('#typeRow .sel-btn').forEach((b, i) =>
         b.classList.toggle('active', i === currentType));
+    document.querySelectorAll('#scaleRow .sel-btn').forEach((b, i) =>
+        b.classList.toggle('active', i === currentScale));
 }
 
 function updateChordInfo() {
-    const name = getChordFullName(currentKey, currentType);
-    const notes = getChordNotesNames(currentKey, currentType);
-    const formula = CHORD_TYPES[currentType].formula;
+    const name = getCurrentDisplayName();
+    const noteIndices = getCurrentNoteIndices();
+    const noteNames = noteIndices.map(i => NOTES[i]);
+    const formula = getCurrentFormula();
     document.getElementById('chordName').textContent = name;
-    document.getElementById('chordNotes').textContent = notes.join('  ');
+    document.getElementById('chordNotes').textContent = noteNames.join('  ');
     document.getElementById('chordFormula').textContent = formula;
 }
 
@@ -459,7 +581,7 @@ function getStringY(si) {
 }
 
 function buildFretboard() {
-    const chordNoteIndices = getChordNotes(currentKey, currentType);
+    const chordNoteIndices = getCurrentNoteIndices();
     let svg = '';
 
     // 指板底色（木紋色）
@@ -513,13 +635,26 @@ function buildFretboard() {
 
             if (!chordNoteIndices.includes(noteIdx)) continue;
 
-            const role = getNoteRole(noteIdx, currentKey, currentType);
-            if (!role) continue;
+            let role, color, isRoot;
+            if (currentTab === 'chord') {
+                role = getNoteRole(noteIdx, currentKey, currentType);
+                if (!role) continue;
+                color = ROLE_COLORS[role];
+                isRoot = role === 'root';
+            } else {
+                role = getScaleNoteRole(noteIdx);
+                if (!role) continue;
+                isRoot = role === 'root';
+                if (isRoot) {
+                    color = SCALE_COLORS[0];
+                } else {
+                    const degIdx = parseInt(role.split('-')[1]);
+                    color = SCALE_COLORS[degIdx % SCALE_COLORS.length];
+                }
+            }
 
             const cx = getNoteX(f);
             const cy = getStringY(si);
-            const color = ROLE_COLORS[role];
-            const isRoot = role === 'root';
             const r = isRoot ? NR + 2 : NR;
             const isSelected = selectedNotes.some(n => n.string === si && n.fret === f);
 
@@ -605,7 +740,7 @@ async function listenChord() {
     initAudio();
     const midis = selectedNotes.length > 0
         ? selectedNotes.map(n => n.midi)
-        : getChordNotes(currentKey, currentType).map(n => 48 + n);
+        : getCurrentNoteIndices().map(n => 48 + n);
     playNotes(midis);
 }
 
@@ -614,7 +749,7 @@ async function listenArpeggio() {
     initAudio();
     const midis = selectedNotes.length > 0
         ? selectedNotes.map(n => n.midi)
-        : getChordNotes(currentKey, currentType).map(n => 48 + n);
+        : getCurrentNoteIndices().map(n => 48 + n);
     playArpeggio(midis);
 }
 
@@ -721,7 +856,7 @@ function generateChordDiagramSVG(selected) {
 function addToProgression() {
     if (selectedNotes.length === 0) return;
 
-    const name = getChordFullName(currentKey, currentType);
+    const name = getCurrentDisplayName();
     const diagramSVG = generateChordDiagramSVG(selectedNotes);
     const notes = selectedNotes.map(n => ({ ...n }));
 
