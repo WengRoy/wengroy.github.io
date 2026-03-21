@@ -125,6 +125,31 @@
         .btn-stop { background: var(--warm-red); color: white; border-color: var(--comic-black); box-shadow: 2px 2px 0 var(--comic-black); }
         .btn-clear { background: var(--surface); color: #888; border-color: #ccc; }
         .btn-clear:hover { border-color: var(--warm-red); color: var(--warm-red); }
+        .btn-arp { background: var(--warm-purple); color: white; border-color: var(--comic-black); box-shadow: 2px 2px 0 var(--comic-black); }
+        .btn-arp:hover { background: #763b91; }
+        .btn-download { background: var(--warm-gold); color: white; border-color: var(--comic-black); box-shadow: 2px 2px 0 var(--comic-black); }
+        .btn-download:hover { background: #c09840; }
+        .btn-load { background: var(--surface); color: var(--warm-brown); border-color: var(--comic-black); box-shadow: 2px 2px 0 var(--comic-black); }
+        .btn-load:hover { background: #f5efe3; }
+
+        /* 播放模式切換 */
+        .mode-toggle {
+            display: flex; gap: 4px; background: #f5efe3;
+            border: var(--border-thin); border-radius: 20px; padding: 3px;
+        }
+        .mode-toggle button {
+            padding: 5px 14px; border: none; border-radius: 16px;
+            font-family: 'Noto Sans TC', sans-serif; font-size: 0.78rem;
+            font-weight: 600; cursor: pointer; transition: all 0.12s;
+            background: transparent; color: #999;
+        }
+        .mode-toggle button.active {
+            background: var(--warm-brown); color: white;
+        }
+        .mode-toggle button:hover:not(.active) { color: var(--comic-black); }
+
+        /* 隱藏的 file input */
+        #fileInput { display: none; }
 
         .selected-count {
             font-size: 0.8rem; color: #aaa; font-weight: 600;
@@ -235,7 +260,8 @@
         </div>
 
         <div class="actions-row">
-            <button class="action-btn btn-listen" onclick="listenChord()"><i data-lucide="volume-2"></i> 試聽和弦</button>
+            <button class="action-btn btn-listen" onclick="listenChord()"><i data-lucide="volume-2"></i> 刷弦</button>
+            <button class="action-btn btn-arp" onclick="listenArpeggio()"><i data-lucide="arrow-up-down"></i> 分解和弦</button>
             <button class="action-btn btn-add" onclick="addToProgression()"><i data-lucide="plus-circle"></i> 加入和弦進行</button>
             <span class="selected-count" id="selectedCount">已選 0 音</span>
         </div>
@@ -246,9 +272,19 @@
         <div class="panel-title"><i data-lucide="list-music"></i> 和弦進行編曲</div>
         <div class="progression-grid" id="progressionGrid"></div>
         <div class="actions-row" style="margin-top:12px;">
-            <button class="action-btn btn-play" onclick="playProgression()"><i data-lucide="play"></i> 播放進行</button>
+            <div class="mode-toggle" id="playModeToggle">
+                <button class="active" onclick="setPlayMode('strum')">刷弦</button>
+                <button onclick="setPlayMode('arpeggio')">分解和弦</button>
+            </div>
+            <button class="action-btn btn-play" onclick="playProgression()"><i data-lucide="play"></i> 播放</button>
             <button class="action-btn btn-stop" onclick="stopProgression()"><i data-lucide="square"></i> 停止</button>
             <button class="action-btn btn-clear" onclick="clearProgression()"><i data-lucide="trash-2"></i> 清空</button>
+        </div>
+        <div class="actions-row" style="margin-top:8px;">
+            <button class="action-btn btn-download" onclick="copyProgression()"><i data-lucide="clipboard-copy"></i> 複製</button>
+            <button class="action-btn btn-load" onclick="downloadProgression()"><i data-lucide="download"></i> 下載</button>
+            <button class="action-btn btn-load" onclick="document.getElementById('fileInput').click()"><i data-lucide="upload"></i> 載入</button>
+            <input type="file" id="fileInput" accept=".txt" onchange="loadProgression(event)">
         </div>
     </div>
 
@@ -297,6 +333,7 @@ let selectedNotes = []; // [{string, fret, note, midi}]
 let progression = []; // [{name, tab, notes:[{midi}]}]
 let isProgressionPlaying = false;
 let progressionTimeout = null;
+let playMode = 'strum'; // 'strum' | 'arpeggio'
 
 // === AUDIO ===
 let pluckSynth = null;
@@ -540,18 +577,48 @@ function update() {
     lucide.createIcons();
 }
 
+// === 分解和弦播放 ===
+function playArpeggio(midiNotes) {
+    initAudio();
+    const sorted = [...midiNotes].sort((a, b) => a - b);
+    // 低→高 再 高→低（去掉頭尾避免重複）
+    const sequence = [...sorted, ...sorted.slice(1, -1).reverse()];
+    const interval = 0.15; // 每音間隔
+
+    sequence.forEach((midi, i) => {
+        const t = Tone.now() + i * interval;
+        pluckSynth.triggerAttackRelease(midiToFreq(midi), '8n', t);
+    });
+
+    // 回傳總時長（供 progression 計算等待時間）
+    return sequence.length * interval;
+}
+
 // === LISTEN ===
 async function listenChord() {
     await Tone.start();
     initAudio();
-    if (selectedNotes.length > 0) {
-        playNotes(selectedNotes.map(n => n.midi));
-    } else {
-        // 沒選音就播和弦組成音（中間八度）
-        const notes = getChordNotes(currentKey, currentType);
-        const midis = notes.map(n => 48 + n); // C3 起始
-        playNotes(midis);
-    }
+    const midis = selectedNotes.length > 0
+        ? selectedNotes.map(n => n.midi)
+        : getChordNotes(currentKey, currentType).map(n => 48 + n);
+    playNotes(midis);
+}
+
+async function listenArpeggio() {
+    await Tone.start();
+    initAudio();
+    const midis = selectedNotes.length > 0
+        ? selectedNotes.map(n => n.midi)
+        : getChordNotes(currentKey, currentType).map(n => 48 + n);
+    playArpeggio(midis);
+}
+
+// === 播放模式 ===
+function setPlayMode(mode) {
+    playMode = mode;
+    document.querySelectorAll('#playModeToggle button').forEach(b => {
+        b.classList.toggle('active', b.textContent.includes(mode === 'strum' ? '刷弦' : '分解'));
+    });
 }
 
 // === 和弦圖 SVG 生成 ===
@@ -709,11 +776,17 @@ async function playProgression() {
         });
 
         const midis = progression[i].notes.map(n => n.midi);
-        playNotes(midis);
+        let waitTime;
+        if (playMode === 'arpeggio') {
+            const duration = playArpeggio(midis);
+            waitTime = Math.max(duration * 1000 + 200, 1200);
+        } else {
+            playNotes(midis);
+            waitTime = 1200;
+        }
 
-        // 等待拍子（用 BPM 80 算約 750ms per beat，一個和弦 2 拍）
         await new Promise(r => {
-            progressionTimeout = setTimeout(r, 1200);
+            progressionTimeout = setTimeout(r, waitTime);
         });
     }
 
@@ -730,6 +803,173 @@ function stopProgression() {
     document.querySelectorAll('.tab-card').forEach(c => {
         c.style.outline = 'none';
     });
+}
+
+// === 解析和弦名稱 ===
+function parseChordName(name) {
+    // 嘗試從和弦名反推 key index 和 type index
+    // 例如 "C#m7" → key=1, type=6 (Min7)
+    for (let ki = 0; ki < NOTES.length; ki++) {
+        const root = NOTES[ki];
+        if (!name.startsWith(root)) continue;
+        // 確保是完整匹配（C 不要匹配到 C#）
+        if (root.length === 1 && name.length > 1 && name[1] === '#') continue;
+
+        const suffix = name.slice(root.length);
+        const ti = CHORD_TYPES.findIndex(t => t.suffix === suffix);
+        if (ti >= 0) return { key: ki, type: ti };
+    }
+    return null;
+}
+
+// === 下載和弦進行（.cpg 格式）===
+// CPG = Chord Progression 格式
+// 格式範例：
+// #CPG v1.0
+// #TITLE My Progression
+// #DATE 2026-03-21
+// ---
+// Cmaj | 5:3 4:2 3:0 2:1 1:0
+// Am   | 5:0 4:2 3:2 2:1 1:0
+// F    | 4:3 3:2 2:1 1:1
+// G7   | 6:3 5:2 4:0 3:0 2:0 1:1
+//
+// 格式說明：和弦名 | 弦號:格號 弦號:格號 ...
+// 弦號：1=高E, 2=B, 3=G, 4=D, 5=A, 6=低E
+
+function buildProgressionText() {
+    if (progression.length === 0) return null;
+
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10);
+    const timeStr = now.toTimeString().slice(0, 8);
+
+    let content = `#CPG v1.0\n`;
+    content += `#TITLE Chord Progression\n`;
+    content += `#DATE ${dateStr} ${timeStr}\n`;
+    content += `---\n`;
+
+    progression.forEach(chord => {
+        const notesStr = [...chord.notes]
+            .sort((a, b) => b.string - a.string) // 低E 先
+            .map(n => `${6 - n.string}:${n.fret}`) // 轉成 弦號:格號
+            .join(' ');
+        content += `${chord.name.padEnd(8)} | ${notesStr}\n`;
+    });
+
+    content += `---\n`;
+    content += `# 弦號：1=高E, 2=B, 3=G, 4=D, 5=A, 6=低E\n`;
+    content += `# 格式：和弦名 | 弦號:格號 弦號:格號 ...\n`;
+
+    return content;
+}
+
+function downloadProgression() {
+    const content = buildProgressionText();
+    if (!content) return;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `chord-progression-${dateStr}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+async function copyProgression() {
+    const content = buildProgressionText();
+    if (!content) return;
+    try {
+        await navigator.clipboard.writeText(content);
+        // 按鈕短暫顯示成功
+        const btn = event.target.closest('.action-btn');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check"></i> 已複製！';
+        btn.style.background = 'var(--warm-green)';
+        lucide.createIcons({ nodes: btn.querySelectorAll('i') });
+        setTimeout(() => {
+            btn.innerHTML = original;
+            btn.style.background = '';
+            lucide.createIcons({ nodes: btn.querySelectorAll('i') });
+        }, 1500);
+    } catch (e) {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = content;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+    }
+}
+
+// === 載入和弦進行 ===
+function loadProgression(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const text = e.target.result;
+        const lines = text.split('\n');
+        const newProgression = [];
+
+        let inBody = false;
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed === '---') {
+                if (!inBody) { inBody = true; continue; }
+                else break; // 第二個 --- 結束
+            }
+            if (!inBody || trimmed.startsWith('#') || trimmed === '') continue;
+
+            // 解析：Cmaj | 5:3 4:2 3:0
+            const parts = trimmed.split('|');
+            if (parts.length !== 2) continue;
+
+            const chordName = parts[0].trim();
+            const notePairs = parts[1].trim().split(/\s+/);
+
+            const notes = [];
+            for (const pair of notePairs) {
+                const [strNum, fret] = pair.split(':').map(Number);
+                if (isNaN(strNum) || isNaN(fret)) continue;
+                const si = 6 - strNum; // 轉回 string index (0=高E)
+                if (si < 0 || si > 5) continue;
+                const midi = STRINGS[si].midi + fret;
+                const noteIdx = midi % 12;
+                notes.push({ string: si, fret, note: NOTES[noteIdx], midi });
+            }
+
+            if (notes.length > 0) {
+                // 反推 key 和 type 來正確上色
+                const parsed = parseChordName(chordName);
+                if (parsed) {
+                    const savedKey = currentKey;
+                    const savedType = currentType;
+                    currentKey = parsed.key;
+                    currentType = parsed.type;
+                    const diagramSVG = generateChordDiagramSVG(notes);
+                    currentKey = savedKey;
+                    currentType = savedType;
+                    newProgression.push({ name: chordName, diagramSVG, notes });
+                } else {
+                    const diagramSVG = generateChordDiagramSVG(notes);
+                    newProgression.push({ name: chordName, diagramSVG, notes });
+                }
+            }
+        }
+
+        if (newProgression.length > 0) {
+            progression = newProgression;
+            renderProgression();
+        }
+
+        // 重置 file input
+        event.target.value = '';
+    };
+    reader.readAsText(file);
 }
 
 // === INIT ===
