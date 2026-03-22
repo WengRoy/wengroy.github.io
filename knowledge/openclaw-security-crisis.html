@@ -24,7 +24,7 @@
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--ink); overflow: hidden; height: 100vh; }
 
         /* === DECK === */
-        .deck { display: flex; width: 700vw; height: 100vh; transition: transform 0.45s cubic-bezier(0.4,0,0.2,1); }
+        .deck { display: flex; width: 800vw; height: 100vh; transition: transform 0.45s cubic-bezier(0.4,0,0.2,1); }
 
         .slide {
             width: 100vw; height: 100vh;
@@ -243,7 +243,7 @@
     <button class="nav-btn" onclick="go(-1)">&#8592;</button>
     <div class="nav-dots" id="dots"></div>
     <button class="nav-btn" onclick="go(1)">&#8594;</button>
-    <span class="page-num" id="pn">1/7</span>
+    <span class="page-num" id="pn">1/8</span>
 </div>
 
 <div class="deck" id="deck">
@@ -397,6 +397,38 @@
                 </div>
             </div>
             <div class="quote fu d3" style="margin-top:12px;">「真正的安全不是能跑多快，而是能不能確定停得下來」🛡️</div>
+        </div>
+    </div>
+
+    <!-- 8: 參考來源 -->
+    <div class="slide">
+        <div class="slide-inner">
+            <span class="tag tag-gold fu">零幻覺引證</span>
+            <div class="bubble fu d1"><h2>所有來源，<span class="accent">可驗證</span></h2></div>
+            <div class="two-col fu d2">
+                <div class="col">
+                    <div class="mc mc-red" style="margin-bottom:6px;"><h4>核心事件報導</h4>
+                        <p><a href="https://techcrunch.com/2026/02/23/a-meta-ai-security-researcher-said-an-openclaw-agent-ran-amok-on-her-inbox/" target="_blank" style="color:var(--coral);">TechCrunch: OpenClaw agent ran amok</a></p>
+                        <p><a href="https://medium.com/@dingzhanjun/analyzing-the-incident-of-openclaw-deleting-emails-a-technical-deep-dive-56e50028637b" target="_blank" style="color:var(--coral);">John Ding: 技術深度分析</a></p>
+                        <p><a href="https://abmedia.io/meta-ai-director-runs-to-stop-openclaw-from-deleting-inbox" target="_blank" style="color:var(--coral);">ABMedia: Meta 總監慘劇（中文）</a></p>
+                    </div>
+                    <div class="mc mc-violet" style="margin-bottom:6px;"><h4>資安分析</h4>
+                        <p><a href="https://www.kaspersky.com/blog/openclaw-vulnerabilities-exposed/55263/" target="_blank" style="color:var(--coral);">Kaspersky: OpenClaw 不安全</a></p>
+                        <p><a href="https://socradar.io/blog/cve-2026-25253-rce-openclaw-auth-token/" target="_blank" style="color:var(--coral);">SOCRadar: CVE-2026-25253</a></p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mc mc-gold" style="margin-bottom:6px;"><h4>供應鏈 & 架構</h4>
+                        <p><a href="https://repello.ai/blog/clawhavoc-supply-chain-attack" target="_blank" style="color:var(--coral);">Repello AI: ClawHavoc 攻擊</a></p>
+                        <p><a href="https://blogs.cisco.com/ai/personal-ai-agents-like-openclaw-are-a-security-nightmare" target="_blank" style="color:var(--coral);">Cisco: AI Agent 是資安噩夢</a></p>
+                        <p><a href="https://www.trendmicro.com/en_us/research/26/b/what-openclaw-reveals-about-agentic-assistants.html" target="_blank" style="color:var(--coral);">Trend Micro: OpenClaw 啟示</a></p>
+                    </div>
+                    <div class="mc mc-teal"><h4>修復方案</h4>
+                        <p><a href="https://github.com/openclaw/openclaw/issues/25947" target="_blank" style="color:var(--coral);">GitHub #25947: Sticky context slots</a></p>
+                        <p><a href="https://chatmaxima.com/blog/ai-agents-need-guardrails-openclaw-gmail-incident/" target="_blank" style="color:var(--coral);">ChatMaxima: AI Guardrails</a></p>
+                    </div>
+                </div>
+            </div>
             <div class="foot fu d3">
                 Forever AI 小隊 · 2026-03-22<br>
                 <a href="index.html">知識分享專區</a> ｜ <a href="../index.html">Roy's Lab 首頁</a>
@@ -407,7 +439,7 @@
 </div>
 
 <script>
-const T = 7;
+const T = 8;
 let c = 0;
 const dk = document.getElementById('deck');
 const dt = document.getElementById('dots');
