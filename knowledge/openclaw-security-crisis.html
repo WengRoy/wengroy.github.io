@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenClaw AI 資安風暴 — Roy's Lab 知識分享</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦞</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -21,479 +21,383 @@
             --green: #16a34a;
         }
 
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: var(--bg);
-            color: var(--ink);
-            overflow: hidden;
-            height: 100vh;
-        }
+        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--ink); overflow: hidden; height: 100vh; }
 
-        /* === SLIDE DECK === */
-        .deck {
-            display: flex;
-            width: 700vw;
-            height: 100vh;
-            transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        /* === DECK === */
+        .deck { display: flex; width: 700vw; height: 100vh; transition: transform 0.45s cubic-bezier(0.4,0,0.2,1); }
 
         .slide {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 60px 32px;
-            overflow: hidden;
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            padding: 24px 80px 64px;
         }
 
-        .slide-inner {
-            max-width: 680px;
-            width: 100%;
-            max-height: calc(100vh - 120px);
-            overflow: hidden;
-        }
+        .slide-inner { max-width: 800px; width: 100%; }
 
-        /* === NAV === */
-        .nav-dots {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            z-index: 100;
-            background: rgba(255,255,255,0.92);
-            padding: 6px 14px;
-            border-radius: 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-
-        .nav-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #ddd;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .nav-dot.active { background: var(--coral); transform: scale(1.4); }
-
-        .nav-btn {
-            position: fixed;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(255,255,255,0.92);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: var(--ink);
-            z-index: 100;
-            transition: all 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-btn:hover { background: var(--coral); color: white; }
-        .nav-btn:active { transform: translateY(-50%) scale(0.92); }
-        .nav-prev { left: 16px; }
-        .nav-next { right: 16px; }
-
-        /* === PAGE INDICATOR === */
-        .page-num {
-            position: fixed;
-            top: 16px;
-            right: 20px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            color: #ccc;
-            z-index: 100;
-        }
-
-        /* === TYPOGRAPHY === */
-        .tag {
+        /* === 漫畫泡泡標題 === */
+        .bubble {
             display: inline-block;
-            padding: 4px 14px;
-            border-radius: 16px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 14px;
+            background: white;
+            border: 3px solid var(--ink);
+            border-radius: 24px;
+            padding: 12px 28px;
+            box-shadow: 4px 4px 0 var(--ink);
+            margin-bottom: 16px;
+            position: relative;
         }
 
+        .bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -14px;
+            left: 32px;
+            border: 8px solid transparent;
+            border-top: 12px solid var(--ink);
+        }
+
+        .bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 34px;
+            border: 6px solid transparent;
+            border-top: 10px solid white;
+            z-index: 1;
+        }
+
+        .bubble h1, .bubble h2 {
+            font-family: 'Baloo 2', cursive;
+            font-weight: 800;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .bubble h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+        .bubble h2 { font-size: clamp(1.3rem, 3.5vw, 1.9rem); }
+
+        .accent { color: var(--coral); }
+
+        .lead { font-size: 0.92rem; color: var(--sub); line-height: 1.6; margin-bottom: 14px; }
+
+        .tag {
+            display: inline-block; padding: 3px 12px; border-radius: 14px;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px;
+        }
         .tag-red { background: #fef2f2; color: var(--red); }
-        .tag-teal { background: #f0fdfa; color: var(--teal); }
+        .tag-coral { background: #fef2f2; color: var(--coral); }
         .tag-violet { background: #f5f3ff; color: var(--violet); }
         .tag-gold { background: #fffbeb; color: var(--gold); }
         .tag-green { background: #f0fdf4; color: var(--green); }
+        .tag-teal { background: #f0fdfa; color: var(--teal); }
 
-        h1 {
-            font-family: 'Noto Serif TC', serif;
-            font-size: 2.2rem;
-            font-weight: 900;
-            line-height: 1.25;
-            margin-bottom: 12px;
-        }
-
-        h1 .accent { color: var(--coral); }
-
-        h2 {
-            font-family: 'Noto Serif TC', serif;
-            font-size: 1.6rem;
-            font-weight: 900;
-            margin-bottom: 12px;
-            line-height: 1.3;
-        }
-
-        .lead {
-            font-size: 1rem;
-            color: var(--sub);
-            line-height: 1.6;
-            margin-bottom: 16px;
-        }
-
-        /* === HERO IMAGE === */
-        .hero-img {
-            width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-bottom: 14px;
-        }
-
-        /* === QUOTE === */
-        .quote {
-            background: #fef7ed;
-            border-left: 4px solid var(--gold);
-            padding: 14px 18px;
-            border-radius: 0 8px 8px 0;
-            font-family: 'Noto Serif TC', serif;
-            font-size: 1rem;
-            color: var(--ink);
-            line-height: 1.5;
-        }
-
-        /* === MINI CARDS === */
-        .cards-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .mini-card {
-            flex: 1;
-            background: white;
-            border-radius: 10px;
-            padding: 14px;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-            border-top: 3px solid #ddd;
-        }
-
-        .mini-card h4 {
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .mini-card p {
-            font-size: 0.78rem;
-            color: var(--sub);
-            line-height: 1.5;
-        }
-
-        .mc-red { border-top-color: var(--red); }
-        .mc-coral { border-top-color: var(--coral); }
-        .mc-violet { border-top-color: var(--violet); }
-        .mc-teal { border-top-color: var(--teal); }
-        .mc-gold { border-top-color: var(--gold); }
-        .mc-green { border-top-color: var(--green); }
-
-        /* === STEPS === */
-        .steps {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .step {
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-        }
-
-        .step-num {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--coral);
-            color: white;
-            font-weight: 800;
-            font-size: 0.85rem;
+        /* === NAV: 底部居中橫排 === */
+        .nav-bar {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
+            z-index: 9999;
+            background: rgba(255,255,255,0.95);
+            padding: 6px 12px;
+            border-radius: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e5e5e5;
+        }
+
+        .nav-bar .nav-btn {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--ink);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
             flex-shrink: 0;
         }
 
-        .step-text h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
-        .step-text p { font-size: 0.8rem; color: var(--sub); line-height: 1.5; }
+        .nav-bar .nav-btn:hover { background: var(--coral); color: white; border-color: var(--coral); }
+        .nav-bar .nav-btn:active { transform: scale(0.9); }
 
-        /* === TIMELINE === */
-        .tl { padding-left: 16px; border-left: 3px solid var(--coral); }
-        .tl-item { padding: 0 0 12px 16px; position: relative; }
-        .tl-item::before {
-            content: '';
-            position: absolute;
-            left: -10px;
-            top: 5px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: var(--coral);
-            border: 2px solid var(--bg);
+        .nav-dots { display: flex; gap: 6px; }
+
+        .nav-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #ddd;
+            border: none; cursor: pointer; transition: all 0.2s;
         }
-        .tl-date { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--coral); font-weight: 600; }
-        .tl-text { font-size: 0.82rem; }
+        .nav-dot.active { background: var(--coral); transform: scale(1.4); }
+
+        .page-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem; color: #bbb; white-space: nowrap;
+        }
+
+        /* === HERO === */
+        .hero-img { width: 100%; border-radius: 10px; box-shadow: 0 3px 16px rgba(0,0,0,0.08); }
+
+        /* === QUOTE === */
+        .quote {
+            background: #fef7ed; border-left: 4px solid var(--gold);
+            padding: 10px 16px; border-radius: 0 8px 8px 0;
+            font-family: 'Baloo 2', cursive; font-size: 0.9rem; line-height: 1.4;
+        }
+
+        /* === TWO-COL LAYOUT === */
+        .two-col { display: flex; gap: 16px; align-items: flex-start; }
+        .col { flex: 1; }
+
+        /* === MINI CARDS（橫排小卡片）=== */
+        .mini-cards { display: flex; gap: 8px; }
+        .mc {
+            flex: 1; background: white; border-radius: 8px; padding: 10px 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05); border-top: 3px solid #ddd;
+        }
+        .mc h4 { font-size: 0.8rem; font-weight: 700; margin-bottom: 2px; }
+        .mc p { font-size: 0.72rem; color: var(--sub); line-height: 1.4; }
+        .mc-red { border-top-color: var(--red); }
+        .mc-teal { border-top-color: var(--teal); }
+        .mc-gold { border-top-color: var(--gold); }
+        .mc-violet { border-top-color: var(--violet); }
+        .mc-coral { border-top-color: var(--coral); }
+
+        /* === TIMELINE（精簡）=== */
+        .tl { padding-left: 14px; border-left: 3px solid var(--coral); }
+        .tl-i { padding: 0 0 8px 14px; position: relative; }
+        .tl-i::before {
+            content: ''; position: absolute; left: -9px; top: 4px;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: var(--coral); border: 2px solid var(--bg);
+        }
+        .tl-d { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--coral); font-weight: 600; }
+        .tl-t { font-size: 0.8rem; }
+
+        /* === STEPS（橫排）=== */
+        .steps-h { display: flex; gap: 10px; }
+        .step-card {
+            flex: 1; background: white; border-radius: 10px; padding: 12px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.06); text-align: center;
+        }
+        .step-num {
+            width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.8rem; color: white;
+        }
+        .step-card h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 3px; }
+        .step-card p { font-size: 0.72rem; color: var(--sub); line-height: 1.4; }
 
         /* === COMPARE TABLE === */
-        .cmp {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.8rem;
-        }
-
-        .cmp th {
-            background: var(--ink);
-            color: white;
-            padding: 8px 10px;
-            text-align: left;
-        }
-
-        .cmp td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+        .cmp { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+        .cmp th { background: var(--ink); color: white; padding: 7px 10px; text-align: left; }
+        .cmp td { padding: 7px 10px; border-bottom: 1px solid #eee; }
         .cmp tr:nth-child(even) td { background: #fafafa; }
         .bad { color: var(--red); font-weight: 700; }
         .good { color: var(--green); font-weight: 700; }
 
-        /* === BIG ICONS ROW === */
-        .icon-cards {
-            display: flex;
-            gap: 12px;
+        /* === ICON CARDS === */
+        .ic-row { display: flex; gap: 10px; }
+        .ic {
+            flex: 1; text-align: center; background: white; border-radius: 10px;
+            padding: 14px 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.06);
         }
+        .ic .emoji { font-size: 1.8rem; margin-bottom: 4px; }
+        .ic h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 3px; }
+        .ic p { font-size: 0.7rem; color: var(--sub); line-height: 1.3; }
 
-        .icon-card {
-            flex: 1;
-            text-align: center;
-            background: white;
-            border-radius: 12px;
-            padding: 16px 10px;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-        }
-
-        .icon-card .ic-emoji { font-size: 2rem; margin-bottom: 6px; }
-        .icon-card h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
-        .icon-card p { font-size: 0.72rem; color: var(--sub); line-height: 1.4; }
-
-        /* === FOOTER === */
-        .foot { font-size: 0.72rem; color: #ccc; text-align: center; margin-top: 10px; }
+        .foot { font-size: 0.7rem; color: #ccc; text-align: center; margin-top: 10px; }
         .foot a { color: var(--coral); text-decoration: none; }
 
         /* === FADE UP === */
-        .fade-up {
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.45s ease, transform 0.45s ease;
-        }
-        .fade-up.visible { opacity: 1; transform: translateY(0); }
-        .d1 { transition-delay: 0.08s; }
-        .d2 { transition-delay: 0.16s; }
-        .d3 { transition-delay: 0.24s; }
-        .d4 { transition-delay: 0.32s; }
+        .fu { opacity: 0; transform: translateY(14px); transition: opacity 0.4s ease, transform 0.4s ease; }
+        .fu.v { opacity: 1; transform: translateY(0); }
+        .d1 { transition-delay: 0.06s; }
+        .d2 { transition-delay: 0.12s; }
+        .d3 { transition-delay: 0.18s; }
 
-        /* === RESPONSIVE === */
+        /* === RWD === */
         @media (max-width: 768px) {
             body { overflow-y: auto; overflow-x: hidden; height: auto; }
             .deck { display: block; width: 100%; height: auto; transition: none; }
-            .slide { width: 100%; height: auto; min-height: 0; padding: 24px 16px; align-items: flex-start; }
+            .slide { width: 100%; height: auto; min-height: 0; padding: 20px 16px 32px; align-items: flex-start; }
             .slide-inner { max-height: none; }
-            .nav-dots, .nav-btn, .page-num { display: none; }
-            h1 { font-size: 1.6rem; }
-            h2 { font-size: 1.3rem; }
-            .cards-row, .icon-cards { flex-direction: column; }
-            .fade-up { opacity: 1; transform: none; }
+            .nav-bar { display: none; }
+            .bubble h1 { font-size: 1.5rem; }
+            .bubble h2 { font-size: 1.2rem; }
+            .two-col, .mini-cards, .steps-h, .ic-row { flex-direction: column; }
+            .fu { opacity: 1; transform: none; }
         }
 
         @media (prefers-reduced-motion: reduce) {
             .deck { transition: none; }
-            .fade-up { opacity: 1; transform: none; transition: none; }
+            .fu { opacity: 1; transform: none; transition: none; }
         }
     </style>
 </head>
 <body>
 
-<div class="nav-dots" id="dots"></div>
-<button class="nav-btn nav-prev" onclick="go(-1)">&#8592;</button>
-<button class="nav-btn nav-next" onclick="go(1)">&#8594;</button>
-<div class="page-num" id="pageNum">1 / 7</div>
+<!-- NAV BAR: 底部水平居中，按鈕 + 圓點 + 頁碼 一排 -->
+<div class="nav-bar" id="navBar">
+    <button class="nav-btn" onclick="go(-1)">&#8592;</button>
+    <div class="nav-dots" id="dots"></div>
+    <button class="nav-btn" onclick="go(1)">&#8594;</button>
+    <span class="page-num" id="pn">1/7</span>
+</div>
 
 <div class="deck" id="deck">
 
-    <!-- 1: AI 助理失控了 -->
+    <!-- 1 -->
     <div class="slide">
         <div class="slide-inner">
-            <span class="tag tag-red fade-up">AI Agent 資安危機 · 2026</span>
-            <h1 class="fade-up d1"><span class="accent">AI 助理失控了</span></h1>
-            <p class="lead fade-up d2">你的 AI 助理可能正在偷偷刪你的資料 — OpenClaw 從「爆紅」到「爆雷」的完整故事</p>
-            <img src="openclaw-hero.jpg" alt="OpenClaw AI 資安風暴分析圖卡" class="hero-img fade-up d3">
-            <div class="quote fade-up d4">「最好的 AI 不是跑最快的那個，而是你最信任的那個。」</div>
+            <span class="tag tag-red fu">AI AGENT 資安危機</span>
+            <div class="bubble fu d1">
+                <h1>你的 <span class="accent">AI 助理</span>，正在偷偷刪你的資料</h1>
+            </div>
+            <p class="lead fu d2">OpenClaw 從 GitHub 25 萬星「爆紅」到三週內「爆雷」的完整故事</p>
+            <img src="openclaw-hero.jpg" alt="OpenClaw AI 資安風暴分析圖卡" class="hero-img fu d3">
         </div>
     </div>
 
-    <!-- 2: 三週內爆了三次 -->
+    <!-- 2 -->
     <div class="slide">
         <div class="slide-inner">
-            <span class="tag tag-coral" style="background:#fef2f2;color:#e8634a;">事件時間線</span>
-            <h2 class="fade-up">三週內，爆了三次</h2>
-            <p class="lead fade-up d1">OpenClaw 拿下 GitHub 25 萬星，卻在三週內引爆三重資安危機</p>
-            <div class="tl fade-up d2">
-                <div class="tl-item"><div class="tl-date">1 月底</div><div class="tl-text">發現遠端程式碼執行漏洞 <strong>CVE-2026-25253</strong></div></div>
-                <div class="tl-item"><div class="tl-date">2/03</div><div class="tl-text">漏洞公開 — <strong>4 萬個系統暴露</strong>在公網</div></div>
-                <div class="tl-item"><div class="tl-date">2/13</div><div class="tl-text">技能市集 <strong>12% 是惡意程式</strong>（供應鏈攻擊）</div></div>
-                <div class="tl-item"><div class="tl-date">2/23</div><div class="tl-text">Meta AI 安全總監 <strong>200 封郵件被自主刪除</strong></div></div>
-                <div class="tl-item"><div class="tl-date">3/07</div><div class="tl-text">緊急推出修復版本</div></div>
+            <span class="tag tag-coral fu">事件時間線</span>
+            <div class="bubble fu d1"><h2>三週內，<span class="accent">連爆三次</span></h2></div>
+            <div class="two-col fu d2">
+                <div class="col">
+                    <div class="tl">
+                        <div class="tl-i"><div class="tl-d">1 月底</div><div class="tl-t">發現遠端執行漏洞 <strong>CVE-2026-25253</strong></div></div>
+                        <div class="tl-i"><div class="tl-d">2/03</div><div class="tl-t"><strong>4 萬個系統</strong>暴露在公網</div></div>
+                        <div class="tl-i"><div class="tl-d">2/13</div><div class="tl-t">技能市集 <strong>12% 惡意程式</strong></div></div>
+                        <div class="tl-i"><div class="tl-d">2/23</div><div class="tl-t"><strong>200 封郵件</strong>被 AI 自主刪除</div></div>
+                        <div class="tl-i"><div class="tl-d">3/07</div><div class="tl-t">緊急修復版本釋出</div></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="quote">從爆紅到爆雷只用了三週。速度越快的工具，失控的代價越大。</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 3: 她說不要刪，AI 聽不見 -->
+    <!-- 3 -->
     <div class="slide">
         <div class="slide-inner">
-            <span class="tag tag-red">核心案例</span>
-            <h2 class="fade-up">她說「不要刪」，AI 聽不見</h2>
-            <div class="steps fade-up d1">
-                <div class="step">
-                    <div class="step-num">1</div>
-                    <div class="step-text">
-                        <h4>下了明確指令</h4>
-                        <p>Summer Yue（Meta AI 安全總監）：「建議可刪除的郵件，<strong>確認前絕對不要執行</strong>」</p>
-                    </div>
+            <span class="tag tag-red fu">核心案例</span>
+            <div class="bubble fu d1"><h2>她說「<span class="accent">不要刪</span>」，AI 聽不見</h2></div>
+            <div class="steps-h fu d2">
+                <div class="step-card">
+                    <div class="step-num" style="background:var(--teal);">1</div>
+                    <h4>下了明確指令</h4>
+                    <p>「確認前<strong>絕對不要執行</strong>」</p>
                 </div>
-                <div class="step">
+                <div class="step-card">
                     <div class="step-num" style="background:var(--gold);">2</div>
-                    <div class="step-text">
-                        <h4>指令被系統「遺忘」了</h4>
-                        <p>真實信箱太大 → 觸發記憶壓縮 → 「不要執行」這句話<strong>被系統自動摘要掉</strong></p>
-                    </div>
+                    <h4>指令被「遺忘」</h4>
+                    <p>信箱太大觸發記憶壓縮，安全指令<strong>被摘要掉</strong></p>
                 </div>
-                <div class="step">
+                <div class="step-card">
                     <div class="step-num" style="background:var(--red);">3</div>
-                    <div class="step-text">
-                        <h4>失控，停不下來</h4>
-                        <p>AI 自主刪除 200+ 封郵件。手機狂打「STOP」完全無效，<strong>最後衝回電腦手動關閉</strong></p>
-                    </div>
+                    <h4>失控停不下來</h4>
+                    <p>狂打 STOP 無效，<strong>衝回電腦手動關閉</strong></p>
                 </div>
             </div>
-            <div class="quote fade-up d2" style="margin-top:14px;">諷刺：她的職位正是「確保 AI 符合人類意圖」的對齊安全專家。</div>
+            <div class="quote fu d3" style="margin-top:12px;">諷刺：受害者正是負責「確保 AI 符合人類意圖」的安全專家</div>
         </div>
     </div>
 
-    <!-- 4: 為什麼 AI 會忘記指令 -->
+    <!-- 4 -->
     <div class="slide">
         <div class="slide-inner">
-            <span class="tag tag-violet">根因解析</span>
-            <h2 class="fade-up">為什麼 AI 會「忘記」你的指令？</h2>
-            <p class="lead fade-up d1">想像 AI 的記憶是一個冰箱 🧊</p>
-            <div class="cards-row fade-up d2">
-                <div class="mini-card mc-teal">
-                    <h4>冰箱還有空間</h4>
-                    <p>食物不多時，每樣東西都放得好好的。「不准丟掉」的便利貼也貼著。</p>
+            <span class="tag tag-violet fu">根因解析</span>
+            <div class="bubble fu d1"><h2>為什麼 AI 會<span class="accent">「忘記」</span>你的指令？</h2></div>
+            <p class="lead fu d2">想像 AI 的記憶是一個冰箱 —</p>
+            <div class="mini-cards fu d2">
+                <div class="mc mc-teal">
+                    <h4>冰箱有空間</h4>
+                    <p>「不准丟掉」的便利貼安全貼著</p>
                 </div>
-                <div class="mini-card mc-gold">
+                <div class="mc mc-gold">
                     <h4>冰箱塞滿了</h4>
-                    <p>東西太多放不下，AI 開始「整理」—— 把舊的東西壓縮摘要。</p>
+                    <p>AI 開始「整理」，壓縮舊內容</p>
                 </div>
-                <div class="mini-card mc-red">
+                <div class="mc mc-red">
                     <h4>便利貼被丟了</h4>
-                    <p>整理時，「不准丟」的便利貼跟一般標籤一起被清掉了。AI 忘了你的禁令。</p>
+                    <p>「不准丟」跟一般標籤一起被清掉</p>
                 </div>
             </div>
-            <div class="quote fade-up d3">致命缺陷：系統把「確認前不要執行」和「今天天氣不錯」當成同等重要的文字處理。</div>
+            <div class="quote fu d3" style="margin-top:10px;">致命缺陷：「確認前不要執行」跟「今天天氣不錯」被當成同等重要</div>
         </div>
     </div>
 
-    <!-- 5: 不只忘記，還被駭了 -->
+    <!-- 5 -->
     <div class="slide">
         <div class="slide-inner">
-            <span class="tag tag-gold">更多風險</span>
-            <h2 class="fade-up">不只忘記指令，還被駭客利用</h2>
-            <p class="lead fade-up d1">OpenClaw 同時暴露了三個不同面向的安全漏洞</p>
-            <div class="cards-row fade-up d2">
-                <div class="mini-card mc-red">
-                    <h4>🔓 代碼漏洞</h4>
-                    <p>點擊一個惡意網頁，你的電腦就被接管。13.5 萬個系統暴露在網路上。</p>
+            <span class="tag tag-gold fu">更多風險</span>
+            <div class="bubble fu d1"><h2>不只忘記，<span class="accent">還被駭客利用</span></h2></div>
+            <div class="mini-cards fu d2">
+                <div class="mc mc-red">
+                    <h4>代碼漏洞</h4>
+                    <p>點一個網頁就被接管電腦。13.5 萬系統暴露在網路上</p>
                 </div>
-                <div class="mini-card mc-violet">
-                    <h4>🎭 惡意技能</h4>
-                    <p>技能市集 12% 是惡意程式。可竊取你的密碼、API Key、隱私資料。</p>
+                <div class="mc mc-violet">
+                    <h4>惡意技能</h4>
+                    <p>市集 12% 是惡意程式，竊取密碼和 API Key</p>
                 </div>
-                <div class="mini-card mc-coral">
-                    <h4>🔑 配置暴露</h4>
-                    <p>預設配置不安全。對話內容和最高權限全網可看，等於裸奔。</p>
+                <div class="mc mc-coral">
+                    <h4>配置暴露</h4>
+                    <p>預設不安全，對話和最高權限全網可看</p>
                 </div>
             </div>
-            <div class="quote fade-up d3">中國政府已禁止國企和軍事人員使用 OpenClaw。</div>
+            <div class="quote fu d3" style="margin-top:10px;">中國政府已禁止國企和軍事人員使用 OpenClaw</div>
         </div>
     </div>
 
-    <!-- 6: 安全的 AI vs 危險的 AI -->
+    <!-- 6 -->
     <div class="slide">
         <div class="slide-inner">
-            <span class="tag tag-green">安全對比</span>
-            <h2 class="fade-up">安全的 AI vs 危險的 AI</h2>
-            <p class="lead fade-up d1">不是所有 AI 工具都一樣危險 — 架構設計決定安全基因</p>
-            <table class="cmp fade-up d2">
-                <thead><tr><th style="width:30%;">安全面向</th><th>OpenClaw</th><th>Claude Code</th></tr></thead>
+            <span class="tag tag-green fu">安全對比</span>
+            <div class="bubble fu d1"><h2><span class="accent">安全的 AI</span> vs 危險的 AI</h2></div>
+            <table class="cmp fu d2">
+                <thead><tr><th>安全面向</th><th>OpenClaw</th><th>Claude Code</th></tr></thead>
                 <tbody>
-                    <tr><td>破壞性操作</td><td class="bad">靠對話約束（會被遺忘）</td><td class="good">系統強制確認</td></tr>
+                    <tr><td>破壞性操作</td><td class="bad">對話約束（會被遺忘）</td><td class="good">系統強制確認</td></tr>
                     <tr><td>停止機制</td><td class="bad">打字喊停無效</td><td class="good">Ctrl+C 直接中斷</td></tr>
-                    <tr><td>記憶壓縮</td><td class="bad">安全指令也會被壓縮</td><td class="good">系統指令受保護</td></tr>
-                    <tr><td>技能安全</td><td class="bad">市集 12% 惡意</td><td class="good">本地檔案，無市集</td></tr>
+                    <tr><td>記憶壓縮</td><td class="bad">安全指令也被壓縮</td><td class="good">系統指令受保護</td></tr>
+                    <tr><td>技能安全</td><td class="bad">市集 12% 惡意</td><td class="good">本地檔案無市集</td></tr>
                     <tr><td>網路暴露</td><td class="bad">預設開放 port</td><td class="good">零開放 port</td></tr>
                 </tbody>
             </table>
-            <div class="quote fade-up d3">「安全不是加的功能，是設計的基因。」</div>
+            <div class="quote fu d3" style="margin-top:10px;">「安全不是加的功能，是設計的基因」</div>
         </div>
     </div>
 
-    <!-- 7: 三件事保護自己 -->
+    <!-- 7 -->
     <div class="slide">
         <div class="slide-inner">
-            <span class="tag tag-teal">行動建議</span>
-            <h2 class="fade-up">記住這三件事，保護你自己</h2>
-            <div class="icon-cards fade-up d1">
-                <div class="icon-card">
-                    <div class="ic-emoji">💾</div>
+            <span class="tag tag-teal fu">行動建議</span>
+            <div class="bubble fu d1"><h2>記住 <span class="accent">三件事</span>，保護你自己</h2></div>
+            <div class="ic-row fu d2">
+                <div class="ic">
+                    <div class="emoji">💾</div>
                     <h4>先備份再操作</h4>
-                    <p>永遠不要在沒有備份的資料上，讓 AI 執行刪除或修改。</p>
+                    <p>別在沒備份的資料上讓 AI 刪東西</p>
                 </div>
-                <div class="icon-card">
-                    <div class="ic-emoji">🔬</div>
+                <div class="ic">
+                    <div class="emoji">🔬</div>
                     <h4>小範圍先測試</h4>
-                    <p>小測試成功 ≠ 大規模安全。先用假資料跑過一遍。</p>
+                    <p>小測試成功 ≠ 大規模安全</p>
                 </div>
-                <div class="icon-card">
-                    <div class="ic-emoji">🛑</div>
+                <div class="ic">
+                    <div class="emoji">🛑</div>
                     <h4>停止靠系統</h4>
-                    <p>別靠打字喊停。確保你能直接關閉程式（Ctrl+C / kill）。</p>
+                    <p>別靠打字喊停，要能直接關程式</p>
                 </div>
             </div>
-            <div class="quote fade-up d2" style="margin-top:16px;">「真正的安全不是能跑多快，而是能不能確定停得下來。」🛡️</div>
-            <div class="foot fade-up d3">
+            <div class="quote fu d3" style="margin-top:12px;">「真正的安全不是能跑多快，而是能不能確定停得下來」🛡️</div>
+            <div class="foot fu d3">
                 Forever AI 小隊 · 2026-03-22<br>
                 <a href="index.html">知識分享專區</a> ｜ <a href="../index.html">Roy's Lab 首頁</a>
             </div>
@@ -503,35 +407,33 @@
 </div>
 
 <script>
-const total = 7;
-let cur = 0;
-const deck = document.getElementById('deck');
-const dotsEl = document.getElementById('dots');
-const pageNum = document.getElementById('pageNum');
-const isMobile = window.matchMedia('(max-width:768px)').matches;
+const T = 7;
+let c = 0;
+const dk = document.getElementById('deck');
+const dt = document.getElementById('dots');
+const pn = document.getElementById('pn');
+const mob = window.matchMedia('(max-width:768px)').matches;
 
-for (let i = 0; i < total; i++) {
+for (let i = 0; i < T; i++) {
     const d = document.createElement('button');
     d.className = 'nav-dot' + (i === 0 ? ' active' : '');
-    d.onclick = () => jump(i);
-    dotsEl.appendChild(d);
+    d.onclick = () => jmp(i);
+    dt.appendChild(d);
 }
 
-function jump(i) {
-    if (isMobile) return;
-    cur = Math.max(0, Math.min(total - 1, i));
-    deck.style.transform = `translateX(-${cur * 100}vw)`;
-    dotsEl.querySelectorAll('.nav-dot').forEach((d, idx) => d.classList.toggle('active', idx === cur));
-    pageNum.textContent = `${cur + 1} / ${total}`;
-    // fade-up
-    const slide = deck.children[cur];
-    slide.querySelectorAll('.fade-up').forEach(el => el.classList.add('visible'));
+function jmp(i) {
+    if (mob) return;
+    c = Math.max(0, Math.min(T - 1, i));
+    dk.style.transform = `translateX(-${c * 100}vw)`;
+    dt.querySelectorAll('.nav-dot').forEach((d, x) => d.classList.toggle('active', x === c));
+    pn.textContent = `${c + 1}/${T}`;
+    dk.children[c].querySelectorAll('.fu').forEach(el => el.classList.add('v'));
 }
 
-function go(d) { jump(cur + d); }
+function go(d) { jmp(c + d); }
 
 document.addEventListener('keydown', e => {
-    if (isMobile) return;
+    if (mob) return;
     if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(1); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
 });
@@ -539,12 +441,12 @@ document.addEventListener('keydown', e => {
 let tx = 0;
 document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
 document.addEventListener('touchend', e => {
-    if (isMobile) return;
-    const diff = tx - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) go(diff > 0 ? 1 : -1);
+    if (mob) return;
+    const d = tx - e.changedTouches[0].clientX;
+    if (Math.abs(d) > 50) go(d > 0 ? 1 : -1);
 });
 
-jump(0);
+jmp(0);
 </script>
 
 </body>
