@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知識分享 — Roy's Lab</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #faf8f5; color: #1a1a2e; min-height: 100vh; padding: 24px; }
+        .app { max-width: 720px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-family: 'Baloo 2', cursive; font-size: 2rem; font-weight: 800; color: #6b4226; }
+        .header h1 span { color: #e8713a; }
+        .header p { color: #999; font-size: 0.9rem; margin-top: 4px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #e8713a; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        .card-list { display: flex; flex-direction: column; gap: 14px; }
+        .know-card {
+            display: block; text-decoration: none; color: inherit;
+            background: white; border: 2px solid #1a1a1a; border-radius: 14px;
+            overflow: hidden; box-shadow: 4px 4px 0 #1a1a1a;
+            transition: all 0.15s;
+        }
+        .know-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #1a1a1a; }
+        .know-card img { width: 100%; height: 200px; object-fit: cover; border-bottom: 2px solid #1a1a1a; }
+        .know-card-body { padding: 16px 20px; }
+        .know-card-tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; margin-bottom: 8px; }
+        .tag-security { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .know-card h3 { font-family: 'Baloo 2', cursive; font-size: 1.2rem; color: #6b4226; margin-bottom: 4px; }
+        .know-card p { font-size: 0.85rem; color: #888; line-height: 1.5; }
+        .know-card-date { font-size: 0.72rem; color: #bbb; margin-top: 6px; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <a href="../index.html" class="back-link">← 回到 Roy's Lab 首頁</a>
+    <div class="header">
+        <h1><span>知識</span>分享</h1>
+        <p>科技洞見 × 互動式教學 — 用圖卡和網頁讓知識更好懂</p>
+    </div>
+    <div class="card-list">
+        <a href="openclaw-security-crisis.html" class="know-card">
+            <img src="openclaw-hero.jpg" alt="OpenClaw AI 危機分析圖卡">
+            <div class="know-card-body">
+                <span class="know-card-tag tag-security">AI 資安</span>
+                <h3>OpenClaw AI 危機全解析</h3>
+                <p>2026 年初最嚴重的 AI Agent 資安事件 — 四大案例、三層次根因分析、Claude Code 安全對比。從郵件被自主刪除到供應鏈攻擊，完整剖析 AI Agent 的控制權危機。</p>
+                <div class="know-card-date">2026-03-22</div>
+            </div>
+        </a>
+    </div>
+</div>
+</body>
+</html>
