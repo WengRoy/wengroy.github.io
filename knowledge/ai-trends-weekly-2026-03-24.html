@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全球 AI 趨勢週報 2026/03/17-24 — Roy's Lab</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --cream:#fff8eb;--orange:#e8713a;--brown:#6b4226;--gold:#d4a853;
+  --black:#1a1a1a;--panel-bg:#fffdf7;--shadow:4px 4px 0 var(--black);
+  --shadow-lg:6px 6px 0 var(--black);
+}
+@media(prefers-reduced-motion:reduce){
+  .fade-up{opacity:1!important;transform:none!important;transition:none!important}
+}
+body{
+  font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--black);
+  line-height:1.7;overflow-x:hidden;
+  background-image:radial-gradient(circle,#e0d5c3 1px,transparent 1px);
+  background-size:20px 20px;
+}
+a{color:var(--orange);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:960px;margin:0 auto;padding:0 20px}
+
+/* ===== FADE-UP ANIMATION ===== */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* ===== HEADER ===== */
+.hero{
+  text-align:center;padding:60px 20px 40px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'POW!';position:absolute;top:20px;right:5%;
+  font-family:'Baloo 2',cursive;font-size:2.5rem;font-weight:800;
+  color:var(--gold);opacity:.18;transform:rotate(12deg);
+  text-shadow:2px 2px 0 var(--black);
+}
+.hero::after{
+  content:'BAM!';position:absolute;bottom:10px;left:5%;
+  font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;
+  color:var(--orange);opacity:.15;transform:rotate(-8deg);
+  text-shadow:2px 2px 0 var(--black);
+}
+.hero h1{
+  font-family:'Baloo 2',cursive;font-size:clamp(2rem,6vw,3.5rem);font-weight:800;
+  color:var(--brown);line-height:1.2;
+  text-shadow:3px 3px 0 rgba(0,0,0,.08);
+}
+.hero h1 span{color:var(--orange)}
+.hero .subtitle{
+  font-size:clamp(.95rem,2.5vw,1.25rem);color:#888;margin-top:8px;font-weight:500;
+}
+.date-badge{
+  display:inline-block;margin-top:16px;padding:6px 20px;
+  background:var(--orange);color:white;font-weight:700;font-size:.85rem;
+  border:3px solid var(--black);border-radius:30px;box-shadow:var(--shadow);
+  font-family:'JetBrains Mono',monospace;
+}
+.back-link{
+  display:inline-block;padding:16px 20px;font-weight:600;font-size:.85rem;color:var(--orange);
+}
+
+/* ===== COMIC PANEL CARD ===== */
+.panel{
+  background:var(--panel-bg);border:3px solid var(--black);border-radius:14px;
+  box-shadow:var(--shadow);padding:28px 28px 24px;margin-bottom:28px;
+  position:relative;overflow:hidden;
+}
+.panel::before{
+  content:'';position:absolute;top:0;right:0;width:80px;height:80px;
+  background:radial-gradient(circle,rgba(0,0,0,.06) 1px,transparent 1px);
+  background-size:6px 6px;border-bottom-left-radius:14px;
+}
+.panel-number{
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.75rem;
+  color:white;background:var(--brown);display:inline-block;
+  padding:2px 12px;border-radius:20px;margin-bottom:12px;
+  border:2px solid var(--black);
+}
+.panel h2{
+  font-family:'Baloo 2',cursive;font-size:clamp(1.3rem,4vw,1.8rem);font-weight:800;
+  color:var(--brown);margin-bottom:6px;line-height:1.3;
+}
+.panel .one-liner{
+  font-size:.95rem;color:#666;margin-bottom:14px;font-weight:500;
+  border-left:4px solid var(--gold);padding-left:12px;
+}
+.flags{margin-bottom:14px;font-size:1.3rem;letter-spacing:4px}
+.news-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.news-item{
+  background:white;border:2px solid #e8e0d4;border-radius:10px;
+  padding:10px 14px;font-size:.85rem;display:flex;align-items:flex-start;gap:8px;
+}
+.news-item .bullet{
+  flex-shrink:0;width:22px;height:22px;border-radius:50%;
+  background:var(--gold);border:2px solid var(--black);display:flex;
+  align-items:center;justify-content:center;font-size:.65rem;font-weight:700;margin-top:2px;
+}
+.news-item .news-text{line-height:1.5}
+.news-item .news-src{font-size:.72rem;color:#aaa;margin-top:2px}
+.panel .analysis{
+  margin-top:16px;padding:14px 16px;background:#fdf6ec;
+  border:2px dashed var(--gold);border-radius:10px;font-size:.88rem;
+  color:#555;line-height:1.7;
+}
+.analysis strong{color:var(--brown)}
+.key-signal{
+  margin-top:10px;padding:10px 14px;background:var(--orange);color:white;
+  border-radius:8px;font-size:.82rem;font-weight:600;
+  border:2px solid var(--black);box-shadow:2px 2px 0 var(--black);
+}
+.key-signal::before{content:'SIGNAL! ';font-family:'Baloo 2',cursive;font-weight:800}
+
+/* ===== TABLE SECTION ===== */
+.table-section{margin-bottom:28px}
+.table-section h2{
+  font-family:'Baloo 2',cursive;font-size:1.6rem;color:var(--brown);
+  margin-bottom:16px;text-align:center;
+}
+.table-controls{
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;
+}
+.filter-btn{
+  padding:6px 14px;border:2px solid var(--black);border-radius:20px;
+  background:white;font-size:.78rem;font-weight:700;cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;transition:all .15s;box-shadow:2px 2px 0 var(--black);
+}
+.filter-btn:hover,.filter-btn.active{background:var(--orange);color:white;transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--black)}
+.table-wrap{
+  overflow-x:auto;border:3px solid var(--black);border-radius:14px;
+  box-shadow:var(--shadow);background:white;
+}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+thead{background:var(--brown);color:white}
+th{padding:10px 12px;text-align:left;font-weight:700;cursor:pointer;white-space:nowrap;font-size:.78rem}
+th:hover{background:var(--orange)}
+td{padding:8px 12px;border-top:1px solid #eee;vertical-align:top}
+tr:hover td{background:#fef9f0}
+.country-dot{
+  display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;
+  border:1.5px solid var(--black);vertical-align:middle;
+}
+.dot-us{background:#3b82f6}.dot-eu{background:#8b5cf6}.dot-uk{background:#14b8a6}
+.dot-tw{background:#ef4444}.dot-cn{background:#f59e0b}.dot-jp{background:#ec4899}
+.country-cell{white-space:nowrap}
+
+/* ===== SUMMARY SECTION ===== */
+.summary-section{
+  margin-bottom:28px;
+}
+.summary-section .panel{
+  border-left:6px solid var(--gold);
+}
+.summary-section h2{
+  font-family:'Baloo 2',cursive;font-size:1.6rem;color:var(--brown);
+  margin-bottom:16px;text-align:center;
+}
+.summary-block{
+  margin-bottom:16px;
+}
+.summary-block h3{
+  font-family:'Baloo 2',cursive;font-size:1.1rem;color:var(--orange);margin-bottom:4px;
+}
+.summary-block p{font-size:.9rem;color:#555;line-height:1.8}
+.summary-quote{
+  text-align:center;font-size:1.05rem;font-weight:700;color:var(--brown);
+  padding:20px;border:3px solid var(--black);border-radius:14px;
+  background:var(--gold);color:white;box-shadow:var(--shadow);
+  font-family:'Noto Sans TC',sans-serif;line-height:1.6;
+}
+
+/* ===== ACTION CARDS ===== */
+.actions-section{margin-bottom:28px}
+.actions-section h2{
+  font-family:'Baloo 2',cursive;font-size:1.6rem;color:var(--brown);
+  margin-bottom:16px;text-align:center;
+}
+.action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.action-card{
+  background:var(--panel-bg);border:3px solid var(--black);border-radius:14px;
+  box-shadow:var(--shadow);padding:20px;transition:all .15s;
+}
+.action-card:hover{transform:translate(-2px,-2px);box-shadow:var(--shadow-lg)}
+.action-icon{
+  width:48px;height:48px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;margin-bottom:12px;border:2px solid var(--black);
+  box-shadow:2px 2px 0 var(--black);
+}
+.action-card h3{font-family:'Baloo 2',cursive;font-size:1rem;color:var(--brown);margin-bottom:6px}
+.action-card p{font-size:.82rem;color:#666;line-height:1.6}
+
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;padding:40px 20px;margin-top:20px;
+  border-top:3px solid var(--black);
+}
+.footer p{font-size:.82rem;color:#999;margin-bottom:4px}
+.footer a{font-weight:700}
+.footer .team{font-family:'Baloo 2',cursive;font-size:1.1rem;color:var(--brown);margin-bottom:8px}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+  .panel{padding:20px 16px 18px}
+  .hero{padding:40px 16px 28px}
+  .hero::before,.hero::after{font-size:1.5rem}
+  table{font-size:.72rem}
+  th,td{padding:6px 8px}
+  .action-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- BACK LINK -->
+<a href="index.html" class="back-link">&larr; 回到知識分享</a>
+
+<!-- ===== HEADER ===== -->
+<header class="hero fade-up">
+  <h1><span>全球 AI</span> 趨勢週報</h1>
+  <p class="subtitle">2026/03/17 — 24 | 四區 44 條新聞彙整分析</p>
+  <div class="date-badge">2026-03-24</div>
+</header>
+
+<div class="container">
+
+<!-- ===== 趨勢 1 ===== -->
+<section class="panel fade-up">
+  <span class="panel-number">TREND 01</span>
+  <h2>AI 晶片軍備競賽白熱化</h2>
+  <p class="one-liner">Nvidia、Musk 陣營、日本軟銀同步下注兆級規模晶片與算力基礎建設，AI 硬體進入「超級工廠」時代。</p>
+  <div class="flags">🇺🇸 🇯🇵 🇹🇼</div>
+  <ul class="news-list">
+    <li class="news-item">
+      <span class="bullet">1</span>
+      <div><div class="news-text">Nvidia GTC 2026 LPU 晶片發表，宣告 Agentic AI 達「拐點」</div><div class="news-src">美國</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">2</span>
+      <div><div class="news-text">TERAFAB：Tesla/SpaceX/xAI $25B 晶片廠啟動</div><div class="news-src">美國</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">3</span>
+      <div><div class="news-text">軟銀孫正義 80 兆日圓 AI 資料中心 + 自建 10GW 發電</div><div class="news-src">日本</div></div>
+    </li>
+  </ul>
+  <div class="analysis">
+    Nvidia GTC 2026 發表全新 <strong>LPU（Language Processing Unit）</strong>架構，AI 專用晶片從 GPU 通用加速轉向語言推理專用化。Musk 旗下 TERAFAB 以 $25B 規模啟動晶片廠，軟銀以 80 兆日圓佈局並自建 10GW 發電設施。台灣 16 家新創組成史上最大團前進 GTC。
+  </div>
+  <div class="key-signal">算力競爭已從晶片層面擴展到能源自主層面，軟銀自建發電設施代表 AI 基礎建設開始「垂直整合」電力供應。</div>
+</section>
+
+<!-- ===== 趨勢 2 ===== -->
+<section class="panel fade-up">
+  <span class="panel-number">TREND 02</span>
+  <h2>Agentic AI 從概念走向大規模商用</h2>
+  <p class="one-liner">各國政府與企業同步將 AI Agent 視為下一代生產力引擎，從資安、企業營運到政府服務全面部署。</p>
+  <div class="flags">🇺🇸 🇹🇼 🇨🇳 🇯🇵</div>
+  <ul class="news-list">
+    <li class="news-item">
+      <span class="bullet">1</span>
+      <div><div class="news-text">Nvidia 宣告 Agentic AI 達「拐點」；Google Cloud 22 秒回應資安威脅</div><div class="news-src">美國</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">2</span>
+      <div><div class="news-text">KDDI 自律型 AI Agent 上線，精度 90%、作業時間削減 7 成</div><div class="news-src">日本</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">3</span>
+      <div><div class="news-text">工信部 2027 年推出 1000 個工業智能體</div><div class="news-src">中國</div></div>
+    </li>
+  </ul>
+  <div class="analysis">
+    黃仁勳在 GTC 明確宣示 Agentic AI 已到達<strong>「拐點」</strong>。Google 在 RSAC '26 展示 Agentic 資安作戰中心，攻擊回應壓至 22 秒。KDDI 自律型 AI Agent 是亞洲電信業首個大規模商用案例。AI Agent 的落地場景已從「助手」升級為<strong>「自主決策者」</strong>。
+  </div>
+  <div class="key-signal">AI Agent 從「能做什麼」的問題，轉為「如何規模化部署」的工程問題。資安、電信、製造業是第一波大規模採用行業。</div>
+</section>
+
+<!-- ===== 趨勢 3 ===== -->
+<section class="panel fade-up">
+  <span class="panel-number">TREND 03</span>
+  <h2>大模型價格戰與開源競爭加劇</h2>
+  <p class="one-liner">DeepSeek V4 推理成本降至 GPT-4 的 1/70，模型能力的「價格崩塌」正在發生。</p>
+  <div class="flags">🇨🇳 🇺🇸</div>
+  <ul class="news-list">
+    <li class="news-item">
+      <span class="bullet">1</span>
+      <div><div class="news-text">DeepSeek V4 推理成本 GPT-4 的 1/70，百萬 Token 上下文</div><div class="news-src">中國</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">2</span>
+      <div><div class="news-text">Cursor Composer 2 以 1/10 價格超越 Claude Opus 4.6</div><div class="news-src">美國</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">3</span>
+      <div><div class="news-text">小米 MiMo-V2 萬億參數全球第八；百度「秒哒」全球開放</div><div class="news-src">中國</div></div>
+    </li>
+  </ul>
+  <div class="analysis">
+    中國大模型 Token 調用量<strong>首次超越美國</strong>，標誌著里程碑。Cursor Composer 2 以十分之一價格達到同等甚至更優的程式碼生成品質，「性價比天花板」被不斷打破。
+  </div>
+  <div class="key-signal">模型能力正在快速「商品化」，差異化將轉移到應用層（Agent、垂直場景）而非模型本身。</div>
+</section>
+
+<!-- ===== 趨勢 4 ===== -->
+<section class="panel fade-up">
+  <span class="panel-number">TREND 04</span>
+  <h2>各國 AI 治理框架加速成形</h2>
+  <p class="one-liner">歐盟延後高風險規則、台灣公平會首發競爭法政策聲明、日本閣議決定 AI 基本計畫——全球監管進入「務實落地」階段。</p>
+  <div class="flags">🇪🇺 🇹🇼 🇯🇵 🇬🇧 🇺🇸</div>
+  <ul class="news-list">
+    <li class="news-item">
+      <span class="bullet">1</span>
+      <div><div class="news-text">歐盟 AI Act Omnibus VII 簡化，高風險規則延後至 2027/12</div><div class="news-src">歐盟</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">2</span>
+      <div><div class="news-text">台灣公平會首度發布 AI 競爭法政策聲明（4 大原則 7 項議題）</div><div class="news-src">台灣</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">3</span>
+      <div><div class="news-text">日本人工知能基本計畫閣議決定；英國不立新法由法院適用</div><div class="news-src">日本/英國</div></div>
+    </li>
+  </ul>
+  <div class="analysis">
+    歐盟 AI Act 高風險規則確定延後至 <strong>2027 年 12 月</strong>。台灣公平會以 4 大原則 7 項議題首次正式表態，不需修法即可處理 AI 競爭問題。各國不約而同選擇「現有法律框架 + 彈性適用」的路線。
+  </div>
+  <div class="key-signal">全球 AI 監管共識是「不急著立新法」，以現有框架彈性適用，避免扼殺創新。</div>
+</section>
+
+<!-- ===== 趨勢 5 ===== -->
+<section class="panel fade-up">
+  <span class="panel-number">TREND 05</span>
+  <h2>AI 人才與算力的國家戰略佈局</h2>
+  <p class="one-liner">台灣投 100 億培育 AI 新創與人才、日本推「AI・半導體・機器人」三位一體戰略、中國國家力量推動製造業 AI 轉型。</p>
+  <div class="flags">🇹🇼 🇯🇵 🇨🇳</div>
+  <ul class="news-list">
+    <li class="news-item">
+      <span class="bullet">1</span>
+      <div><div class="news-text">數發部擴充算力池 140 片 GPU、國發基金 100 億投 AI 新創</div><div class="news-src">台灣</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">2</span>
+      <div><div class="news-text">經產省三位一體戰略：2040 年 60 兆日圓市場目標</div><div class="news-src">日本</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">3</span>
+      <div><div class="news-text">工信部八部門「AI+製造」：2026 十項重點工作</div><div class="news-src">中國</div></div>
+    </li>
+  </ul>
+  <div class="analysis">
+    亞洲三國不約而同將 AI 視為國家戰略核心。台灣數發部以算力產品化加速 AI 民主化，行政院啟動 <strong>900 名種子 + 180 名師資</strong>的人才培育。日本目標 2040 年創造 60 兆日圓市場。
+  </div>
+  <div class="key-signal">AI 競爭已從「企業競爭」升級為「國家產業政策」層級，算力、人才、法規三管齊下是共同模式。</div>
+</section>
+
+<!-- ===== 趨勢 6 ===== -->
+<section class="panel fade-up">
+  <span class="panel-number">TREND 06</span>
+  <h2>國產大模型與數位主權覺醒</h2>
+  <p class="one-liner">日本數位廳選定 7 款國產 LLM 供 18 萬公務員使用，各國積極降低對外國 AI 的依賴。</p>
+  <div class="flags">🇯🇵 🇨🇳 🇹🇼</div>
+  <ul class="news-list">
+    <li class="news-item">
+      <span class="bullet">1</span>
+      <div><div class="news-text">數位廳「源內」選定 tsuzumi 2、PLaMo 2.0 等 7 款國產 LLM</div><div class="news-src">日本</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">2</span>
+      <div><div class="news-text">中國大模型 Token 調用量首次超越美國</div><div class="news-src">中國</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">3</span>
+      <div><div class="news-text">台灣數發部 AI 算力產品化 266 項模型上架</div><div class="news-src">台灣</div></div>
+    </li>
+  </ul>
+  <div class="analysis">
+    日本「源內」計畫選定 7 款國產 LLM 在 <strong>18 萬公務員</strong>中實證，是全球最大規模的「國產 AI 政府導入」。各國正從「使用 AI」走向「掌握 AI」。
+  </div>
+  <div class="key-signal">「數位主權」不再只是口號，各國開始以實際採購和政策推動國產 AI 模型落地。</div>
+</section>
+
+<!-- ===== 趨勢 7 ===== -->
+<section class="panel fade-up">
+  <span class="panel-number">TREND 07</span>
+  <h2>AI 與垂直產業深度融合</h2>
+  <p class="one-liner">從智慧汽車到製造業、從電信到資安，AI 正以 Agent 形態深入每個垂直場景。</p>
+  <div class="flags">🇨🇳 🇯🇵 🇺🇸</div>
+  <ul class="news-list">
+    <li class="news-item">
+      <span class="bullet">1</span>
+      <div><div class="news-text">智己汽車 IM Ultra Agent 首搭千問大模型上車</div><div class="news-src">中國</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">2</span>
+      <div><div class="news-text">高市政權 AI 機器人全球市占 3 成目標</div><div class="news-src">日本</div></div>
+    </li>
+    <li class="news-item">
+      <span class="bullet">3</span>
+      <div><div class="news-text">Google Agentic 資安作戰中心；KDDI 電信 AI Agent</div><div class="news-src">美國/日本</div></div>
+    </li>
+  </ul>
+  <div class="analysis">
+    中國智己汽車首次將阿里千問大模型搭載至量產車，開啟<strong>「大模型上車」元年</strong>。日本設定 AI 機器人全球市占 3 成目標。AI 從「通用對話」走向「行業專用」的速度遠超預期。
+  </div>
+  <div class="key-signal">下一波 AI 價值創造將來自「行業 know-how + AI Agent」的結合，而非通用模型的能力提升。</div>
+</section>
+
+<!-- ===== 引證總表 ===== -->
+<section class="table-section fade-up">
+  <h2>零幻覺引證總表</h2>
+  <div class="table-controls">
+    <button class="filter-btn active" data-filter="all">全部 (44)</button>
+    <button class="filter-btn" data-filter="美國">🇺🇸 美國</button>
+    <button class="filter-btn" data-filter="歐盟">🇪🇺 歐盟</button>
+    <button class="filter-btn" data-filter="英國">🇬🇧 英國</button>
+    <button class="filter-btn" data-filter="台灣">🇹🇼 台灣</button>
+    <button class="filter-btn" data-filter="中國">🇨🇳 中國</button>
+    <button class="filter-btn" data-filter="日本">🇯🇵 日本</button>
+  </div>
+  <div class="table-wrap">
+    <table id="newsTable">
+      <thead>
+        <tr>
+          <th data-sort="num">#</th>
+          <th data-sort="country">國家</th>
+          <th data-sort="title">標題</th>
+          <th>摘要</th>
+        </tr>
+      </thead>
+      <tbody id="newsBody">
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 趨勢總結 ===== -->
+<section class="summary-section fade-up">
+  <h2>趨勢總結</h2>
+  <div class="panel" style="border-left:6px solid var(--gold)">
+    <div class="summary-block">
+      <h3>硬體層：從晶片到能源的垂直整合</h3>
+      <p>Nvidia LPU 標誌 AI 晶片走向語言推理專用化。Musk $25B TERAFAB + 軟銀 80 兆日圓 + 自建 10GW 發電——競爭已從「誰有最好的晶片」演進到「誰能掌控從晶片到電力的完整供應鏈」。</p>
+    </div>
+    <div class="summary-block">
+      <h3>模型層：價格崩塌與能力商品化</h3>
+      <p>DeepSeek V4 成本 GPT-4 的 1/70，中國 Token 調用量超越美國。大模型「能力溢價」正在消失，價值重心轉向「誰的應用場景最深」。</p>
+    </div>
+    <div class="summary-block">
+      <h3>應用層：Agentic AI 全面進入生產環境</h3>
+      <p>Google 22 秒資安回應、KDDI 90% 精度、智己千問上車、工信部 1000 個工業智能體。AI Agent 不再是「能做什麼」，而是「如何規模化部署」。</p>
+    </div>
+    <div class="summary-block">
+      <h3>治理層：全球共識「不急著立新法」</h3>
+      <p>歐盟延後、英國不立新法、台灣現行法架構、日本閣議決定。各國選擇「現有框架 + 彈性適用」，避免損害國家競爭力。</p>
+    </div>
+    <div class="summary-block">
+      <h3>數位主權：國產 AI 的戰略佈局</h3>
+      <p>日本 18 萬公務員實證國產 LLM，中國國家力量推動生態，台灣 266 項模型上架。各國從「使用 AI」走向「掌握 AI」。</p>
+    </div>
+  </div>
+  <div class="summary-quote fade-up">
+    AI 的競爭焦點正從「模型能力」轉向<br>「算力基建 + Agent 落地 + 數位主權」的三角競賽
+  </div>
+</section>
+
+<!-- ===== 行動建議 ===== -->
+<section class="actions-section fade-up">
+  <h2>台灣 / CAMEO 行動建議</h2>
+  <div class="action-grid">
+    <div class="action-card fade-up">
+      <div class="action-icon" style="background:#fef2f2"><i data-lucide="bot" style="color:var(--orange)"></i></div>
+      <h3>1. 加速 AI Agent 產品化</h3>
+      <p>Agentic AI 已進入大規模商用階段。評估將現有產品以 AI Agent 形態重新封裝，特別是行銷自動化、社群管理場景。IDC 預測台灣代理式 AI 2029 年佔 AI 支出 17%。</p>
+    </div>
+    <div class="action-card fade-up">
+      <div class="action-icon" style="background:#f0fdf4"><i data-lucide="server" style="color:#16a34a"></i></div>
+      <h3>2. 善用政府 AI 算力與資金</h3>
+      <p>數發部已擴充算力池至 140 片 GPU、266 項模型上架，國發基金投入 100 億元。積極申請政府算力資源與新創補助，降低 AI 研發成本。</p>
+    </div>
+    <div class="action-card fade-up">
+      <div class="action-icon" style="background:#fefce8"><i data-lucide="trending-down" style="color:var(--gold)"></i></div>
+      <h3>3. 掌握模型成本崩塌機會</h3>
+      <p>DeepSeek V4 推理成本降至 GPT-4 的 1/70。過去「太貴不敢做」的 AI 功能現在可以大規模部署，將更多 AI 能力下放到基礎版產品。</p>
+    </div>
+    <div class="action-card fade-up">
+      <div class="action-icon" style="background:#eff6ff"><i data-lucide="shield-check" style="color:#3b82f6"></i></div>
+      <h3>4. 建立 AI 合規準備度</h3>
+      <p>台灣公平會已發布 AI 競爭法政策聲明，人工智慧基本法進入施行期。提前盤點 AI 產品在數據使用、演算法透明度等面向的合規狀態。</p>
+    </div>
+    <div class="action-card fade-up">
+      <div class="action-icon" style="background:#fdf4ff"><i data-lucide="landmark" style="color:#a855f7"></i></div>
+      <h3>5. 觀察日本「國產 LLM + 政府採購」模式</h3>
+      <p>日本 18 萬公務員規模實證國產 LLM，這個模式未來可能被台灣效仿。思考是否有機會參與台灣政府的「AI 服務國產化」趨勢。</p>
+    </div>
+  </div>
+</section>
+
+</div><!-- .container -->
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer fade-up">
+  <p class="team">Forever AI 小隊</p>
+  <p>分析師：肉乙 &amp; 卡拉 | 技術：Roy's Lab</p>
+  <p><a href="../index.html">Roy's Lab</a> &middot; <a href="index.html">知識分享</a> &middot; <a href="https://github.com/WengRoy/forever-ai-roy" target="_blank">GitHub</a></p>
+</footer>
+
+<script>
+// ===== 新聞資料 =====
+const NEWS=[
+{n:1,country:"美國",dot:"us",title:"Nvidia GTC 2026: LPU 晶片發表，Agentic AI 達「拐點」",summary:"Nvidia 在 GTC 2026 發表全新 LPU 語言處理晶片，黃仁勳宣告 Agentic AI 已達到拐點"},
+{n:2,country:"美國",dot:"us",title:"Nvidia Vera CPU 機架，$1 trillion 訂單",summary:"Nvidia 公布 Vera CPU 機架架構，揭露累計 $1 兆美元訂單管線"},
+{n:3,country:"美國",dot:"us",title:"TERAFAB：Tesla/SpaceX/xAI $25B 晶片廠啟動",summary:"Musk 旗下 Tesla、SpaceX、xAI 聯合啟動 $250 億 TERAFAB 晶片廠計畫"},
+{n:4,country:"美國",dot:"us",title:"美國財政部 AI Innovation Series 啟動",summary:"美國財政部啟動 AI 創新系列計畫，探索 AI 在金融監管的應用"},
+{n:5,country:"美國",dot:"us",title:"Google Cloud Agentic AI 資安策略",summary:"Google Cloud 發表 Agentic AI 資安方案，攻擊回應時間縮至 22 秒"},
+{n:6,country:"美國",dot:"us",title:"Google RSAC '26 Agentic 資安作戰中心",summary:"Google 在 RSAC 2026 大會展示 Agentic AI 驅動的資安作戰中心"},
+{n:7,country:"美國",dot:"us",title:"Cursor Composer 2 以 1/10 價格超越 Claude Opus 4.6",summary:"AI 程式碼工具 Cursor Composer 2 以十分之一成本達到同等品質"},
+{n:8,country:"歐盟",dot:"eu",title:"歐盟 AI Act Omnibus VII 簡化，高風險規則延後至 2027/12",summary:"歐盟通過 Omnibus VII 修正案，簡化 AI Act 合規要求"},
+{n:9,country:"歐盟",dot:"eu",title:"歐洲議會支持延後 AI 高風險系統規則",summary:"歐洲議會投票支持延後 AI 高風險系統規則實施"},
+{n:10,country:"英國",dot:"uk",title:"英國 AI 著作權報告：不立新法，由法院適用現行法",summary:"英國政府決定不制定新法，交由法院以現行法處理 AI 著作權"},
+{n:11,country:"英國",dot:"uk",title:"英國 AI 著作權經濟影響評估",summary:"英國政府發布 AI 對著作權產業的經濟影響評估報告"},
+{n:12,country:"美國",dot:"us",title:"AI 基礎設施需為 Agentic Computing 進化",summary:"產業分析指出 AI 基礎設施必須從訓練導向轉為 Agentic Computing 導向"},
+{n:13,country:"台灣",dot:"tw",title:"公平會首度發布生成式 AI 競爭法政策聲明",summary:"台灣公平交易委員會首次發布生成式 AI 競爭法政策聲明，提出 4 大原則 7 項議題"},
+{n:14,country:"台灣",dot:"tw",title:"公平會不需修法，現有公平法架構下處理",summary:"公平會表示以現行公平法架構即可處理 AI 競爭問題"},
+{n:15,country:"台灣",dot:"tw",title:"16 家台灣新創史上最大團前進 NVIDIA GTC 2026",summary:"16 家台灣 AI 新創組成歷來最大參展團前進 Nvidia GTC 2026"},
+{n:16,country:"台灣",dot:"tw",title:"是方電訊 Q2 推 AI 賦能平臺",summary:"是方電訊預計 Q2 推出企業級 AI Agent 賦能平臺"},
+{n:17,country:"台灣",dot:"tw",title:"數發部 AI 算力產品化：242 家次、266 項模型",summary:"數位發展部推動 AI 算力產品化，累計 242 家次使用、266 項模型上架"},
+{n:18,country:"台灣",dot:"tw",title:"數發部擴充算力池至 140 片 GPU，國發基金 100 億投 AI 新創",summary:"數發部擴充算力池，國發基金投入 100 億元支持 AI 新創"},
+{n:19,country:"台灣",dot:"tw",title:"公平會 7 項競爭議題",summary:"公平會 AI 競爭政策涵蓋晶片、數據、雲端、人才等 7 大議題"},
+{n:20,country:"台灣",dot:"tw",title:"IDC 預測台灣代理式 AI 2029 佔 AI 支出 17%",summary:"IDC 預測台灣代理式 AI 至 2029 年將佔整體 AI 支出的 17%"},
+{n:21,country:"台灣",dot:"tw",title:"行政院 AI 人才培育計畫",summary:"行政院啟動 AI 人才培育計畫，培訓 900 名種子教師與 180 名師資"},
+{n:22,country:"台灣",dot:"tw",title:"人工智慧基本法施行期",summary:"台灣人工智慧基本法進入施行期，確立 7 大原則"},
+{n:23,country:"中國",dot:"cn",title:"智己汽車 IM Ultra Agent 首搭千問大模型上車",summary:"智己汽車發表 IM Ultra Agent，首次將阿里千問大模型搭載至量產車"},
+{n:24,country:"中國",dot:"cn",title:"小米 MiMo-V2：萬億參數，全球第八",summary:"小米發表 MiMo-V2 萬億參數大模型，排名全球第八"},
+{n:25,country:"中國",dot:"cn",title:"小米認領神秘模型 Hunter Alpha",summary:"小米主動認領匿名提交的神秘模型 Hunter Alpha"},
+{n:26,country:"中國",dot:"cn",title:"中國發展高層論壇 2026：AI 為核心議題",summary:"中國發展高層論壇 2026 以 AI 作為核心議題進行討論"},
+{n:27,country:"中國",dot:"cn",title:"第一財經 AI Agent 重構企業運營沙龍",summary:"第一財經舉辦 AI Agent 重構企業運營沙龍，探討 Agent 落地場景"},
+{n:28,country:"中國",dot:"cn",title:"百度「秒哒」全球開放",summary:"百度 AI 應用「秒哒」正式對全球使用者開放"},
+{n:29,country:"中國",dot:"cn",title:"DeepSeek V4：百萬 Token、推理成本 GPT-4 的 1/70",summary:"DeepSeek V4 支援百萬 Token 上下文，推理成本僅為 GPT-4 的七十分之一"},
+{n:30,country:"中國",dot:"cn",title:"中國大模型 Token 調用量首次超越美國",summary:"中國大模型整體 Token 調用量首次在統計上超越美國"},
+{n:31,country:"中國",dot:"cn",title:"工信部：製造業擁抱 AI 是必答題",summary:"工信部表示製造業導入 AI 已不是選擇題而是必答題"},
+{n:32,country:"中國",dot:"cn",title:"DeepSeek vs 騰訊兩條突圍路",summary:"分析 DeepSeek 與騰訊在大模型領域的不同競爭策略"},
+{n:33,country:"中國",dot:"cn",title:"工信部八部門「AI+製造」：2027 年推出 1000 個工業智能體",summary:"工信部聯合八部門推動 AI+製造，目標 2027 年推出 1000 個工業智能體"},
+{n:34,country:"中國",dot:"cn",title:"工信部 2026 十項重點：培育行業智能體",summary:"工信部列出 2026 年十項重點工作，培育行業智能體為核心"},
+{n:35,country:"日本",dot:"jp",title:"軟銀孫正義 80 兆日圓 AI 資料中心（俄亥俄州）",summary:"軟銀孫正義宣布在俄亥俄州投資 80 兆日圓建設 AI 資料中心"},
+{n:36,country:"日本",dot:"jp",title:"軟銀 AI 拠點自建 10GW 發電設施",summary:"軟銀為 AI 據點自建 10GW 規模發電設施"},
+{n:37,country:"日本",dot:"jp",title:"經產省「AI・半導體・機器人」三位一體戰略",summary:"日本經產省推出三位一體戰略，目標 2040 年創造 60 兆日圓市場"},
+{n:38,country:"日本",dot:"jp",title:"高市政權 AI 機器人全球市占 3 成目標",summary:"日本政府設定 AI 機器人全球市占率 30% 的國家目標"},
+{n:39,country:"日本",dot:"jp",title:"KDDI 自律型 AI Agent 正式上線",summary:"KDDI 自律型 AI Agent 上線，精度達 90%、作業時間削減 7 成"},
+{n:40,country:"日本",dot:"jp",title:"數位廳「源內」選定 7 款國產 LLM",summary:"日本數位廳「源內」計畫選定 7 款國產 LLM，供 18 萬公務員實證使用"},
+{n:41,country:"日本",dot:"jp",title:"數位廳國產 LLM：tsuzumi 2、PLaMo 2.0 等",summary:"獲選國產 LLM 包含 NTT tsuzumi 2、Preferred Networks PLaMo 2.0 等"},
+{n:42,country:"日本",dot:"jp",title:"國產半導體目標 2040 年 40 兆日圓",summary:"日本設定國產半導體 2040 年達 40 兆日圓產值目標"},
+{n:43,country:"日本",dot:"jp",title:"KDDI/ELYZA 獲選政府 AI 供應商",summary:"KDDI 及 ELYZA 獲選為日本政府 AI 服務供應商"},
+{n:44,country:"日本",dot:"jp",title:"人工知能基本計畫閣議決定",summary:"日本內閣以閣議決定通過人工智能基本計畫"}
+];
+
+// ===== 渲染表格 =====
+const tbody=document.getElementById('newsBody');
+let currentFilter='all';
+let sortKey='num';let sortAsc=true;
+
+function render(){
+  const filtered=currentFilter==='all'?NEWS:NEWS.filter(n=>n.country===currentFilter);
+  const sorted=[...filtered].sort((a,b)=>{
+    if(sortKey==='num')return sortAsc?a.n-b.n:b.n-a.n;
+    if(sortKey==='country')return sortAsc?a.country.localeCompare(b.country):b.country.localeCompare(a.country);
+    if(sortKey==='title')return sortAsc?a.title.localeCompare(b.title):b.title.localeCompare(a.title);
+    return 0;
+  });
+  tbody.innerHTML=sorted.map(r=>`<tr>
+    <td style="font-family:'JetBrains Mono',monospace;font-weight:700;text-align:center">${r.n}</td>
+    <td class="country-cell"><span class="country-dot dot-${r.dot}"></span>${r.country}</td>
+    <td><strong>${r.title}</strong></td>
+    <td>${r.summary}</td>
+  </tr>`).join('');
+}
+render();
+
+// ===== 篩選按鈕 =====
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter=btn.dataset.filter;
+    render();
+  });
+});
+
+// ===== 表頭排序 =====
+document.querySelectorAll('th[data-sort]').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const key=th.dataset.sort;
+    if(sortKey===key)sortAsc=!sortAsc;else{sortKey=key;sortAsc=true}
+    render();
+  });
+});
+
+// ===== FADE-UP 動畫 =====
+const obs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
+},{threshold:0.1});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+
+// ===== Lucide icons =====
+document.addEventListener('DOMContentLoaded',()=>{if(window.lucide)lucide.createIcons()});
+</script>
+</body>
+</html>
