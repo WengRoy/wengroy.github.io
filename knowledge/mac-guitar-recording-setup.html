@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mac 電吉他錄音最小架設指南 — Roy's Lab</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎸</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --comic-black: #1a1a1a;
+            --comic-white: #fdf6e3;
+            --warm-cream: #fff8eb;
+            --warm-orange: #e8713a;
+            --warm-brown: #6b4226;
+            --warm-gold: #d4a853;
+            --warm-red: #c0392b;
+            --warm-blue: #2e86ab;
+            --warm-green: #27ae60;
+            --warm-purple: #9b59b6;
+            --panel-shadow: 4px 4px 0px var(--comic-black);
+            --border-thick: 3px solid var(--comic-black);
+            --border-thicker: 5px solid var(--comic-black);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Baloo 2', sans-serif;
+            background: var(--warm-cream);
+            color: var(--comic-black);
+            line-height: 1.7;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
+            background-size: 12px 12px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* === NAV === */
+        .comic-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--warm-cream);
+            border-bottom: var(--border-thicker);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--warm-brown);
+            text-decoration: none;
+        }
+
+        .nav-title span { color: var(--warm-orange); }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--comic-black);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border: 2px solid var(--comic-black);
+            border-radius: 20px;
+            background: var(--comic-white);
+            transition: all 0.15s ease;
+        }
+
+        .back-link:hover {
+            background: var(--warm-orange);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 2px 2px 0px var(--comic-black);
+        }
+
+        /* === MAIN === */
+        main {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* === HERO === */
+        .page-hero {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .page-hero .badge {
+            display: inline-block;
+            background: var(--warm-orange);
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 5px 16px;
+            border-radius: 20px;
+            border: 2px solid var(--comic-black);
+            margin-bottom: 16px;
+            transform: rotate(-2deg);
+        }
+
+        .page-hero h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: var(--warm-brown);
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .page-hero h1 span { color: var(--warm-orange); }
+
+        .page-hero p {
+            font-size: 1.05rem;
+            color: #555;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* === SECTION === */
+        .section {
+            background: white;
+            border: var(--border-thicker);
+            border-radius: 20px;
+            box-shadow: 6px 6px 0px var(--comic-black);
+            padding: 32px 36px;
+            margin-bottom: 36px;
+        }
+
+        .section h2 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--warm-brown);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section h2 .num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--warm-orange);
+            color: white;
+            border: 3px solid var(--comic-black);
+            border-radius: 50%;
+            font-size: 1.2rem;
+            box-shadow: 3px 3px 0px var(--comic-black);
+        }
+
+        .section h3 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.3rem;
+            color: var(--warm-brown);
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .section p { margin-bottom: 12px; color: #444; }
+
+        .section ul, .section ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        .section li {
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        .section strong { color: var(--warm-red); }
+
+        .section code {
+            background: var(--comic-white);
+            border: 2px solid var(--comic-black);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-family: 'Menlo', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: var(--warm-brown);
+        }
+
+        /* === SVG DIAGRAM === */
+        .diagram-wrap {
+            background: var(--comic-white);
+            border: var(--border-thick);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .diagram-wrap svg {
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 980px;
+            height: auto;
+        }
+
+        /* === TABLE === */
+        .table-wrap {
+            overflow-x: auto;
+            border: var(--border-thick);
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 0.95rem;
+        }
+
+        thead {
+            background: var(--warm-brown);
+            color: white;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 2px solid var(--comic-black);
+        }
+
+        th { font-weight: 700; font-family: 'Baloo 2', cursive; }
+
+        tbody tr:nth-child(even) { background: #fff8eb; }
+        tbody tr:hover { background: #ffe9c8; }
+
+        td a {
+            color: var(--warm-orange);
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 2px dotted var(--warm-orange);
+        }
+
+        td a:hover {
+            color: var(--warm-red);
+            border-bottom-style: solid;
+        }
+
+        .price {
+            font-weight: 700;
+            color: var(--warm-green);
+            white-space: nowrap;
+        }
+
+        .price-free {
+            display: inline-block;
+            background: var(--warm-green);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            border: 2px solid var(--comic-black);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* === STEPS === */
+        .step-list {
+            list-style: none;
+            margin-left: 0 !important;
+            counter-reset: step-counter;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            position: relative;
+            padding: 14px 14px 14px 56px;
+            background: var(--comic-white);
+            border: 2px solid var(--comic-black);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            background: var(--warm-orange);
+            color: white;
+            border: 2px solid var(--comic-black);
+            border-radius: 50%;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* === HIGHLIGHT BOX === */
+        .highlight-box {
+            background: linear-gradient(135deg, #fff5d8 0%, #ffe9c8 100%);
+            border: var(--border-thick);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .highlight-box::before {
+            content: '💡';
+            position: absolute;
+            top: -16px;
+            left: 16px;
+            background: white;
+            border: 2px solid var(--comic-black);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .highlight-box h4 {
+            font-family: 'Baloo 2', cursive;
+            color: var(--warm-brown);
+            margin-bottom: 8px;
+            margin-top: 4px;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #ffd8d8 0%, #ffc8c8 100%);
+            border: var(--border-thick);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .warning-box::before {
+            content: '⚠️';
+            position: absolute;
+            top: -16px;
+            left: 16px;
+            background: white;
+            border: 2px solid var(--comic-black);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .warning-box h4 {
+            font-family: 'Baloo 2', cursive;
+            color: var(--warm-red);
+            margin-bottom: 8px;
+            margin-top: 4px;
+        }
+
+        /* === TOTAL BOX === */
+        .total-box {
+            background: var(--warm-orange);
+            color: white;
+            border: var(--border-thicker);
+            border-radius: 14px;
+            padding: 20px 28px;
+            text-align: center;
+            box-shadow: 5px 5px 0px var(--comic-black);
+            margin-top: 16px;
+        }
+
+        .total-box .label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .total-box .price-num {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        /* === FOOTER === */
+        footer {
+            text-align: center;
+            padding: 30px 24px;
+            border-top: var(--border-thicker);
+            background: var(--comic-white);
+            color: var(--warm-brown);
+            font-weight: 600;
+        }
+
+        footer a {
+            color: var(--warm-orange);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .section { padding: 24px 20px; }
+            .page-hero h1 { font-size: 1.9rem; }
+            .section h2 { font-size: 1.4rem; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="comic-nav">
+        <a href="../index.html" class="nav-title">Roy's <span>Lab</span></a>
+        <a href="index.html" class="back-link">← 回知識分享</a>
+    </nav>
+
+    <main>
+
+        <!-- HERO -->
+        <section class="page-hero">
+            <span class="badge">Mac 錄音指南</span>
+            <h1>電吉他 × <span>GarageBand</span> × 免費 Plugin<br>最小錄音架構</h1>
+            <p>從零開始，用最少的錢、最少的設備，把電吉他接進 Mac、用 GarageBand + 免費 AU plugin 錄出像樣的音色。</p>
+        </section>
+
+        <!-- 1. 訊號流架構圖 -->
+        <section class="section">
+            <h2><span class="num">1</span>訊號流架構圖</h2>
+            <p>這張圖告訴你聲音從吉他「跑去哪裡、被誰處理、最後從哪聽到」。看懂這條鏈，你就懂錄音了。</p>
+
+            <div class="diagram-wrap">
+                <svg viewBox="0 0 980 540" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                            <path d="M0,0 L12,6 L0,12 z" fill="#1a1a1a"/>
+                        </marker>
+                        <pattern id="dots" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+                            <circle cx="4" cy="4" r="0.8" fill="rgba(0,0,0,0.06)"/>
+                        </pattern>
+                    </defs>
+
+                    <rect width="980" height="540" fill="url(#dots)"/>
+
+                    <!-- Title -->
+                    <text x="490" y="32" text-anchor="middle" font-family="Baloo 2, cursive" font-size="22" font-weight="800" fill="#6b4226">
+                        🎸 訊號流：從電吉他到耳機
+                    </text>
+
+                    <!-- ===== 第一排：硬體訊號鏈 ===== -->
+
+                    <!-- 1. 電吉他 -->
+                    <g>
+                        <rect x="30" y="80" width="150" height="110" rx="14" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+                        <rect x="34" y="84" width="150" height="110" rx="14" fill="none" stroke="#1a1a1a" stroke-width="2" opacity="0.3"/>
+                        <text x="105" y="115" text-anchor="middle" font-size="38">🎸</text>
+                        <text x="105" y="145" text-anchor="middle" font-family="Baloo 2" font-size="16" font-weight="800" fill="#6b4226">電吉他</text>
+                        <text x="105" y="165" text-anchor="middle" font-size="11" fill="#666">類比 高阻抗訊號</text>
+                        <text x="105" y="180" text-anchor="middle" font-size="11" fill="#666">(Hi-Z)</text>
+                    </g>
+
+                    <!-- Arrow 1 -->
+                    <line x1="185" y1="135" x2="225" y2="135" stroke="#1a1a1a" stroke-width="3" marker-end="url(#arrow)"/>
+                    <text x="205" y="125" text-anchor="middle" font-size="10" font-weight="700" fill="#c0392b">導線</text>
+
+                    <!-- 2. Audio Interface -->
+                    <g>
+                        <rect x="230" y="80" width="180" height="110" rx="14" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+                        <rect x="234" y="84" width="180" height="110" rx="14" fill="none" stroke="#1a1a1a" stroke-width="2" opacity="0.3"/>
+                        <!-- 介面外型 -->
+                        <rect x="250" y="100" width="140" height="40" rx="6" fill="#e8713a" stroke="#1a1a1a" stroke-width="2"/>
+                        <circle cx="270" cy="120" r="8" fill="#1a1a1a"/>
+                        <circle cx="270" cy="120" r="3" fill="#fff"/>
+                        <circle cx="300" cy="120" r="8" fill="#1a1a1a"/>
+                        <circle cx="300" cy="120" r="3" fill="#fff"/>
+                        <rect x="320" y="113" width="60" height="14" rx="2" fill="#1a1a1a"/>
+                        <text x="350" y="124" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">Hi-Z</text>
+                        <text x="320" y="160" text-anchor="middle" font-family="Baloo 2" font-size="14" font-weight="800" fill="#6b4226">Audio Interface</text>
+                        <text x="320" y="178" text-anchor="middle" font-size="10" fill="#666">類比→數位轉換 (ADC)</text>
+                    </g>
+
+                    <!-- Arrow 2 -->
+                    <line x1="415" y1="135" x2="455" y2="135" stroke="#1a1a1a" stroke-width="3" marker-end="url(#arrow)"/>
+                    <text x="435" y="125" text-anchor="middle" font-size="10" font-weight="700" fill="#c0392b">USB-C</text>
+
+                    <!-- 3. Mac -->
+                    <g>
+                        <rect x="460" y="80" width="170" height="110" rx="14" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+                        <rect x="464" y="84" width="170" height="110" rx="14" fill="none" stroke="#1a1a1a" stroke-width="2" opacity="0.3"/>
+                        <!-- Mac 外型 -->
+                        <rect x="495" y="100" width="100" height="60" rx="4" fill="#2e86ab" stroke="#1a1a1a" stroke-width="2"/>
+                        <rect x="500" y="105" width="90" height="48" rx="2" fill="#1a1a1a"/>
+                        <text x="545" y="135" text-anchor="middle" font-size="20">💻</text>
+                        <rect x="475" y="160" width="140" height="6" rx="2" fill="#1a1a1a"/>
+                        <text x="545" y="183" text-anchor="middle" font-family="Baloo 2" font-size="14" font-weight="800" fill="#6b4226">Mac (數位訊號)</text>
+                    </g>
+
+                    <!-- Arrow down to GarageBand -->
+                    <line x1="545" y1="195" x2="545" y2="240" stroke="#1a1a1a" stroke-width="3" marker-end="url(#arrow)"/>
+
+                    <!-- ===== 第二排：軟體層 ===== -->
+
+                    <!-- 4. GarageBand 大框 -->
+                    <g>
+                        <rect x="80" y="245" width="820" height="180" rx="18" fill="#fff8eb" stroke="#1a1a1a" stroke-width="5"/>
+                        <text x="490" y="275" text-anchor="middle" font-family="Baloo 2" font-size="18" font-weight="800" fill="#6b4226">🎛️ GarageBand (DAW — 數位音訊工作站)</text>
+
+                        <!-- Audio Track in GarageBand -->
+                        <rect x="110" y="295" width="170" height="110" rx="10" fill="#fff" stroke="#1a1a1a" stroke-width="3"/>
+                        <text x="195" y="320" text-anchor="middle" font-family="Baloo 2" font-size="13" font-weight="700" fill="#6b4226">Audio Track</text>
+                        <text x="195" y="338" text-anchor="middle" font-size="10" fill="#666">(吉他軌)</text>
+                        <rect x="125" y="350" width="140" height="40" rx="4" fill="#27ae60" opacity="0.3" stroke="#27ae60" stroke-width="2"/>
+                        <path d="M 135 370 L 145 360 L 155 380 L 165 365 L 175 375 L 185 358 L 195 372 L 205 365 L 215 378 L 225 362 L 235 374 L 245 368 L 255 376" stroke="#27ae60" stroke-width="2" fill="none"/>
+                        <text x="195" y="402" text-anchor="middle" font-size="9" fill="#666">錄到的 raw 波形</text>
+
+                        <!-- Arrow -->
+                        <line x1="285" y1="350" x2="325" y2="350" stroke="#1a1a1a" stroke-width="3" marker-end="url(#arrow)"/>
+                        <text x="305" y="340" text-anchor="middle" font-size="10" font-weight="700" fill="#c0392b">送進</text>
+
+                        <!-- AU Plugin -->
+                        <rect x="330" y="295" width="200" height="110" rx="10" fill="#fff" stroke="#1a1a1a" stroke-width="3"/>
+                        <text x="430" y="320" text-anchor="middle" font-family="Baloo 2" font-size="13" font-weight="700" fill="#6b4226">AU Plugin</text>
+                        <text x="430" y="338" text-anchor="middle" font-size="10" fill="#666">(Amp Simulator)</text>
+                        <!-- 假音箱 icon -->
+                        <rect x="360" y="348" width="40" height="42" rx="3" fill="#1a1a1a"/>
+                        <circle cx="380" cy="365" r="10" fill="#6b4226" stroke="#fff" stroke-width="1"/>
+                        <circle cx="380" cy="383" r="5" fill="#6b4226" stroke="#fff" stroke-width="1"/>
+                        <text x="450" y="365" font-size="9" fill="#444">• Blue Cat Free Amp</text>
+                        <text x="450" y="378" font-size="9" fill="#444">• AmpliTube 5 CS</text>
+                        <text x="450" y="391" font-size="9" fill="#444">• NAM / Ignite Emissary</text>
+
+                        <!-- Arrow -->
+                        <line x1="535" y1="350" x2="575" y2="350" stroke="#1a1a1a" stroke-width="3" marker-end="url(#arrow)"/>
+                        <text x="555" y="340" text-anchor="middle" font-size="10" font-weight="700" fill="#c0392b">處理後</text>
+
+                        <!-- Mix / Output -->
+                        <rect x="580" y="295" width="170" height="110" rx="10" fill="#fff" stroke="#1a1a1a" stroke-width="3"/>
+                        <text x="665" y="320" text-anchor="middle" font-family="Baloo 2" font-size="13" font-weight="700" fill="#6b4226">Master Output</text>
+                        <text x="665" y="338" text-anchor="middle" font-size="10" fill="#666">(混音輸出)</text>
+                        <rect x="595" y="350" width="140" height="40" rx="4" fill="#e8713a" opacity="0.3" stroke="#e8713a" stroke-width="2"/>
+                        <path d="M 605 370 L 615 358 L 625 382 L 635 360 L 645 378 L 655 355 L 665 375 L 675 360 L 685 380 L 695 358 L 705 375 L 715 365 L 725 378" stroke="#e8713a" stroke-width="2.5" fill="none"/>
+                        <text x="665" y="402" text-anchor="middle" font-size="9" fill="#666">有音色的吉他聲</text>
+
+                        <!-- Arrow out -->
+                        <line x1="755" y1="350" x2="795" y2="350" stroke="#1a1a1a" stroke-width="3" marker-end="url(#arrow)"/>
+
+                        <!-- 監聽 -->
+                        <g>
+                            <text x="840" y="340" text-anchor="middle" font-size="34">🎧</text>
+                            <text x="840" y="385" text-anchor="middle" font-family="Baloo 2" font-size="13" font-weight="700" fill="#6b4226">監聽耳機</text>
+                            <text x="840" y="400" text-anchor="middle" font-size="9" fill="#666">(從介面輸出)</text>
+                        </g>
+                    </g>
+
+                    <!-- ===== 底部說明 ===== -->
+                    <g>
+                        <rect x="80" y="450" width="820" height="70" rx="12" fill="#fff5d8" stroke="#1a1a1a" stroke-width="3"/>
+                        <text x="100" y="478" font-family="Baloo 2" font-size="14" font-weight="800" fill="#c0392b">💡 關鍵概念</text>
+                        <text x="100" y="498" font-size="11" fill="#444">
+                            <tspan font-weight="700">GarageBand 是錄音平台</tspan>，
+                            <tspan font-weight="700" fill="#e8713a">AU Plugin 是音色處理器</tspan>。
+                            吉他訊號進入 GarageBand 是「乾淨無音色的原始訊號」，
+                        </text>
+                        <text x="100" y="513" font-size="11" fill="#444">
+                            必須掛上 AU plugin 才會變成你聽到的「破音、Crunch、Clean」音色。沒掛 plugin 會聽起來像「插電的木吉他」。
+                        </text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="highlight-box">
+                <h4>什麼是 AU Plugin？</h4>
+                <p>AU = <strong>Audio Unit</strong>，是 Apple 自家的 plugin 格式，<strong>GarageBand、Logic Pro 只吃 AU</strong>，不吃 Windows 的 VST。我推薦的免費 plugin 全部都有 AU 版本，所以可以直接掛進 GarageBand。</p>
+            </div>
+        </section>
+
+        <!-- 1.5 AU 詳細介紹 -->
+        <section class="section">
+            <h2><span class="num">★</span>什麼是 AU (Audio Units)？</h2>
+            <p>因為這個詞會一直出現，這邊單獨開一節仔細講清楚。</p>
+
+            <h3>📦 一句話定義</h3>
+            <p><strong>AU (Audio Units)</strong> 是 Apple 在 macOS 系統內建的「音訊外掛程式格式」，由 Apple 開發、屬於 Core Audio 框架的一部分。它讓第三方開發者可以做出「擴大機模擬、效果器、合成器、EQ、壓縮器」等模組，讓 GarageBand、Logic Pro 等 DAW 直接載入使用。</p>
+
+            <h3>🌍 三大主流 Plugin 格式比較</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>格式</th>
+                            <th>全名</th>
+                            <th>開發者</th>
+                            <th>支援平台</th>
+                            <th>誰會用</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>AU</strong></td>
+                            <td>Audio Units</td>
+                            <td>Apple</td>
+                            <td>僅 macOS / iOS</td>
+                            <td>GarageBand、Logic Pro</td>
+                        </tr>
+                        <tr>
+                            <td><strong>VST / VST3</strong></td>
+                            <td>Virtual Studio Technology</td>
+                            <td>Steinberg</td>
+                            <td>Windows / Mac / Linux</td>
+                            <td>Cubase、Ableton、Reaper、FL Studio</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AAX</strong></td>
+                            <td>Avid Audio eXtension</td>
+                            <td>Avid</td>
+                            <td>Windows / Mac</td>
+                            <td>Pro Tools</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>🤔 為什麼 GarageBand 不吃 VST？</h3>
+            <p>因為 VST 是 Steinberg 的格式，而 Apple 想要在 macOS 上維持自己的標準（也方便和 iOS 整合），所以 GarageBand 跟 Logic Pro 都<strong>只認 AU</strong>。換句話說，你在 GarageBand 上看不到任何 VST plugin，就算你裝了也不會出現。</p>
+
+            <p>幸好 99% 的商業 plugin 都會同時推出三種格式（AU + VST + AAX），所以你下載時只要確認「有 AU 版本」就好。我推薦的那六款免費 plugin 全部都支援 AU。</p>
+
+            <h3>📁 AU Plugin 安裝在哪裡？</h3>
+            <p>所有 AU plugin 都放在這兩個固定路徑（系統會自動掃描）：</p>
+            <ul>
+                <li><code>/Library/Audio/Plug-Ins/Components/</code> ← 系統共用（所有使用者）</li>
+                <li><code>~/Library/Audio/Plug-Ins/Components/</code> ← 個人使用者</li>
+            </ul>
+            <p>每個 plugin 是一個 <code>.component</code> 檔案。你不需要手動操作，<strong>下載官方安裝程式（.pkg）執行即可</strong>，安裝程式會自動放到正確位置。</p>
+
+            <h3>🔄 第一次裝完看不到 plugin 怎麼辦？</h3>
+            <p>GarageBand 第一次啟動時會「掃描 + 驗證」所有 AU plugin（叫做 <strong>AU Validation</strong>），這個過程要幾秒到幾分鐘。如果還是找不到：</p>
+            <ol>
+                <li>完全離開 GarageBand（⌘ + Q）</li>
+                <li>打開「Logic Pro 內建的 AU Manager」（如果沒有 Logic 就跳過）</li>
+                <li>重開 GarageBand，再到 Smart Controls → Plug-ins → Audio Units 列表找</li>
+                <li>還是不行 → 確認是否裝到 <code>Components/</code> 資料夾、是否有重開機</li>
+            </ol>
+
+            <h3>💡 一個有趣的小知識</h3>
+            <div class="highlight-box">
+                <h4>AU vs VST 哪個比較好？</h4>
+                <p>音質上<strong>沒有差別</strong>。AU 跟 VST 只是「打包格式」不同，裡面跑的 DSP 演算法是一樣的。Blue Cat Free Amp 的 AU 版跟 VST 版聽起來完全一樣，差別只在「哪個 DAW 認得它」。所以你不用糾結格式問題，<strong>只要在 Mac 上錄音，認 AU 就對了</strong>。</p>
+            </div>
+        </section>
+
+        <!-- 2. GarageBand 與 Plugin 怎麼合作 -->
+        <section class="section">
+            <h2><span class="num">2</span>GarageBand 與 Plugin 怎麼合作？</h2>
+            <p>GarageBand 本身就有內建吉他擴大機模擬（Amp Designer），但音色種類有限。<strong>第三方 AU plugin 的角色，就是「取代或加掛」在這條音色處理鏈上</strong>，讓你用更專業的音色。</p>
+
+            <h3>🔧 安裝 → 使用流程</h3>
+            <ol class="step-list">
+                <li><strong>下載 plugin 安裝檔</strong>（.pkg 或 .dmg），執行安裝。安裝程式會自動把 plugin 放到 <code>/Library/Audio/Plug-Ins/Components/</code></li>
+                <li>打開 <strong>GarageBand</strong> → 新增專案 → 選 <strong>「Empty Project」（空白專案）</strong></li>
+                <li>新增軌道時選 <strong>「Audio — Guitar」（電吉他軌）</strong>，輸入來源選你的 audio interface</li>
+                <li>點軌道 → 按左下角 <strong>「Smart Controls」</strong>（或按 B 鍵）→ 點 <strong>「Plug-ins」</strong> 區塊</li>
+                <li>點 <strong>「+」</strong> → <strong>「Audio Units」</strong> → 找到剛剛安裝的 plugin（例如 IK Multimedia → AmpliTube 5）</li>
+                <li>建議把 GarageBand 內建的 <strong>Amp Designer / Pedalboard 關掉</strong>（按 Bypass），避免兩層 amp 疊在一起</li>
+                <li>按 <strong>R 鍵</strong> 開始錄音 → 用 plugin 的音色彈奏 → 錄完按空白鍵停止</li>
+            </ol>
+
+            <div class="warning-box">
+                <h4>常見錯誤：聲音變兩次破音、糊成一團</h4>
+                <p>因為你<strong>沒有關掉 GarageBand 內建的 Amp Designer</strong>，等於訊號被破音兩次。記得：插了第三方 AU 之後，把內建的擴大機模擬 bypass 掉。</p>
+            </div>
+
+            <h3>🎚️ Input Monitoring（即時監聽）</h3>
+            <p>錄音時想聽到自己彈出來的音色，要打開「Input Monitoring」：軌道頭上有個喇叭 icon（橘色那個），點亮它。如果延遲很大，到 <strong>GarageBand 偏好設定 → Audio/MIDI → Buffer Size</strong> 調小到 64 或 128。</p>
+        </section>
+
+        <!-- 3. 硬體購買清單 -->
+        <section class="section">
+            <h2><span class="num">3</span>硬體購買清單</h2>
+            <p>下面是「最小架構」需要的三樣東西：音訊介面、導線、監聽耳機。電吉他你已經有了 ✌️</p>
+
+            <h3>🎛️ Audio Interface（音訊介面）</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>產品</th>
+                            <th>特色</th>
+                            <th>價格</th>
+                            <th>連結</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Focusrite Scarlett Solo 4th Gen</strong><br><span style="font-size:0.8rem;color:#888">🥇 純新手首選</span></td>
+                            <td>1 個 Hi-Z 吉他輸入<br>Auto Gain + Clip Safe<br>USB-C 免插電</td>
+                            <td class="price">~NT$ 4,200</td>
+                            <td><a href="https://focusrite.com/products/scarlett-solo" target="_blank" rel="noopener">官網 ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Focusrite Scarlett 2i2 4th Gen</strong><br><span style="font-size:0.8rem;color:#888">⭐ Roy 推薦</span></td>
+                            <td>2 個 Hi-Z 輸入<br>未來想雙錄人聲＋吉他<br>不用換機</td>
+                            <td class="price">~NT$ 5,800</td>
+                            <td><a href="https://focusrite.com/products/scarlett-2i2" target="_blank" rel="noopener">官網 ↗</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>🔌 樂器導線</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>產品</th>
+                            <th>特色</th>
+                            <th>價格</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Mogami / Canare 6.3mm TS</strong><br><span style="font-size:0.8rem;color:#888">日系錄音室標準</span></td>
+                            <td>長壽、音色穩定、可用十年</td>
+                            <td class="price">~NT$ 800–1,500</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pig Hog 6.3mm TS</strong><br><span style="font-size:0.8rem;color:#888">入門 CP 值</span></td>
+                            <td>夠用、價格便宜</td>
+                            <td class="price">~NT$ 400</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>🎧 監聽耳機</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>產品</th>
+                            <th>特色</th>
+                            <th>價格</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Audio-Technica ATH-M40x</strong><br><span style="font-size:0.8rem;color:#888">🥇 新手最推</span></td>
+                            <td>平衡好聽、CP 值之王</td>
+                            <td class="price">~NT$ 2,800</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sony MDR-7506</strong></td>
+                            <td>業界經典、錄音室常見</td>
+                            <td class="price">~NT$ 3,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 4. 軟體下載清單 -->
+        <section class="section">
+            <h2><span class="num">4</span>軟體下載清單（全部免費）</h2>
+            <p>所有 plugin 都有 <strong>AU 版本</strong>，安裝後 GarageBand 就會自動抓到。建議第一次先裝 <strong>Blue Cat Free Amp</strong> 跟 <strong>AmpliTube 5 CS</strong> 兩款練手。</p>
+
+            <h3>🎚️ DAW（錄音軟體）</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>產品</th><th>說明</th><th>價格</th><th>連結</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>GarageBand</strong></td>
+                            <td>Mac 內建，無腦開機就能錄</td>
+                            <td><span class="price-free">免費</span></td>
+                            <td>App Store 內建</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>🎸 Amp Simulator Plugin（AU 格式）</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>產品</th><th>適合風格</th><th>價格</th><th>下載</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>AmpliTube 5 CS</strong><br>IK Multimedia<br><span style="font-size:0.8rem;color:#888">🥇 入門首選</span></td>
+                            <td>全能型，內建 42 個 model（5 amps + 10 stompbox + cab + mic）</td>
+                            <td><span class="price-free">免費</span></td>
+                            <td><a href="https://www.ikmultimedia.com/products/amplitubecs/" target="_blank" rel="noopener">官網 ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Blue Cat Free Amp</strong><br>Blue Cat Audio</td>
+                            <td>Clean / Crunch / Modern Drive 三種音色</td>
+                            <td><span class="price-free">免費</span></td>
+                            <td><a href="https://www.bluecataudio.com/Products/Product_FreeAmp/" target="_blank" rel="noopener">官網 ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ignite Emissary + NadIR</strong><br>Ignite Amps</td>
+                            <td>Metal / Hard Rock 神器，含 IR Loader</td>
+                            <td><span class="price-free">免費</span></td>
+                            <td><a href="https://www.stltones.com/products/stl-ignite-emissary-plug-in-bundle" target="_blank" rel="noopener">STL Tones ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Amped Roots Free</strong><br>ML Sound Lab</td>
+                            <td>Modern Metal Chug，無需 overdrive</td>
+                            <td><span class="price-free">免費</span></td>
+                            <td><a href="https://ml-sound-lab.com/products/amped-roots" target="_blank" rel="noopener">官網 ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Neural Amp Modeler (NAM)</strong><br>Steven Atkinson<br><span style="font-size:0.8rem;color:#888">⭐ 進階推薦</span></td>
+                            <td>AI 建模，音色逼近真機</td>
+                            <td><span class="price-free">免費</span></td>
+                            <td><a href="https://www.neuralampmodeler.com/" target="_blank" rel="noopener">官網 ↗</a> / <a href="https://www.tone3000.com/" target="_blank" rel="noopener">音色檔 ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Voxengo Boogex</strong></td>
+                            <td>輕量備援，內建 IR + reverb</td>
+                            <td><span class="price-free">免費</span></td>
+                            <td><a href="https://www.voxengo.com/product/boogex/" target="_blank" rel="noopener">官網 ↗</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 5. 兩個方案總價 -->
+        <section class="section">
+            <h2><span class="num">5</span>Roy 的「最小架設」推薦方案</h2>
+
+            <h3>🪙 方案 A：純新手最省（約 NT$ 7,400）</h3>
+            <ul>
+                <li>Audio Interface：<strong>Focusrite Scarlett Solo 4th Gen</strong> ~NT$ 4,200</li>
+                <li>導線：<strong>Pig Hog 6.3mm</strong> ~NT$ 400</li>
+                <li>監聽耳機：<strong>Audio-Technica ATH-M40x</strong> ~NT$ 2,800</li>
+                <li>DAW：<strong>GarageBand</strong>（Mac 內建）<span class="price-free">免費</span></li>
+                <li>Amp Sim：<strong>AmpliTube 5 CS + Blue Cat Free Amp</strong> <span class="price-free">免費</span></li>
+            </ul>
+            <div class="total-box">
+                <div class="label">總計</div>
+                <div class="price-num">~NT$ 7,400</div>
+            </div>
+
+            <h3 style="margin-top:36px;">⭐ 方案 B：一次到位（約 NT$ 9,800）</h3>
+            <ul>
+                <li>Audio Interface：<strong>Focusrite Scarlett 2i2 4th Gen</strong>（兩個輸入孔）~NT$ 5,800</li>
+                <li>導線：<strong>Mogami / Canare 1.5m</strong> ~NT$ 1,200</li>
+                <li>監聽耳機：<strong>Audio-Technica ATH-M40x</strong> ~NT$ 2,800</li>
+                <li>DAW：<strong>GarageBand</strong> <span class="price-free">免費</span></li>
+                <li>Amp Sim：<strong>NAM + Tone3000 capture 檔</strong> <span class="price-free">免費</span></li>
+            </ul>
+            <div class="total-box">
+                <div class="label">總計</div>
+                <div class="price-num">~NT$ 9,800</div>
+            </div>
+        </section>
+
+        <!-- 6. YouTube 教學頻道推薦 -->
+        <section class="section">
+            <h2><span class="num">6</span>跟著做一個禮拜就能錄出 Demo 的 YouTube 頻道</h2>
+            <p>下面把頻道分成「中文」與「英文」兩塊，每個頻道都標好「該看什麼主題」。你不用全部追，照著一週計畫看完幾隻關鍵影片就夠了。</p>
+
+            <h3>🇹🇼 中文頻道（先看這些）</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>頻道</th>
+                            <th>主理人</th>
+                            <th>推薦看什麼</th>
+                            <th>連結</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>NiceChord 好和弦</strong><br><span style="font-size:0.8rem;color:#888">🥇 樂理打底首選</span></td>
+                            <td>官大為 Wiwi</td>
+                            <td>樂理、和弦、編曲思維。錄音前先把基本觀念打通，事半功倍</td>
+                            <td><a href="https://www.youtube.com/@NiceChord" target="_blank" rel="noopener">YouTube ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mixodus Music</strong><br><span style="font-size:0.8rem;color:#888">編曲混音教學</span></td>
+                            <td>Robin</td>
+                            <td>GarageBand、Logic Pro 編曲、混音、錄音實作教學</td>
+                            <td><a href="https://www.youtube.com/@mixodusmusic" target="_blank" rel="noopener">YouTube ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>璃思維 LiSWEi</strong></td>
+                            <td>璃思維スタジオ</td>
+                            <td>GarageBand 系列教學（節奏編輯、旋律編輯、Drummer 使用）</td>
+                            <td><a href="https://liswei.com/tw/" target="_blank" rel="noopener">官網 ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>DigiLog 聲響實驗室</strong></td>
+                            <td>DigiLog 團隊</td>
+                            <td>器材開箱、軟體介紹、製作觀念，台灣音樂科技媒體龍頭</td>
+                            <td><a href="https://digilog.tw/" target="_blank" rel="noopener">官網 ↗</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>🌍 英文頻道（進階必看）</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>頻道</th>
+                            <th>主理人</th>
+                            <th>推薦看什麼</th>
+                            <th>連結</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>JustinGuitar</strong><br><span style="font-size:0.8rem;color:#888">🥇 全球最知名免費吉他課</span></td>
+                            <td>Justin Sandercoe</td>
+                            <td>從零開始的吉他系統課程，網站有完整免費學習路徑</td>
+                            <td><a href="https://www.youtube.com/@JustinGuitar" target="_blank" rel="noopener">YouTube ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marty Music</strong></td>
+                            <td>Marty Schwartz</td>
+                            <td>歌曲拆解教學，想學特定一首歌就來這找</td>
+                            <td><a href="https://www.youtube.com/@MartyMusic" target="_blank" rel="noopener">YouTube ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Spectre Sound Studios</strong><br><span style="font-size:0.8rem;color:#888">🔥 錄音技術硬派派</span></td>
+                            <td>Glenn Fricker</td>
+                            <td>16 年職業錄音師，毒舌吐槽風格，金屬／搖滾錄音技術寶庫</td>
+                            <td><a href="https://www.youtube.com/@SpectreSoundStudios" target="_blank" rel="noopener">YouTube ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ola Englund</strong></td>
+                            <td>Ola Englund<br>(The Haunted)</td>
+                            <td>Plugin 評測、吉他評測、錄音 demo，一線金屬吉他手親自示範</td>
+                            <td><a href="https://www.youtube.com/@OlaEnglund" target="_blank" rel="noopener">YouTube ↗</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Andy Guitar</strong></td>
+                            <td>Andy Crowley</td>
+                            <td>Home Recording with GarageBand 完整課程，新手友善</td>
+                            <td><a href="https://www.youtube.com/@andyguitar" target="_blank" rel="noopener">YouTube ↗</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>📅 一週速成計畫：七天錄出第一首 Demo</h3>
+            <div class="diagram-wrap" style="background:white;">
+                <ol class="step-list">
+                    <li><strong>Day 1 — 設備與環境</strong>：搜尋 YouTube「Focusrite Scarlett Solo 開箱 教學」，把硬體接好、Hi-Z 鈕按下去、確認 Mac 抓得到介面</li>
+                    <li><strong>Day 2 — GarageBand 入門</strong>：看 Mixodus Music 或 璃思維 的 GarageBand 教學，建立第一個 Audio Track、學會錄音與停止</li>
+                    <li><strong>Day 3 — 安裝 Plugin</strong>：下載 Blue Cat Free Amp + AmpliTube 5 CS，掛進 GarageBand，bypass 內建 Amp Designer，調出第一個自己喜歡的音色</li>
+                    <li><strong>Day 4 — 錄一段 riff</strong>：選一段你會彈的 8 小節 riff（自己寫或翻彈都可），錄 3 次取最好的一次。重點是「習慣聽自己彈奏的錄音」</li>
+                    <li><strong>Day 5 — 加鼓 + Bass</strong>：用 GarageBand 內建 Drummer 加一段鼓，再用內建貝斯軌做簡單低音線。看 LiSWEi 的 Drummer 教學</li>
+                    <li><strong>Day 6 — 疊軌 + Solo</strong>：在原本的 riff 上再錄一軌（雙吉他左右 pan 開），如果想加 solo 就再開一軌錄 solo</li>
+                    <li><strong>Day 7 — 簡單混音 + 輸出</strong>：調整音量平衡、加一點 reverb、Master 掛上限制器（內建即可）→ <strong>Share → Export Song to Disk → MP3</strong>。你的第一首 Demo 完成！</li>
+                </ol>
+            </div>
+
+            <div class="highlight-box">
+                <h4>Roy 的建議</h4>
+                <p>不要想著「先學完所有理論再動手」。<strong>第一週就強迫自己錄出一首 demo（哪怕很爛）</strong>，比花一個月看教學影片但什麼都沒錄要有用 100 倍。錄音這件事 70% 是肌肉記憶，30% 才是技術。</p>
+            </div>
+        </section>
+
+        <!-- 7. 新手避雷 -->
+        <section class="section">
+            <h2><span class="num">7</span>新手最常踩的坑</h2>
+            <ol>
+                <li><strong>沒按 Hi-Z / Inst 鈕</strong>：吉他直接插但音色超乾 → 先檢查介面上有沒有 Hi-Z 開關</li>
+                <li><strong>延遲太大（latency）</strong>：buffer size 設太高 → GarageBand 偏好設定改 64 或 128 samples</li>
+                <li><strong>聽不到自己聲音</strong>：軌道頭上的 Input Monitoring 喇叭 icon 要點亮</li>
+                <li><strong>音色變兩層破音</strong>：忘了把 GarageBand 內建 Amp Designer bypass 掉</li>
+                <li><strong>用筆電喇叭聽混音</strong>：請務必用耳機，不然永遠調不準</li>
+                <li><strong>裝完 plugin 看不到</strong>：重開 GarageBand 一次，AU 第一次掃描要時間</li>
+            </ol>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>Roy's Lab 羅伊的實驗室 — Built with AI by <a href="https://github.com/WengRoy" target="_blank" rel="noopener">Roy</a> & 波特人羅伊 🐻</p>
+    </footer>
+
+</body>
+</html>
