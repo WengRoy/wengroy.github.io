@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Tag：AI 進駐你的 Slack 頻道，從「個人助理」變「團隊隊友」</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #fdf6e3;
+    --black: #1a1a1a;
+    --orange: #e8713a;
+    --brown: #6b4226;
+    --gold: #d4a853;
+    --blue: #2e86ab;
+    --green: #27ae60;
+    --red: #c0392b;
+    --shadow: 4px 4px 0px #1a1a1a;
+    --border: 3px solid #1a1a1a;
+    --border-thick: 5px solid #1a1a1a;
+    --sans: 'Noto Sans TC', 'Baloo 2', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--black);
+    line-height: 1.75;
+    font-size: 18px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 12px 12px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px 80px; position: relative; z-index: 1; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg); border-bottom: var(--border-thick);
+    padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand { font-family: 'Baloo 2'; font-size: 1.4rem; font-weight: 800; color: var(--brown); text-decoration: none; }
+  .nav-brand span { color: var(--orange); }
+  .nav-back {
+    text-decoration: none; color: var(--black); font-weight: 700; font-size: 0.85rem;
+    padding: 5px 14px; border: var(--border); border-radius: 20px;
+    background: white; box-shadow: 2px 2px 0 var(--black);
+  }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; margin: 32px 0 0; border-bottom: var(--border-thick); }
+  .tab-btn {
+    padding: 10px 22px; font-size: 15px; font-weight: 700; font-family: var(--sans);
+    border: var(--border); border-bottom: none; background: white; cursor: pointer;
+    margin-right: -3px; margin-bottom: -3px; position: relative;
+  }
+  .tab-btn.active { background: var(--orange); color: white; z-index: 2; }
+  .tab-content { display: none; padding-top: 36px; }
+  .tab-content.active { display: block; }
+
+  /* HERO */
+  .hero-panel {
+    border: var(--border-thick); border-radius: 4px; background: white;
+    box-shadow: var(--shadow); padding: 32px 36px; margin-bottom: 32px;
+    position: relative; overflow: hidden;
+  }
+  .hero-panel::before {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 120px; height: 120px;
+    background: var(--orange); opacity: 0.08;
+    border-radius: 50%; transform: translate(30px, -40px);
+  }
+  .source-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--orange); color: white; padding: 4px 12px;
+    border: 2px solid var(--black); border-radius: 20px;
+    font-size: 13px; font-weight: 700; margin-bottom: 18px;
+  }
+  h1 {
+    font-family: 'Baloo 2'; font-size: 1.9rem; font-weight: 800;
+    line-height: 1.3; color: var(--brown); margin-bottom: 14px;
+  }
+  .hero-meta { font-size: 14px; color: #888; display: flex; flex-wrap: wrap; gap: 14px; }
+  .hero-meta span::before { content: '·'; margin-right: 6px; }
+  .hero-meta span:first-child::before { content: ''; }
+
+  /* PANELS */
+  .panel {
+    border: var(--border); border-radius: 4px; background: white;
+    box-shadow: var(--shadow); padding: 26px 30px; margin-bottom: 24px;
+  }
+  .panel-label {
+    font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--orange); margin-bottom: 12px;
+  }
+  h2 {
+    font-family: 'Baloo 2'; font-size: 1.4rem; font-weight: 800;
+    color: var(--brown); margin-bottom: 18px; margin-top: 36px;
+  }
+  h3 { font-size: 1rem; font-weight: 700; color: var(--blue); margin-bottom: 10px; margin-top: 20px; }
+  p { margin-bottom: 14px; }
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 6px; }
+
+  /* SVG BOX */
+  .svg-box {
+    border: var(--border-thick); border-radius: 4px; background: white;
+    box-shadow: var(--shadow); padding: 28px 20px; margin: 28px 0;
+    overflow-x: auto;
+  }
+  .svg-caption { text-align: center; font-size: 13px; color: #777; margin-top: 14px; }
+
+  /* HIGHLIGHT BOX */
+  .highlight {
+    border: var(--border); border-radius: 4px; padding: 20px 24px;
+    margin: 20px 0; background: #fffbf0; border-left: 6px solid var(--gold);
+  }
+  .highlight strong { color: var(--brown); }
+
+  .callout {
+    border: var(--border); border-radius: 4px; padding: 20px 24px;
+    margin: 20px 0; background: #e8f4fd; border-left: 6px solid var(--blue);
+  }
+
+  /* NUMBER STAT */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin: 20px 0; }
+  .stat-card {
+    border: var(--border); border-radius: 4px; background: white;
+    box-shadow: var(--shadow); padding: 18px 20px; text-align: center;
+  }
+  .stat-num { font-family: 'Baloo 2'; font-size: 2.2rem; font-weight: 800; color: var(--orange); }
+  .stat-label { font-size: 13px; color: #666; margin-top: 4px; }
+
+  /* COMPARE TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 16px; margin: 16px 0; }
+  th { background: var(--brown); color: white; padding: 12px 16px; text-align: left; font-size: 14px; }
+  td { padding: 12px 16px; border-bottom: 2px solid var(--black); vertical-align: top; }
+  tr:nth-child(even) td { background: #fffbf0; }
+
+  /* CITE TABLE */
+  .cite-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .cite-table th { background: var(--brown); color: white; padding: 12px 16px; text-align: left; font-size: 13px; }
+  .cite-table td { padding: 12px 14px; border-bottom: 2px solid #e0d8c8; vertical-align: top; }
+  .cite-table tr:nth-child(even) td { background: #fffbf0; }
+  .cite-table a { color: var(--blue); text-decoration: none; word-break: break-all; }
+  .cite-table a:hover { text-decoration: underline; }
+  .cite-num { font-family: 'Baloo 2'; font-size: 1.1rem; font-weight: 800; color: var(--orange); }
+
+  /* INSIGHT */
+  .insight-box {
+    border: var(--border-thick); border-radius: 4px; background: var(--orange);
+    color: white; padding: 22px 26px; margin: 28px 0; box-shadow: var(--shadow);
+  }
+  .insight-box .label { font-size: 12px; font-weight: 800; letter-spacing: 2px; opacity: 0.8; margin-bottom: 10px; }
+  .insight-box p { font-size: 1.05rem; font-weight: 700; line-height: 1.6; margin: 0; }
+
+  footer { text-align: center; margin-top: 60px; padding-top: 20px; border-top: var(--border); font-size: 13px; color: #888; line-height: 2; }
+  footer a { color: var(--orange); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-brand">Roy's <span>Lab</span></a>
+  <a href="index.html" class="nav-back">← 知識分享</a>
+</nav>
+
+<div class="wrap">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('main',this)">🤖 AI 晨報</button>
+    <button class="tab-btn" onclick="showTab('cite',this)">🔍 零幻覺引證</button>
+  </div>
+
+  <!-- ══════ 主報告 ══════ -->
+  <div id="main" class="tab-content active">
+
+    <!-- HERO -->
+    <div class="hero-panel">
+      <div class="source-badge">📡 Anthropic Blog｜2026-06-23</div>
+      <h1>Claude Tag：AI 進駐你的 Slack 頻道，從「個人助理」變「整個團隊的隊友」</h1>
+      <div class="hero-meta">
+        <span>AI 晨報 #001</span>
+        <span>2026-06-27</span>
+        <span>Agentic AI / 協作工具</span>
+        <span>閱讀約 6 分鐘</span>
+      </div>
+    </div>
+
+    <!-- 一句話說清楚 -->
+    <div class="insight-box">
+      <div class="label">✨ 一句話說清楚</div>
+      <p>以前每個人和 Claude 各聊各的——現在整個 Slack 頻道共用同一個 Claude，它記得頻道的歷史、能主動開口、而且 Anthropic 內部已經用它寫了 65% 的程式碼。</p>
+    </div>
+
+    <!-- 圖解 -->
+    <h2>📐 架構圖解：舊 vs 新</h2>
+    <div class="svg-box">
+      <svg viewBox="0 0 780 360" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans TC, sans-serif">
+
+        <!-- 左半：舊模式 -->
+        <rect x="10" y="10" width="360" height="340" rx="8" fill="#fff8eb" stroke="#1a1a1a" stroke-width="3"/>
+        <text x="190" y="42" text-anchor="middle" font-size="16" font-weight="800" fill="#c0392b">❌ 舊模式：各說各的</text>
+
+        <!-- 三個人各自對話 -->
+        <rect x="30" y="60" width="90" height="56" rx="6" fill="white" stroke="#1a1a1a" stroke-width="2"/>
+        <text x="75" y="86" text-anchor="middle" font-size="13" fill="#1a1a1a">👤 Roy</text>
+        <text x="75" y="104" text-anchor="middle" font-size="11" fill="#888">自己的 Claude</text>
+
+        <rect x="140" y="60" width="90" height="56" rx="6" fill="white" stroke="#1a1a1a" stroke-width="2"/>
+        <text x="185" y="86" text-anchor="middle" font-size="13" fill="#1a1a1a">👤 Coco</text>
+        <text x="185" y="104" text-anchor="middle" font-size="11" fill="#888">自己的 Claude</text>
+
+        <rect x="250" y="60" width="90" height="56" rx="6" fill="white" stroke="#1a1a1a" stroke-width="2"/>
+        <text x="295" y="86" text-anchor="middle" font-size="13" fill="#1a1a1a">👤 Jack</text>
+        <text x="295" y="104" text-anchor="middle" font-size="11" fill="#888">自己的 Claude</text>
+
+        <!-- 三個孤立 Claude -->
+        <rect x="30" y="160" width="90" height="44" rx="6" fill="#fee2e2" stroke="#c0392b" stroke-width="2"/>
+        <text x="75" y="186" text-anchor="middle" font-size="12" fill="#c0392b">🤖 Claude A</text>
+        <rect x="140" y="160" width="90" height="44" rx="6" fill="#fee2e2" stroke="#c0392b" stroke-width="2"/>
+        <text x="185" y="186" text-anchor="middle" font-size="12" fill="#c0392b">🤖 Claude B</text>
+        <rect x="250" y="160" width="90" height="44" rx="6" fill="#fee2e2" stroke="#c0392b" stroke-width="2"/>
+        <text x="295" y="186" text-anchor="middle" font-size="12" fill="#c0392b">🤖 Claude C</text>
+
+        <!-- 連接線 -->
+        <line x1="75" y1="116" x2="75" y2="160" stroke="#c0392b" stroke-width="2" stroke-dasharray="5,3"/>
+        <line x1="185" y1="116" x2="185" y2="160" stroke="#c0392b" stroke-width="2" stroke-dasharray="5,3"/>
+        <line x1="295" y1="116" x2="295" y2="160" stroke="#c0392b" stroke-width="2" stroke-dasharray="5,3"/>
+
+        <!-- 問題說明 -->
+        <rect x="30" y="226" width="310" height="106" rx="6" fill="#fff0f0" stroke="#c0392b" stroke-width="2"/>
+        <text x="185" y="252" text-anchor="middle" font-size="13" fill="#c0392b" font-weight="700">問題：三個 Claude 各自孤立</text>
+        <text x="185" y="274" text-anchor="middle" font-size="12" fill="#888">• 每人都要重新說明背景</text>
+        <text x="185" y="292" text-anchor="middle" font-size="12" fill="#888">• 工作進度無法共享</text>
+        <text x="185" y="310" text-anchor="middle" font-size="12" fill="#888">• 同一件事說三遍</text>
+
+        <!-- 右半：新模式 -->
+        <rect x="410" y="10" width="360" height="340" rx="8" fill="#e8f8f0" stroke="#1a1a1a" stroke-width="3"/>
+        <text x="590" y="42" text-anchor="middle" font-size="16" font-weight="800" fill="#27ae60">✅ Claude Tag：共用一個 AI 隊友</text>
+
+        <!-- 三個人 -->
+        <rect x="430" y="60" width="70" height="50" rx="6" fill="white" stroke="#1a1a1a" stroke-width="2"/>
+        <text x="465" y="84" text-anchor="middle" font-size="13">👤 Roy</text>
+        <rect x="520" y="60" width="70" height="50" rx="6" fill="white" stroke="#1a1a1a" stroke-width="2"/>
+        <text x="555" y="84" text-anchor="middle" font-size="13">👤 Coco</text>
+        <rect x="610" y="60" width="70" height="50" rx="6" fill="white" stroke="#1a1a1a" stroke-width="2"/>
+        <text x="645" y="84" text-anchor="middle" font-size="13">👤 Jack</text>
+
+        <!-- 共用 Claude Tag -->
+        <rect x="465" y="160" width="180" height="54" rx="8" fill="#e8713a" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="555" y="183" text-anchor="middle" font-size="14" fill="white" font-weight="800">🤖 Claude Tag</text>
+        <text x="555" y="202" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.85)">共用 · 有記憶 · 可主動</text>
+
+        <!-- 連接 -->
+        <line x1="465" y1="110" x2="510" y2="160" stroke="#27ae60" stroke-width="2.5"/>
+        <line x1="555" y1="110" x2="555" y2="160" stroke="#27ae60" stroke-width="2.5"/>
+        <line x1="645" y1="110" x2="600" y2="160" stroke="#27ae60" stroke-width="2.5"/>
+
+        <!-- 優點 -->
+        <rect x="430" y="230" width="310" height="106" rx="6" fill="#d4fae5" stroke="#27ae60" stroke-width="2"/>
+        <text x="585" y="256" text-anchor="middle" font-size="13" fill="#065f46" font-weight="700">✨ Claude Tag 的優勢</text>
+        <text x="585" y="278" text-anchor="middle" font-size="12" fill="#444">• 持久記憶：記得頻道所有脈絡</text>
+        <text x="585" y="296" text-anchor="middle" font-size="12" fill="#444">• 任何人都能接手進行中任務</text>
+        <text x="585" y="314" text-anchor="middle" font-size="12" fill="#444">• Ambient Mode：主動標記重要事項</text>
+      </svg>
+      <p class="svg-caption">左：舊模式——每人各自對話，脈絡無法共享。右：Claude Tag——整個頻道共用一個有記憶的 AI 隊友</p>
+    </div>
+
+    <!-- 三大核心能力 -->
+    <h2>🔧 三大核心能力</h2>
+
+    <div class="panel">
+      <div class="panel-label">能力 01</div>
+      <h3>🧠 頻道共用記憶（Channel Memory）</h3>
+      <p>Claude Tag 不是每次都重新開始，它記得整個 Slack 頻道的歷史對話。<strong>任何一個成員都能從上一個人停下來的地方接著做</strong>，不需要重新說明背景。</p>
+      <p>如果管理員授權，Claude Tag 甚至可以自動從其他頻道蒐集相關資訊——比如在工程頻道工作時，主動查閱產品頻道裡的設計規格。</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">能力 02</div>
+      <h3>💬 Ambient Mode（主動模式）</h3>
+      <p>不需要每次都 <code>@Claude</code>。開啟 Ambient Mode 後，Claude Tag 會<strong>自己主動跳進對話</strong>——發現某個討論卡住了就主動提議、發現跨頻道有重要更新就主動通知。</p>
+      <p>這是從「被呼叫的工具」到「主動的隊友」的關鍵轉變。</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">能力 03</div>
+      <h3>🔐 管理員精細存取控制（Admin Scope）</h3>
+      <p>系統管理員可以<strong>精細設定</strong>哪個頻道的 Claude 能存取哪些工具和資料。例如：工程頻道的 Claude 不能存取法律頻道的記憶；財務頻道的 Claude 才能讀財報資料庫。</p>
+      <p>這解決了「AI 在公司裡亂存取資料」的信任問題，讓企業可以放心部署。</p>
+    </div>
+
+    <!-- 數字說話 -->
+    <h2>📊 數字說話</h2>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num">65%</div>
+        <div class="stat-label">Anthropic 內部由 Claude Tag 寫的程式碼比例，包含 Claude Tag 本身</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">4.8</div>
+        <div class="stat-label">底層模型：Claude Opus 4.8，最強推理版本</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">頻道成員人數不限，所有人共用同一個 Claude 實例</div>
+      </div>
+    </div>
+
+    <!-- 舊 vs 新對比表 -->
+    <h2>🆚 舊版 vs Claude Tag 對比</h2>
+    <table>
+      <thead><tr><th>項目</th><th>舊版（個人 Claude）</th><th>Claude Tag</th></tr></thead>
+      <tbody>
+        <tr><td>範圍</td><td>每人各自的對話</td><td>整個 Slack 頻道</td></tr>
+        <tr><td>記憶</td><td>每次對話結束就清空</td><td>持久記憶，記得頻道歷史</td></tr>
+        <tr><td>協作</td><td>不能共享工作進度</td><td>任何人都能接手任務</td></tr>
+        <tr><td>主動性</td><td>被動等待呼叫</td><td>Ambient Mode 可主動發言</td></tr>
+        <tr><td>身份</td><td>每人看到不同 AI</td><td>頻道成員共用同一個身份</td></tr>
+        <tr><td>資料存取</td><td>沒有組織層級管控</td><td>Admin 可精細設定每頻道權限</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 實用啟發 -->
+    <h2>💡 對你有什麼啟發？</h2>
+
+    <div class="callout">
+      <h3>👥 對有 Slack 工作環境的團隊</h3>
+      <p>Claude Tag 的核心價值是把「AI 知識孤島」打通——以前每個人的 AI 對話各自為政，現在整個團隊可以在同一個知識脈絡下協作。特別適合需要跨人跨時間接力的專案（例如程式 review、產品需求討論）。</p>
+    </div>
+
+    <div class="highlight">
+      <h3>🏗️ 更深的技術意涵：AI 身份轉型</h3>
+      <p>這不只是加了「頻道記憶」而已。Claude Tag 標誌著 AI 從「工具」升級為「有身份的成員」——它有自己的記憶、有自己的存取權限、有主動參與的能力。<strong>Anthropic 稱這個轉變為「unit of AI collaboration 從 individual 到 team channel」</strong>，是 Agentic AI 走向組織部署的關鍵一步。</p>
+    </div>
+
+    <div class="highlight">
+      <h3>⚠️ 值得關注的問題</h3>
+      <p>「AI 主動開口」聽起來很厲害，但也帶來新挑戰：什麼時候該說、什麼時候不該插嘴？Ambient Mode 如果設計不好，可能反而造成頻道噪音。Anthropic 目前的解法是讓管理員精細控管，但這也需要企業有足夠的 AI 治理能力。</p>
+    </div>
+
+  </div><!-- end main -->
+
+  <!-- ══════ 引證表 ══════ -->
+  <div id="cite" class="tab-content">
+    <h2>零幻覺引證表</h2>
+    <p style="color:#666;font-size:15px;margin-bottom:24px">本報告所有事實主張均可從以下來源核實。</p>
+
+    <div style="overflow-x:auto">
+    <table class="cite-table">
+      <thead>
+        <tr>
+          <th width="40">編號</th>
+          <th width="150">作者 / 媒體</th>
+          <th width="100">發佈日期</th>
+          <th>標題 / 引用重點</th>
+          <th width="160">原始 URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="cite-num">[1]</span></td>
+          <td>Anthropic 官方</td>
+          <td>2026-06-23</td>
+          <td>Introducing Claude Tag — 「unit of AI collaboration 從 individual 到 team channel」；Ambient Mode；Admin 存取控制；Claude Tag is built on Claude Opus 4.8</td>
+          <td><a href="https://www.anthropic.com/news" target="_blank">anthropic.com/news ↗</a></td>
+        </tr>
+        <tr>
+          <td><span class="cite-num">[2]</span></td>
+          <td>TechCrunch</td>
+          <td>2026-06-23</td>
+          <td>「Anthropic's Claude Tag is learning your company, one Slack message at a time」— 工程頻道與法律頻道記憶隔離；admin 指定工具與頻道存取範圍</td>
+          <td><a href="https://techcrunch.com/2026/06/23/anthropics-claude-tag-is-learning-your-company-one-slack-message-at-a-time/" target="_blank">techcrunch.com ↗</a></td>
+        </tr>
+        <tr>
+          <td><span class="cite-num">[3]</span></td>
+          <td>The Decoder</td>
+          <td>2026-06-23</td>
+          <td>「Claude Tag embeds Anthropic's AI in Slack, already writes 65 percent of internal code」— Anthropic 內部使用 Claude Tag 生成 65% 程式碼，包含 Claude Tag 本身</td>
+          <td><a href="https://the-decoder.com/claude-tag-embeds-anthropics-ai-in-slack-already-writes-65-percent-of-internal-code-company-says/" target="_blank">the-decoder.com ↗</a></td>
+        </tr>
+        <tr>
+          <td><span class="cite-num">[4]</span></td>
+          <td>SiliconANGLE</td>
+          <td>2026-06-23</td>
+          <td>「Anthropic debuts Claude Tag, a more capable AI teammate that lives within Slack」— 任何頻道成員可看到 Claude 工作進度並從中接手任務</td>
+          <td><a href="https://siliconangle.com/2026/06/23/anthropic-debuts-claude-tag-capable-ai-teammate-lives-within-slack/" target="_blank">siliconangle.com ↗</a></td>
+        </tr>
+        <tr>
+          <td><span class="cite-num">[5]</span></td>
+          <td>Digital Applied</td>
+          <td>2026-06-23</td>
+          <td>「Claude Tag in Slack: Multiplayer AI Teamwork in 2026」— multiplayer design 說明、beta 適用 Claude Enterprise / Team 客戶</td>
+          <td><a href="https://www.digitalapplied.com/blog/anthropic-claude-tag-slack-team-collaboration-2026" target="_blank">digitalapplied.com ↗</a></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div style="margin-top:28px;padding:18px 22px;background:#fffbf0;border:2px solid #d4a853;border-radius:4px;font-size:14px;color:#666;">
+      <strong>零幻覺聲明：</strong>本報告所有數字（65% 程式碼比例、Claude Opus 4.8 底層）均有對應引證來源。分析與洞見為編輯觀點，已標明來源依據。
+    </div>
+  </div>
+
+</div><!-- end wrap -->
+
+<footer>
+  AI 晨報 #001 · 2026-06-27 · 來源：Anthropic Blog<br>
+  <a href="https://wengroy.github.io/knowledge/">← 回知識分享</a>
+</footer>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
