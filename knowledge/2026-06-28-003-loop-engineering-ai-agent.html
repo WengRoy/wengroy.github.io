@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loop Engineering：AI 從你提示變成自己跑 | AI 晨報 #003</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔄</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #fdf6e3;
+    color: #1a1a1a;
+    min-height: 100vh;
+    background-image: radial-gradient(circle, #d4b896 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .back-link { display: inline-block; margin-bottom: 18px; color: #e8713a; text-decoration: none; font-weight: 700; font-size: 0.85rem; }
+  .back-link:hover { text-decoration: underline; }
+
+  .badge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; border: 2px solid #1a1a1a; box-shadow: 2px 2px 0 #1a1a1a; }
+  .badge-method { background: #dbeafe; color: #1e40af; }
+  .badge-num    { background: #e8713a; color: #fff; }
+  .badge-date   { background: #fff; color: #6b4226; }
+
+  .main-title { font-family: 'Baloo 2', cursive; font-size: 2rem; font-weight: 800; color: #6b4226; line-height: 1.25; margin-bottom: 6px; }
+  .main-title span { color: #e8713a; }
+  .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 24px; }
+
+  /* 頁籤 */
+  .tabs { display: flex; gap: 0; margin-bottom: 0; }
+  .tab-btn { padding: 10px 24px; font-weight: 700; font-size: 0.9rem; border: 3px solid #1a1a1a; border-bottom: none; background: #e8d5b0; cursor: pointer; border-radius: 8px 8px 0 0; color: #6b4226; transition: background 0.15s; }
+  .tab-btn.active { background: #fdf6e3; color: #e8713a; }
+  .tab-panel { display: none; border: 3px solid #1a1a1a; border-radius: 0 8px 8px 8px; padding: 28px; background: #fdf6e3; box-shadow: 5px 5px 0 #1a1a1a; }
+  .tab-panel.active { display: block; }
+
+  /* Insight */
+  .insight { background: #e8713a; color: #fff; border: 3px solid #1a1a1a; border-radius: 10px; padding: 18px 22px; margin-bottom: 26px; box-shadow: 4px 4px 0 #1a1a1a; }
+  .insight-label { font-size: 0.72rem; font-weight: 700; opacity: 0.85; margin-bottom: 6px; letter-spacing: 1px; }
+  .insight p { font-size: 1.05rem; font-weight: 700; line-height: 1.55; }
+
+  /* 引言 */
+  .quote-box { border-left: 5px solid #e8713a; background: #fff8ee; padding: 14px 18px; margin-bottom: 22px; border-radius: 0 8px 8px 0; }
+  .quote-box p { font-size: 1rem; font-style: italic; color: #6b4226; font-weight: 600; margin-bottom: 4px; }
+  .quote-box small { font-size: 0.78rem; color: #999; }
+
+  /* SVG 區 */
+  .diagram-wrap { border: 3px solid #1a1a1a; border-radius: 10px; padding: 20px; margin-bottom: 26px; background: #fff8ee; box-shadow: 4px 4px 0 #1a1a1a; }
+  .diagram-wrap h3 { font-family: 'Baloo 2', cursive; font-size: 1rem; color: #6b4226; margin-bottom: 14px; font-weight: 700; }
+  .diagram-wrap svg { width: 100%; height: auto; display: block; }
+
+  /* 進化鏈 */
+  .evo-chain { display: flex; align-items: center; gap: 0; margin-bottom: 26px; flex-wrap: wrap; }
+  .evo-item { flex: 1; min-width: 120px; border: 3px solid #1a1a1a; padding: 12px; text-align: center; background: #fff; }
+  .evo-item:first-child { border-radius: 10px 0 0 10px; }
+  .evo-item:last-child { border-radius: 0 10px 10px 0; background: #e8713a; color: #fff; }
+  .evo-item:last-child .evo-label { color: #fff; }
+  .evo-emoji { font-size: 1.5rem; }
+  .evo-label { font-size: 0.75rem; font-weight: 700; color: #6b4226; margin-top: 4px; }
+  .evo-arrow { font-size: 1.2rem; color: #e8713a; padding: 0 4px; align-self: center; }
+
+  /* 五大組件 */
+  .components { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .comp { border: 3px solid #1a1a1a; border-radius: 10px; padding: 16px; background: #fff; box-shadow: 4px 4px 0 #1a1a1a; }
+  .comp-num { font-family: 'Baloo 2', cursive; font-size: 1.4rem; font-weight: 800; color: #e8713a; margin-bottom: 4px; }
+  .comp h4 { font-family: 'Baloo 2', cursive; font-size: 0.95rem; color: #6b4226; margin-bottom: 6px; font-weight: 700; }
+  .comp p { font-size: 0.8rem; color: #555; line-height: 1.5; }
+
+  /* 小隊討論 */
+  .team-box { border: 3px solid #1a1a1a; border-radius: 10px; padding: 20px; margin-bottom: 26px; background: #fff; box-shadow: 4px 4px 0 #1a1a1a; }
+  .team-box h3 { font-family: 'Baloo 2', cursive; color: #6b4226; margin-bottom: 14px; font-size: 1rem; }
+  .msg { display: flex; gap: 10px; margin-bottom: 12px; }
+  .msg-avatar { font-size: 1.3rem; width: 32px; flex-shrink: 0; }
+  .msg-bubble { background: #fdf6e3; border: 2px solid #1a1a1a; border-radius: 0 10px 10px 10px; padding: 10px 14px; font-size: 0.83rem; line-height: 1.6; flex: 1; }
+  .msg-bubble strong { color: #e8713a; }
+  .msg.right { flex-direction: row-reverse; }
+  .msg.right .msg-bubble { border-radius: 10px 0 10px 10px; background: #e8f4f8; }
+
+  /* 使用時機 */
+  .when-use { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 26px; }
+  .when-card { border: 3px solid #1a1a1a; border-radius: 10px; padding: 14px; box-shadow: 3px 3px 0 #1a1a1a; }
+  .when-card.good { background: #f0fdf4; }
+  .when-card.bad  { background: #fef2f2; }
+  .when-card h4 { font-family: 'Baloo 2', cursive; font-size: 0.95rem; margin-bottom: 8px; }
+  .when-card.good h4 { color: #166534; }
+  .when-card.bad  h4 { color: #9f1239; }
+  .when-card ul { padding-left: 16px; }
+  .when-card li { font-size: 0.82rem; color: #444; margin-bottom: 4px; }
+
+  /* 引證表 */
+  .cite-table { width: 100%; border-collapse: collapse; }
+  .cite-table th { background: #6b4226; color: #fff; padding: 10px 12px; font-size: 0.8rem; text-align: left; border: 2px solid #1a1a1a; }
+  .cite-table td { padding: 9px 12px; border: 2px solid #1a1a1a; font-size: 0.8rem; background: #fff; vertical-align: top; }
+  .cite-table tr:nth-child(even) td { background: #fdf6e3; }
+  .cite-table a { color: #e8713a; word-break: break-all; }
+  .cite-table a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .main-title { font-size: 1.5rem; }
+    .when-use { grid-template-columns: 1fr; }
+    .evo-arrow { display: none; }
+    .evo-item { border-radius: 8px; margin-bottom: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">← 回知識分享</a>
+
+  <div class="badge-row">
+    <span class="badge badge-num">AI 晨報 #003</span>
+    <span class="badge badge-method">AI 方法論</span>
+    <span class="badge badge-date">2026-06-28</span>
+    <span class="badge badge-date">Addy Osmani / Anthropic</span>
+  </div>
+
+  <h1 class="main-title"><span>Loop Engineering</span>：AI 從你提示變成自己跑</h1>
+  <p class="subtitle">2026-06-07 一篇貼文 6.5M 瀏覽，AI 工程方法論正式進入下一個時代</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('report')">🔄 AI 晨報</button>
+    <button class="tab-btn" onclick="switchTab('cite')">🔍 零幻覺引證</button>
+  </div>
+
+  <!-- ── 主報告 ── -->
+  <div id="tab-report" class="tab-panel active">
+
+    <div class="insight">
+      <div class="insight-label">✨ 一句話說清楚</div>
+      <p>不要再手動提示 AI——改成設計一個「目標 → 行動 → 觀察 → 驗證 → 再行動」的自動迴圈，讓 Agent 自己跑到完成為止。</p>
+    </div>
+
+    <div class="quote-box">
+      <p>"I don't prompt Claude anymore."</p>
+      <small>— Boris Cherny，Anthropic Claude Code 主導工程師，2026-06</small>
+    </div>
+
+    <!-- 進化鏈 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">📈 AI 工程方法論的進化</h3>
+    <div class="evo-chain">
+      <div class="evo-item">
+        <div class="evo-emoji">✍️</div>
+        <div class="evo-label">Prompt<br>Engineering</div>
+      </div>
+      <div class="evo-arrow">→</div>
+      <div class="evo-item">
+        <div class="evo-emoji">📦</div>
+        <div class="evo-label">Context<br>Engineering</div>
+      </div>
+      <div class="evo-arrow">→</div>
+      <div class="evo-item">
+        <div class="evo-emoji">🔧</div>
+        <div class="evo-label">Harness<br>Engineering</div>
+      </div>
+      <div class="evo-arrow">→</div>
+      <div class="evo-item">
+        <div class="evo-emoji">🔄</div>
+        <div class="evo-label">Loop<br>Engineering</div>
+      </div>
+    </div>
+
+    <!-- SVG Loop 示意圖 -->
+    <div class="diagram-wrap">
+      <h3>🗺 Loop Engineering 核心迴圈</h3>
+      <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans TC', sans-serif">
+        <rect width="700" height="240" fill="#fff8ee" rx="8"/>
+
+        <!-- 觸發器 -->
+        <rect x="10" y="95" width="100" height="50" rx="8" fill="#dbeafe" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="60" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#1e40af">⚡ Trigger</text>
+        <text x="60" y="133" text-anchor="middle" font-size="10" fill="#1e40af">定時 / 事件</text>
+
+        <!-- → -->
+        <line x1="112" y1="120" x2="145" y2="120" stroke="#e8713a" stroke-width="2.5" marker-end="url(#a)"/>
+
+        <!-- 行動 -->
+        <rect x="147" y="95" width="100" height="50" rx="8" fill="#fef3c7" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="197" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">🤖 Act</text>
+        <text x="197" y="133" text-anchor="middle" font-size="10" fill="#92400e">Agent 執行</text>
+
+        <!-- → -->
+        <line x1="249" y1="120" x2="282" y2="120" stroke="#e8713a" stroke-width="2.5" marker-end="url(#a)"/>
+
+        <!-- 觀察 -->
+        <rect x="284" y="95" width="100" height="50" rx="8" fill="#fce7f3" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="334" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#9d174d">👁 Observe</text>
+        <text x="334" y="133" text-anchor="middle" font-size="10" fill="#9d174d">讀取結果</text>
+
+        <!-- → -->
+        <line x1="386" y1="120" x2="419" y2="120" stroke="#e8713a" stroke-width="2.5" marker-end="url(#a)"/>
+
+        <!-- 驗證 -->
+        <rect x="421" y="95" width="100" height="50" rx="8" fill="#dcfce7" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="471" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">✅ Verify</text>
+        <text x="471" y="133" text-anchor="middle" font-size="10" fill="#166534">獨立驗收</text>
+
+        <!-- → 往右 成功 -->
+        <line x1="523" y1="120" x2="556" y2="120" stroke="#22c55e" stroke-width="2.5" marker-end="url(#ag)"/>
+        <rect x="558" y="95" width="90" height="50" rx="8" fill="#166534" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="603" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">🎉 Done</text>
+        <text x="603" y="133" text-anchor="middle" font-size="10" fill="#dcfce7">Stop Rule 觸發</text>
+
+        <!-- 失敗回路 (弧線往下再繞回) -->
+        <path d="M471 147 Q471 195 334 195 Q197 195 197 147" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#ar)"/>
+        <text x="334" y="212" text-anchor="middle" font-size="10" fill="#dc2626">❌ 未達標 → 重新行動</text>
+
+        <defs>
+          <marker id="a"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#e8713a"/></marker>
+          <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/></marker>
+          <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- 五大組件 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">⚙️ Addy Osmani 的五大組件（+ 共享記憶）</h3>
+    <div class="components">
+      <div class="comp">
+        <div class="comp-num">01</div>
+        <h4>🤖 Automations</h4>
+        <p>定時觸發 + 自動探索任務，不需人工啟動。讓迴圈在你睡覺時也在跑。</p>
+      </div>
+      <div class="comp">
+        <div class="comp-num">02</div>
+        <h4>🌲 Worktrees</h4>
+        <p>多個 Agent 平行執行時，各自在獨立的 git worktree，不互相踩到。</p>
+      </div>
+      <div class="comp">
+        <div class="comp-num">03</div>
+        <h4>📚 Skills</h4>
+        <p>讓 Agent 讀懂專案知識庫，不靠猜測就知道怎麼做，降低幻覺率。</p>
+      </div>
+      <div class="comp">
+        <div class="comp-num">04</div>
+        <h4>🔌 Connectors</h4>
+        <p>接進你現有的工具：GitHub、Slack、Calendar、測試工具，形成完整反饋。</p>
+      </div>
+      <div class="comp">
+        <div class="comp-num">05</div>
+        <h4>🧠 Sub-agents</h4>
+        <p>一個 Agent 執行、另一個 Agent 驗收，不讓執行者自評成果。</p>
+      </div>
+      <div class="comp" style="background:#fdf6e3;border-color:#e8713a;">
+        <div class="comp-num" style="color:#6b4226;">+1</div>
+        <h4>💾 External State</h4>
+        <p>共享記憶（SQLite、DB）讓多步迴圈不會因 context 溢出而遺忘之前的狀態。</p>
+      </div>
+    </div>
+
+    <!-- 使用時機 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">🎯 什麼時候用 Loop Engineering？</h3>
+    <div class="when-use">
+      <div class="when-card good">
+        <h4>✅ 適合的情境</h4>
+        <ul>
+          <li>重複性高、步驟固定的工作</li>
+          <li>成功條件可以明確定義（測試通過 / validation loss 下降）</li>
+          <li>長時間跑不需要人在旁邊</li>
+          <li>多步驟、輸出接著下一步輸入</li>
+        </ul>
+      </div>
+      <div class="when-card bad">
+        <h4>⚠️ 警告：Loopmaxxing</h4>
+        <ul>
+          <li>沒有明確 Stop Rule → 無限迴圈燒帳單</li>
+          <li>「改善這份程式碼」→ 永遠不知道何時停</li>
+          <li>Verifier 缺失 → 執行者自己說自己好</li>
+          <li>Context 不管理 → 長迴圈爆 context window</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 小隊討論 -->
+    <div class="team-box">
+      <h3>💬 Forever-AI 小隊洞見</h3>
+      <div class="msg">
+        <div class="msg-avatar">🐻</div>
+        <div class="msg-bubble">
+          最難的不是設計迴圈，而是設計<strong>停止條件</strong>。「讓測試通過」是好的迴圈目標，「讓程式碼更好」是爛的——Agent 永遠不知道何時停。
+        </div>
+      </div>
+      <div class="msg right">
+        <div class="msg-avatar">🎨</div>
+        <div class="msg-bubble">
+          這跟音樂錄製超像！錄音師不親自彈每個音符，他設計的是節拍、規則、監聽回放的<strong>結構</strong>——讓音樂自己流動。Loop Engineering 就是設計這個結構。
+        </div>
+      </div>
+      <div class="msg">
+        <div class="msg-avatar">🐻</div>
+        <div class="msg-bubble">
+          Sub-agents 的「一想一驗」正是 Verifier 的核心實作——<strong>執行者永遠不能自評</strong>，要有獨立的驗收 Agent，這樣 loop 才不會自欺欺人地宣布完成。
+        </div>
+      </div>
+      <div class="msg right">
+        <div class="msg-avatar">🎨</div>
+        <div class="msg-bubble">
+          Skills 這個組件讓我眼睛一亮——就像樂手先讀了和弦進行筆記，即興才不會失控。Agent 讀了專案知識庫，才不靠猜測，直接知道怎麼做。
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── 零幻覺引證 ── -->
+  <div id="tab-cite" class="tab-panel">
+    <p style="margin-bottom:18px;font-size:0.85rem;color:#888;">所有引用均有原始 URL 可驗證，報告內容 100% 基於這些來源，無 AI 杜撰。</p>
+    <table class="cite-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>作者 / 機構</th>
+          <th>媒體</th>
+          <th>日期</th>
+          <th>標題</th>
+          <th>來源連結</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Addy Osmani<br>（Google Chrome 工程主導）</td>
+          <td>addyosmani.com</td>
+          <td>2026-06</td>
+          <td>Loop Engineering（命名原文）</td>
+          <td><a href="https://addyosmani.com/blog/loop-engineering/" target="_blank">addyosmani.com</a></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Addy Osmani</td>
+          <td>Substack - Elevate</td>
+          <td>2026-06</td>
+          <td>Loop Engineering（Substack 版）</td>
+          <td><a href="https://addyo.substack.com/p/loop-engineering" target="_blank">addyo.substack.com</a></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Cobus Greyling</td>
+          <td>Medium</td>
+          <td>2026-06</td>
+          <td>Loop Engineering — The Core</td>
+          <td><a href="https://cobusgreyling.medium.com/loop-engineering-62926dd6991c" target="_blank">cobusgreyling.medium.com</a></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Ben Dickson</td>
+          <td>TechTalks (bdtechtalks)</td>
+          <td>2026-06-22</td>
+          <td>Demystifying loop engineering: avoid loopmaxxing</td>
+          <td><a href="https://bdtechtalks.com/2026/06/22/ai-loop-engineering/amp/" target="_blank">bdtechtalks.com</a></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>DataScienceDojo</td>
+          <td>datasciencedojo.com</td>
+          <td>2026-06</td>
+          <td>Agentic Loops: From ReAct to Loop Engineering</td>
+          <td><a href="https://datasciencedojo.com/blog/agentic-loops-explained-from-react-to-loop-engineering-2026-guide/" target="_blank">datasciencedojo.com</a></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Cobus Greyling</td>
+          <td>GitHub</td>
+          <td>2026-06</td>
+          <td>loop-engineering: Practical patterns, starters & CLI tools</td>
+          <td><a href="https://github.com/cobusgreyling/loop-engineering" target="_blank">github.com</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
