@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seedance：ByteDance 的 AI 影片模型 × 日式動畫革命 | AI 晨報 #004</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #fdf6e3;
+    color: #1a1a1a;
+    min-height: 100vh;
+    background-image: radial-gradient(circle, #d4b896 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .back-link { display: inline-block; margin-bottom: 18px; color: #e8713a; text-decoration: none; font-weight: 700; font-size: 0.85rem; }
+  .back-link:hover { text-decoration: underline; }
+
+  .badge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; border: 2px solid #1a1a1a; box-shadow: 2px 2px 0 #1a1a1a; }
+  .badge-anime  { background: #fce7f3; color: #9d174d; }
+  .badge-num    { background: #e8713a; color: #fff; }
+  .badge-date   { background: #fff; color: #6b4226; }
+  .badge-ai     { background: #ede9fe; color: #5b21b6; }
+
+  .main-title { font-family: 'Baloo 2', cursive; font-size: 2rem; font-weight: 800; color: #6b4226; line-height: 1.25; margin-bottom: 6px; }
+  .main-title span { color: #e8713a; }
+  .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 24px; }
+
+  .tabs { display: flex; }
+  .tab-btn { padding: 10px 24px; font-weight: 700; font-size: 0.9rem; border: 3px solid #1a1a1a; border-bottom: none; background: #e8d5b0; cursor: pointer; border-radius: 8px 8px 0 0; color: #6b4226; transition: background 0.15s; }
+  .tab-btn.active { background: #fdf6e3; color: #e8713a; }
+  .tab-panel { display: none; border: 3px solid #1a1a1a; border-radius: 0 8px 8px 8px; padding: 28px; background: #fdf6e3; box-shadow: 5px 5px 0 #1a1a1a; }
+  .tab-panel.active { display: block; }
+
+  .insight { background: #e8713a; color: #fff; border: 3px solid #1a1a1a; border-radius: 10px; padding: 18px 22px; margin-bottom: 26px; box-shadow: 4px 4px 0 #1a1a1a; }
+  .insight-label { font-size: 0.72rem; font-weight: 700; opacity: 0.85; margin-bottom: 6px; letter-spacing: 1px; }
+  .insight p { font-size: 1.05rem; font-weight: 700; line-height: 1.55; }
+
+  /* 模型 vs 平台 */
+  .id-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 26px; }
+  .id-card { border: 3px solid #1a1a1a; border-radius: 10px; padding: 18px; box-shadow: 4px 4px 0 #1a1a1a; }
+  .id-card.model { background: #6b4226; color: #fff; }
+  .id-card.platform { background: #fff8ee; }
+  .id-card h4 { font-family: 'Baloo 2', cursive; font-size: 1rem; margin-bottom: 8px; }
+  .id-card.model h4 { color: #ffd580; }
+  .id-card.platform h4 { color: #6b4226; }
+  .id-card p { font-size: 0.82rem; line-height: 1.55; }
+  .id-card.model p { color: #e8d5b0; }
+  .id-card.platform p { color: #555; }
+
+  /* 版本時間軸 */
+  .timeline { margin-bottom: 26px; }
+  .tl-item { display: flex; gap: 16px; margin-bottom: 10px; }
+  .tl-dot { width: 14px; height: 14px; border-radius: 50%; background: #e8713a; border: 2px solid #1a1a1a; flex-shrink: 0; margin-top: 4px; }
+  .tl-line { width: 2px; background: #e8713a; margin-left: 6px; margin-top: 18px; height: 20px; display: none; }
+  .tl-content { border: 2px solid #1a1a1a; border-radius: 8px; padding: 12px 16px; background: #fff; flex: 1; box-shadow: 3px 3px 0 #1a1a1a; }
+  .tl-content strong { color: #e8713a; font-family: 'Baloo 2', cursive; }
+  .tl-content p { font-size: 0.82rem; color: #555; margin-top: 4px; }
+
+  /* 收費表 */
+  .price-table { width: 100%; border-collapse: collapse; margin-bottom: 26px; }
+  .price-table th { background: #6b4226; color: #fff; padding: 10px 12px; font-size: 0.8rem; border: 2px solid #1a1a1a; text-align: left; }
+  .price-table td { padding: 10px 12px; border: 2px solid #1a1a1a; font-size: 0.82rem; background: #fff; vertical-align: top; }
+  .price-table tr:nth-child(even) td { background: #fdf6e3; }
+  .price-table .rec { background: #fef3c7 !important; font-weight: 700; }
+
+  /* 日式動畫作品 */
+  .anime-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .anime-card { border: 3px solid #1a1a1a; border-radius: 10px; padding: 16px; background: #fff; box-shadow: 4px 4px 0 #1a1a1a; }
+  .anime-card-icon { font-size: 2rem; margin-bottom: 8px; }
+  .anime-card h4 { font-family: 'Baloo 2', cursive; font-size: 0.95rem; color: #6b4226; margin-bottom: 6px; }
+  .anime-card p { font-size: 0.8rem; color: #555; line-height: 1.5; }
+  .anime-card .tag { display: inline-block; margin-top: 6px; padding: 2px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 700; border: 1.5px solid; }
+  .tag-viral { background: #fce7f3; color: #9d174d; border-color: #f9a8d4; }
+  .tag-warn  { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+  .tag-tip   { background: #f0fdf4; color: #166534; border-color: #86efac; }
+
+  /* SVG 工作流 */
+  .diagram-wrap { border: 3px solid #1a1a1a; border-radius: 10px; padding: 20px; margin-bottom: 26px; background: #fff8ee; box-shadow: 4px 4px 0 #1a1a1a; }
+  .diagram-wrap h3 { font-family: 'Baloo 2', cursive; font-size: 1rem; color: #6b4226; margin-bottom: 14px; font-weight: 700; }
+  .diagram-wrap svg { width: 100%; height: auto; display: block; }
+
+  /* 教學資源 */
+  .resources { list-style: none; margin-bottom: 26px; }
+  .resources li { border: 2px solid #1a1a1a; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; background: #fff; display: flex; gap: 12px; align-items: flex-start; box-shadow: 3px 3px 0 #1a1a1a; }
+  .resources li .icon { font-size: 1.2rem; flex-shrink: 0; }
+  .resources li div { font-size: 0.83rem; }
+  .resources li strong { color: #6b4226; display: block; margin-bottom: 2px; }
+  .resources li a { color: #e8713a; }
+
+  /* 小隊 */
+  .team-box { border: 3px solid #1a1a1a; border-radius: 10px; padding: 20px; margin-bottom: 10px; background: #fff; box-shadow: 4px 4px 0 #1a1a1a; }
+  .team-box h3 { font-family: 'Baloo 2', cursive; color: #6b4226; margin-bottom: 14px; font-size: 1rem; }
+  .msg { display: flex; gap: 10px; margin-bottom: 12px; }
+  .msg-bubble { background: #fdf6e3; border: 2px solid #1a1a1a; border-radius: 0 10px 10px 10px; padding: 10px 14px; font-size: 0.83rem; line-height: 1.6; flex: 1; }
+  .msg-bubble strong { color: #e8713a; }
+  .msg.right { flex-direction: row-reverse; }
+  .msg.right .msg-bubble { border-radius: 10px 0 10px 10px; background: #e8f4f8; }
+
+  /* 引證 */
+  .cite-table { width: 100%; border-collapse: collapse; }
+  .cite-table th { background: #6b4226; color: #fff; padding: 10px 12px; font-size: 0.8rem; text-align: left; border: 2px solid #1a1a1a; }
+  .cite-table td { padding: 9px 12px; border: 2px solid #1a1a1a; font-size: 0.8rem; background: #fff; vertical-align: top; }
+  .cite-table tr:nth-child(even) td { background: #fdf6e3; }
+  .cite-table a { color: #e8713a; word-break: break-all; }
+
+  @media (max-width: 600px) {
+    .main-title { font-size: 1.5rem; }
+    .id-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">← 回知識分享</a>
+
+  <div class="badge-row">
+    <span class="badge badge-num">AI 晨報 #004</span>
+    <span class="badge badge-anime">AI 影片 × 動畫</span>
+    <span class="badge badge-ai">ByteDance</span>
+    <span class="badge badge-date">2026-06-29</span>
+  </div>
+
+  <h1 class="main-title"><span>Seedance</span>：ByteDance 的 AI 影片模型<br>× 日式動畫革命</h1>
+  <p class="subtitle">上傳一張自拍，一鍵變假面騎士——這就是 2026 年最火的 AI 創作趨勢</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('report')">🎬 AI 晨報</button>
+    <button class="tab-btn" onclick="switchTab('cite')">🔍 零幻覺引證</button>
+  </div>
+
+  <!-- ── 主報告 ── -->
+  <div id="tab-report" class="tab-panel active">
+
+    <div class="insight">
+      <div class="insight-label">✨ 一句話說清楚</div>
+      <p>Seedance 是 ByteDance 的 AI 影片生成<strong style="color:#ffd580;">模型</strong>（不是平台），用 Dreamina 或 Freepik 可免費試用——它讓「零畫功的人」也能做出電影感日式動畫，最紅的玩法是 Henshin 變身特效。</p>
+    </div>
+
+    <!-- 模型 vs 平台 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">🔍 搞清楚：模型 vs 平台</h3>
+    <div class="id-row">
+      <div class="id-card model">
+        <h4>🤖 Seedance（模型）</h4>
+        <p>ByteDance SEED Lab 開發的影片生成模型，有學術論文（arxiv 2604.14148）。這是技術核心，其他工具都是包裝它的平台。</p>
+      </div>
+      <div class="id-card platform">
+        <h4>📱 平台（用來用 Seedance 的地方）</h4>
+        <p>• <strong>Dreamina</strong>（海外官方，台灣可用，不用 VPN）<br>• <strong>豆包</strong>（中國版，需要中國帳號）<br>• <strong>Freepik / Higgsfield / fal.ai</strong>（第三方）</p>
+      </div>
+    </div>
+
+    <!-- 版本時間軸 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">📅 版本進化</h3>
+    <div class="timeline">
+      <div class="tl-item">
+        <div>
+          <div class="tl-dot"></div>
+        </div>
+        <div class="tl-content">
+          <strong>Seedance 1.0 — 2025-06</strong>
+          <p>初代發布，基礎文字生影片能力，在中國快速走紅</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div>
+          <div class="tl-dot" style="background:#e8713a;"></div>
+        </div>
+        <div class="tl-content">
+          <strong>Seedance 2.0 — 2026-02-12（春晚首秀）🔥</strong>
+          <p>多模態輸入（最多 9 圖 + 3 影片 + 3 音頻 + 文字）、最長 15 秒、原生音效、導演級鏡頭控制、日式動漫 90% 可用率</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div>
+          <div class="tl-dot" style="background:#6b4226;"></div>
+        </div>
+        <div class="tl-content">
+          <strong>Seedance 2.5 — 2026-05+（Volcano Engine 大會）</strong>
+          <p>最長延伸至 <strong>30 秒</strong>、原生 <strong>4K 輸出</strong>、更大 context 窗口，「一個鏡頭」升級為「一個場景」</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 收費 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">💰 收費模式</h3>
+    <table class="price-table">
+      <thead>
+        <tr><th>管道</th><th>入手方式</th><th>免費額度</th><th>付費方案</th><th>適合對象</th></tr>
+      </thead>
+      <tbody>
+        <tr class="rec">
+          <td>Dreamina（官方海外）</td>
+          <td>直接註冊，台灣可用</td>
+          <td>225 credits/天<br>（約 1-2 部短片）</td>
+          <td>$18/月（1,575 cr）<br>$82/月（8,645 cr）</td>
+          <td>⭐ 新手首選</td>
+        </tr>
+        <tr>
+          <td>Freepik / Higgsfield</td>
+          <td>第三方，有英文介面</td>
+          <td>有限免費次數</td>
+          <td>$7-15/月入門</td>
+          <td>英文介面偏好者</td>
+        </tr>
+        <tr>
+          <td>fal.ai API</td>
+          <td>開發者用 API key</td>
+          <td>無</td>
+          <td>按秒計費<br>約 $0.022-0.247/秒</td>
+          <td>開發者 / 大量生成</td>
+        </tr>
+        <tr>
+          <td>Volcengine（官方企業）</td>
+          <td>ByteDance 企業 API</td>
+          <td>無</td>
+          <td>約 $0.14/秒<br>（10 秒 ≈ $1.4）</td>
+          <td>企業 / 商業使用</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 日式動畫工作流 SVG -->
+    <div class="diagram-wrap">
+      <h3>🗺 日式動畫創作工作流（Seedance 的角色）</h3>
+      <svg viewBox="0 0 720 130" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans TC', sans-serif">
+        <rect width="720" height="130" fill="#fff8ee" rx="8"/>
+        <!-- Step 1 -->
+        <rect x="10" y="35" width="120" height="60" rx="8" fill="#dbeafe" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="70" y="60" text-anchor="middle" font-size="11" font-weight="700" fill="#1e40af">🎨 角色設計</text>
+        <text x="70" y="78" text-anchor="middle" font-size="10" fill="#1e40af">Midjourney /</text>
+        <text x="70" y="92" text-anchor="middle" font-size="10" fill="#1e40af">GPT Image</text>
+        <!-- arrow -->
+        <line x1="132" y1="65" x2="158" y2="65" stroke="#e8713a" stroke-width="2.5" marker-end="url(#arr)"/>
+        <!-- Step 2 -->
+        <rect x="160" y="35" width="120" height="60" rx="8" fill="#fef3c7" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="220" y="60" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">📝 Prompt 撰寫</text>
+        <text x="220" y="78" text-anchor="middle" font-size="10" fill="#92400e">鏡頭指令 +</text>
+        <text x="220" y="92" text-anchor="middle" font-size="10" fill="#92400e">動作描述</text>
+        <!-- arrow -->
+        <line x1="282" y1="65" x2="308" y2="65" stroke="#e8713a" stroke-width="2.5" marker-end="url(#arr)"/>
+        <!-- Step 3 Seedance STAR -->
+        <rect x="310" y="20" width="140" height="90" rx="8" fill="#e8713a" stroke="#1a1a1a" stroke-width="3"/>
+        <text x="380" y="52" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">🎬 Seedance</text>
+        <text x="380" y="70" text-anchor="middle" font-size="10" fill="#ffe" >圖片 → 動態影片</text>
+        <text x="380" y="86" text-anchor="middle" font-size="10" fill="#ffe">鏡頭 / 音效 / 動作</text>
+        <text x="380" y="100" text-anchor="middle" font-size="9" fill="#ffd580">最長 30 秒 / 4K</text>
+        <!-- arrow -->
+        <line x1="452" y1="65" x2="478" y2="65" stroke="#e8713a" stroke-width="2.5" marker-end="url(#arr)"/>
+        <!-- Step 4 -->
+        <rect x="480" y="35" width="120" height="60" rx="8" fill="#dcfce7" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="540" y="60" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">✂️ 後製剪輯</text>
+        <text x="540" y="78" text-anchor="middle" font-size="10" fill="#166534">CapCut / PR /</text>
+        <text x="540" y="92" text-anchor="middle" font-size="10" fill="#166534">剪映 串接片段</text>
+        <!-- arrow -->
+        <line x1="602" y1="65" x2="628" y2="65" stroke="#e8713a" stroke-width="2.5" marker-end="url(#arr)"/>
+        <!-- Step 5 -->
+        <rect x="630" y="35" width="80" height="60" rx="8" fill="#f3e8ff" stroke="#1a1a1a" stroke-width="2.5"/>
+        <text x="670" y="60" text-anchor="middle" font-size="11" font-weight="700" fill="#5b21b6">📱 發布</text>
+        <text x="670" y="78" text-anchor="middle" font-size="10" fill="#5b21b6">TikTok /</text>
+        <text x="670" y="92" text-anchor="middle" font-size="10" fill="#5b21b6">Reels</text>
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#e8713a"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- 日式動畫知名作品/趨勢 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">🌸 日式動畫 × Seedance 代表案例</h3>
+    <div class="anime-cards">
+      <div class="anime-card">
+        <div class="anime-card-icon">⚡</div>
+        <h4>Henshin（變身）影片</h4>
+        <p>2026 年最大爆款。上傳自拍 → 一鍵變假面騎士 / 戰隊英雄，爆炸性能量特效、盔甲漸顯、導演級推鏡，在 TikTok / Reels 席捲全球。</p>
+        <span class="tag tag-viral">🔥 最熱趨勢</span>
+      </div>
+      <div class="anime-card">
+        <div class="anime-card-icon">🎮</div>
+        <h4>寶可夢動畫重製</h4>
+        <p>Seedance 2.0 發布初期病毒式傳播的代表作。以皮卡丘等角色重製 2D 動畫風格短片，展示了模型對經典日式動畫美學的掌握。</p>
+        <span class="tag tag-viral">🔥 病毒傳播</span>
+      </div>
+      <div class="anime-card">
+        <div class="anime-card-icon">🤖</div>
+        <h4>鋼彈 / 進擊的巨人</h4>
+        <p>愛好者用 Seedance 重製經典機甲戰鬥場景與巨人攻城片段，機械感與動態流暢度讓社群驚呼，但同時也引發版權爭議。</p>
+        <span class="tag tag-warn">⚠️ 版權爭議</span>
+      </div>
+      <div class="anime-card">
+        <div class="anime-card-icon">🔍</div>
+        <h4>柯南 / 超人力霸王</h4>
+        <p>這批重製影片直接引爆法律戰——日本政府介入，MPA、Disney、Netflix、Warner 聯手控訴 ByteDance 版權侵權，目前官司進行中。</p>
+        <span class="tag tag-warn">⚠️ 法律糾紛中</span>
+      </div>
+      <div class="anime-card">
+        <div class="anime-card-icon">✨</div>
+        <h4>原創 AI 動漫短劇</h4>
+        <p>創作者自創角色 + Seedance 生成完整故事，36 氪報導有中國「AI 漫劇民工」靠這個賺生活費。零畫功出片成為現實。</p>
+        <span class="tag tag-tip">💡 創業新方向</span>
+      </div>
+      <div class="anime-card">
+        <div class="anime-card-icon">🏯</div>
+        <h4>神隱少女 / 宮崎駿風格</h4>
+        <p>用文字 prompt 描述宮崎駿式奇幻場景，Seedance 能還原油畫感光線與流體動態，「水墨遇見歐式動畫」的跨風格嘗試在藝術社群受關注。</p>
+        <span class="tag tag-tip">💡 藝術探索</span>
+      </div>
+    </div>
+
+    <!-- 教學資源 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">📚 推薦教學資源</h3>
+    <ul class="resources">
+      <li>
+        <div class="icon">▶️</div>
+        <div>
+          <strong>Seedance 2.0 Anime Tricks（YouTube 英文）</strong>
+          "Seedance 2.0 TRICKS That Separate Pro Anime From SLOP" — 進階技巧，直接對比業餘 vs 專業輸出<br>
+          <a href="https://www.youtube.com/watch?v=gsWd6KEonjQ" target="_blank">youtube.com/watch?v=gsWd6KEonjQ</a>
+        </div>
+      </li>
+      <li>
+        <div class="icon">▶️</div>
+        <div>
+          <strong>AI Anime 全流程教學（YouTube 英文）</strong>
+          "How to Create AI Anime with Seedance 2.0" — 從零到完整動漫短片<br>
+          <a href="https://www.youtube.com/watch?v=Js2i75X0b5c" target="_blank">youtube.com/watch?v=Js2i75X0b5c</a>
+        </div>
+      </li>
+      <li>
+        <div class="icon">⚡</div>
+        <div>
+          <strong>Synterial — Henshin 變身教學（英文）</strong>
+          最詳細的假面騎士風格變身特效教學，包含完整 prompt 範本<br>
+          <a href="https://synterial.com/blog/seedance-2-0-henshin-tutorial" target="_blank">synterial.com/blog/seedance-2-0-henshin-tutorial</a>
+        </div>
+      </li>
+      <li>
+        <div class="icon">🀄</div>
+        <div>
+          <strong>巴哈姆特 vanessare — 動漫轉影片攻略（繁中）</strong>
+          熱舞、微笑指令全收錄，台灣創作者視角，最好上手<br>
+          <a href="https://home.gamer.com.tw/artwork.php?sn=6333224" target="_blank">home.gamer.com.tw</a>
+        </div>
+      </li>
+      <li>
+        <div class="icon">🀄</div>
+        <div>
+          <strong>梁 Sir — 零畫功 AI 動漫全流程實測（繁中）</strong>
+          從選工具到成片，完整紀錄實際創作過程和踩坑心得<br>
+          <a href="https://www.leungsir.net/%E9%9B%B6%E7%95%AB%E5%8A%9F%E4%B9%9F%E8%83%BD%E5%87%BA%E7%89%87%EF%BC%9Fai-%E5%8B%95%E6%BC%AB%E7%B3%BB%E5%88%97%E5%89%B5%E4%BD%9C%E5%85%A8%E6%B5%81%E7%A8%8B%E6%B7%B1%E5%BA%A6%E5%AF%A6%E6%B8%AC/" target="_blank">leungsir.net</a>
+        </div>
+      </li>
+    </ul>
+
+    <!-- 小隊討論 -->
+    <div class="team-box">
+      <h3>💬 Forever-AI 小隊洞見</h3>
+      <div class="msg">
+        <div style="font-size:1.3rem;flex-shrink:0">🐻</div>
+        <div class="msg-bubble">
+          Seedance 的核心差異是<strong>導演級鏡頭控制</strong>——推、拉、平移、跟拍可以直接在 prompt 指定，AI 自動排鏡頭。這是其他影片生成模型缺少的能力，讓創作者不只是「出圖」而是真的在「拍片」。
+        </div>
+      </div>
+      <div class="msg right">
+        <div style="font-size:1.3rem;flex-shrink:0">🎨</div>
+        <div class="msg-bubble">
+          Seedance 是<strong>動畫界的 GarageBand</strong>——早期 GarageBand 讓沒學過音樂的人也能做出像樣的音樂，Seedance 讓零畫功的人也能做出電影感日式動畫。民主化創作工具的出現，永遠會改變一個產業。
+        </div>
+      </div>
+      <div class="msg">
+        <div style="font-size:1.3rem;flex-shrink:0">🐻</div>
+        <div class="msg-bubble">
+          版權問題是必然的陣痛，但關鍵在於<strong>2.5 版的 30 秒長度</strong>。15 秒只夠一個鏡頭，30 秒可以說完整場景。接下來就看誰能做出第一部完整劇情的 AI 動畫短片——那才是真正的里程碑。
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── 零幻覺引證 ── -->
+  <div id="tab-cite" class="tab-panel">
+    <p style="margin-bottom:18px;font-size:0.85rem;color:#888;">所有引用均有原始 URL 可驗證，無 AI 杜撰。</p>
+    <table class="cite-table">
+      <thead>
+        <tr><th>#</th><th>作者 / 機構</th><th>媒體</th><th>日期</th><th>標題</th><th>來源</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ByteDance SEED Lab</td>
+          <td>arXiv</td>
+          <td>2026-04</td>
+          <td>Seedance 2.0: Advancing Video Generation for World Complexity</td>
+          <td><a href="https://arxiv.org/abs/2604.14148" target="_blank">arxiv.org</a></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Atlas Cloud</td>
+          <td>atlascloud.ai</td>
+          <td>2026</td>
+          <td>Seedance 2.0: The Complete Guide to ByteDance's AI Video Generator</td>
+          <td><a href="https://www.atlascloud.ai/blog/guides/seedance-2.0-complete-guide" target="_blank">atlascloud.ai</a></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>ExplainX</td>
+          <td>explainx.ai</td>
+          <td>2026</td>
+          <td>Seedance 2.5: 30-Second 4K AI Video from ByteDance</td>
+          <td><a href="https://www.explainx.ai/blog/seedance-2-5-bytedance-30-second-4k-ai-video-2026" target="_blank">explainx.ai</a></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>知乎作者</td>
+          <td>zhuanlan.zhihu.com</td>
+          <td>2026</td>
+          <td>Seedance 生成柯南/超人力霸王，引日本政府及 Disney/Netflix 侵權指控</td>
+          <td><a href="https://zhuanlan.zhihu.com/p/2011119399973697121" target="_blank">zhihu.com</a></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Atlas Cloud</td>
+          <td>atlascloud.ai</td>
+          <td>2026</td>
+          <td>Seedance 2.0 Pricing: Full Cost Breakdown 2026</td>
+          <td><a href="https://www.atlascloud.ai/blog/case-studies/seedance-2.0-pricing-full-cost-breakdown-2026" target="_blank">atlascloud.ai</a></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Synterial</td>
+          <td>synterial.com</td>
+          <td>2026</td>
+          <td>Seedance 2.0 Henshin Tutorial（假面騎士變身教學）</td>
+          <td><a href="https://synterial.com/blog/seedance-2-0-henshin-tutorial" target="_blank">synterial.com</a></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>AI Journal</td>
+          <td>aijourn.com</td>
+          <td>2026</td>
+          <td>Dreamina Launches Seedance 2.0 4K and Seedance 2.0 mini</td>
+          <td><a href="https://aijourn.com/dreamina-launches-seedance-2-0-4k-and-seedance-2-0-mini-to-expand-ai-anime-video-creation/" target="_blank">aijourn.com</a></td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>vanessare</td>
+          <td>巴哈姆特</td>
+          <td>2026</td>
+          <td>Seedance 2.0 超強 AI 動漫轉影片攻略：熱舞、微笑指令全收錄</td>
+          <td><a href="https://home.gamer.com.tw/artwork.php?sn=6333224" target="_blank">gamer.com.tw</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

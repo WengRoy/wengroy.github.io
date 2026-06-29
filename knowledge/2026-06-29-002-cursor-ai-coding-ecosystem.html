@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursor 3.x：AI Coding 從「輔助工具」變「Agent 指揮官」| AI 晨報 #005</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: #fdf6e3; color: #1a1a1a; min-height: 100vh; background-image: radial-gradient(circle, #d4b896 1px, transparent 1px); background-size: 18px 18px; }
+  .page { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+  .back-link { display: inline-block; margin-bottom: 18px; color: #e8713a; text-decoration: none; font-weight: 700; font-size: 0.85rem; }
+  .back-link:hover { text-decoration: underline; }
+  .badge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; border: 2px solid #1a1a1a; box-shadow: 2px 2px 0 #1a1a1a; }
+  .badge-num  { background: #e8713a; color: #fff; }
+  .badge-tool { background: #dbeafe; color: #1e40af; }
+  .badge-date { background: #fff; color: #6b4226; }
+  .main-title { font-family: 'Baloo 2', cursive; font-size: 2rem; font-weight: 800; color: #6b4226; line-height: 1.25; margin-bottom: 6px; }
+  .main-title span { color: #e8713a; }
+  .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 24px; }
+
+  .tabs { display: flex; }
+  .tab-btn { padding: 10px 24px; font-weight: 700; font-size: 0.9rem; border: 3px solid #1a1a1a; border-bottom: none; background: #e8d5b0; cursor: pointer; border-radius: 8px 8px 0 0; color: #6b4226; transition: background 0.15s; }
+  .tab-btn.active { background: #fdf6e3; color: #e8713a; }
+  .tab-panel { display: none; border: 3px solid #1a1a1a; border-radius: 0 8px 8px 8px; padding: 28px; background: #fdf6e3; box-shadow: 5px 5px 0 #1a1a1a; }
+  .tab-panel.active { display: block; }
+
+  .insight { background: #e8713a; color: #fff; border: 3px solid #1a1a1a; border-radius: 10px; padding: 18px 22px; margin-bottom: 26px; box-shadow: 4px 4px 0 #1a1a1a; }
+  .insight-label { font-size: 0.72rem; font-weight: 700; opacity: 0.85; margin-bottom: 6px; letter-spacing: 1px; }
+  .insight p { font-size: 1.05rem; font-weight: 700; line-height: 1.55; }
+
+  /* Stats */
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 26px; }
+  .stat { flex: 1; min-width: 120px; border: 3px solid #1a1a1a; border-radius: 10px; padding: 16px; text-align: center; background: #6b4226; color: #fff; box-shadow: 4px 4px 0 #1a1a1a; }
+  .stat-num { font-family: 'Baloo 2', cursive; font-size: 1.8rem; font-weight: 800; color: #ffd580; }
+  .stat-label { font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
+
+  /* 時間軸 */
+  .tl-item { display: flex; gap: 14px; margin-bottom: 10px; }
+  .tl-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #1a1a1a; flex-shrink: 0; margin-top: 4px; }
+  .tl-content { border: 2px solid #1a1a1a; border-radius: 8px; padding: 12px 16px; background: #fff; flex: 1; box-shadow: 3px 3px 0 #1a1a1a; }
+  .tl-content strong { color: #e8713a; font-family: 'Baloo 2', cursive; }
+  .tl-content p { font-size: 0.82rem; color: #555; margin-top: 4px; line-height: 1.5; }
+  .tl-hot { background: #fef3c7 !important; }
+
+  /* 功能卡 */
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .feat { border: 3px solid #1a1a1a; border-radius: 10px; padding: 16px; background: #fff; box-shadow: 4px 4px 0 #1a1a1a; }
+  .feat-icon { font-size: 1.6rem; margin-bottom: 8px; }
+  .feat h4 { font-family: 'Baloo 2', cursive; font-size: 0.95rem; color: #6b4226; margin-bottom: 5px; }
+  .feat p { font-size: 0.8rem; color: #555; line-height: 1.5; }
+
+  /* 三工具比較 */
+  .compare { width: 100%; border-collapse: collapse; margin-bottom: 26px; }
+  .compare th { background: #6b4226; color: #fff; padding: 10px 12px; font-size: 0.8rem; border: 2px solid #1a1a1a; text-align: left; }
+  .compare td { padding: 10px 12px; border: 2px solid #1a1a1a; font-size: 0.82rem; background: #fff; vertical-align: top; }
+  .compare tr:nth-child(even) td { background: #fdf6e3; }
+  .compare .cursor-row td { background: #fef3c7 !important; font-weight: 600; }
+  .compare .claude-row td { background: #e8f4f8 !important; }
+
+  /* 小隊 */
+  .team-box { border: 3px solid #1a1a1a; border-radius: 10px; padding: 20px; margin-bottom: 10px; background: #fff; box-shadow: 4px 4px 0 #1a1a1a; }
+  .team-box h3 { font-family: 'Baloo 2', cursive; color: #6b4226; margin-bottom: 14px; font-size: 1rem; }
+  .msg { display: flex; gap: 10px; margin-bottom: 12px; }
+  .msg-bubble { background: #fdf6e3; border: 2px solid #1a1a1a; border-radius: 0 10px 10px 10px; padding: 10px 14px; font-size: 0.83rem; line-height: 1.6; flex: 1; }
+  .msg-bubble strong { color: #e8713a; }
+  .msg.right { flex-direction: row-reverse; }
+  .msg.right .msg-bubble { border-radius: 10px 0 10px 10px; background: #e8f4f8; }
+
+  /* 引證 */
+  .cite-table { width: 100%; border-collapse: collapse; }
+  .cite-table th { background: #6b4226; color: #fff; padding: 10px 12px; font-size: 0.8rem; text-align: left; border: 2px solid #1a1a1a; }
+  .cite-table td { padding: 9px 12px; border: 2px solid #1a1a1a; font-size: 0.8rem; background: #fff; vertical-align: top; }
+  .cite-table tr:nth-child(even) td { background: #fdf6e3; }
+  .cite-table a { color: #e8713a; word-break: break-all; }
+
+  @media (max-width: 600px) { .main-title { font-size: 1.5rem; } .stats { gap: 8px; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">← 回知識分享</a>
+  <div class="badge-row">
+    <span class="badge badge-num">AI 晨報 #005</span>
+    <span class="badge badge-tool">AI 工具生態</span>
+    <span class="badge badge-date">2026-06-29</span>
+    <span class="badge badge-date">Cursor × Claude Code × Windsurf</span>
+  </div>
+  <h1 class="main-title"><span>Cursor 3.x</span>：AI Coding 從「輔助工具」<br>變「Agent 指揮官」</h1>
+  <p class="subtitle">64% Fortune 500 已在用，Bugbot 從 5 分鐘降到 90 秒——2026 年 AI coding 工具生態全解析</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('report')">⚡ AI 晨報</button>
+    <button class="tab-btn" onclick="switchTab('cite')">🔍 零幻覺引證</button>
+  </div>
+
+  <div id="tab-report" class="tab-panel active">
+
+    <div class="insight">
+      <div class="insight-label">✨ 一句話說清楚</div>
+      <p>Cursor 已不是「AI 輔助編輯器」——它是管理多個平行雲端 Agent 的指揮中樞。64% Fortune 500 在用，Bugbot 自動找 bug 只要 90 秒，Automations 讓你貼個 Slack emoji 就啟動 agent。</p>
+    </div>
+
+    <!-- 數字 -->
+    <div class="stats">
+      <div class="stat"><div class="stat-num">1M+</div><div class="stat-label">全球開發者用戶</div></div>
+      <div class="stat"><div class="stat-num">360K</div><div class="stat-label">付費訂閱用戶</div></div>
+      <div class="stat"><div class="stat-num">64%</div><div class="stat-label">Fortune 500 採用率</div></div>
+      <div class="stat"><div class="stat-num">90秒</div><div class="stat-label">Bugbot 平均審查時間</div></div>
+    </div>
+
+    <!-- 版本時間軸 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">📅 Cursor 2026 版本進化</h3>
+    <div style="margin-bottom:26px;">
+      <div class="tl-item">
+        <div><div class="tl-dot" style="background:#d1d5db;"></div></div>
+        <div class="tl-content">
+          <strong>Cursor 3.0 — 2026-04（重大轉型）</strong>
+          <p>介面從零重建，定位從「AI 編輯器」→ <strong>「Agent-first workspace」</strong>。核心改變：管理平行 coding agents，而非單純補全程式碼。</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div><div class="tl-dot" style="background:#e8713a;"></div></div>
+        <div class="tl-content tl-hot">
+          <strong>Cursor 3.5 — 2026-05-20（Cloud Agents 上線）🔥</strong>
+          <p>Cloud Agents 在獨立雲端 VM 執行，可跨多個 repo 平行工作，非同步回報結果到本機 IDE——本機工作區完全不受影響。</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div><div class="tl-dot" style="background:#6b4226;"></div></div>
+        <div class="tl-content">
+          <strong>v3.7（2026-06-17）</strong>
+          <p>Cloud Environment Setup + Agents Window 加入 Cloud Subagents 管理介面</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div><div class="tl-dot" style="background:#6b4226;"></div></div>
+        <div class="tl-content tl-hot">
+          <strong>v3.8（2026-06-18）Automations 升級 🔥</strong>
+          <p>新增 <code>/automate</code> 指令（自然語言建 workflow）、Slack emoji 觸發、5 種 GitHub 觸發，加上 Cloud Agent 的 computer use 能力</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div><div class="tl-dot" style="background:#6b4226;"></div></div>
+        <div class="tl-content">
+          <strong>v3.9（2026-06-22）</strong>
+          <p>自訂 Cursor 外觀與行為偏好設定</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 四大核心功能 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">⚙️ 四大核心新功能</h3>
+    <div class="features">
+      <div class="feat">
+        <div class="feat-icon">☁️</div>
+        <h4>Cloud Subagents</h4>
+        <p>用 <code>/in-cloud</code> 在雲端 VM 啟動獨立 agent，跑完自動回報。用 <code>/babysit</code> 讓 agent 守著 PR 反覆改到可以 merge 為止。</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🤖</div>
+        <h4>Cursor Automations</h4>
+        <p>Always-on agents 處理重複任務。Slack emoji = 觸發條件、GitHub PR 事件 = 觸發條件。<code>/automate</code> 用說的就能建 workflow。</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🐛</div>
+        <h4>Bugbot（升級版）</h4>
+        <p>每次 PR review 平均 90 秒完成（舊版 5 分鐘），每次多找 10% bug，每次執行成本降 22%。三個指標同步改善。</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🎨</div>
+        <h4>Design Mode</h4>
+        <p>在瀏覽器裡直接點擊、繪製、或用語音描述 UI 變更，agent 即時更新程式碼。設計師 → 工程師的工作流打通。</p>
+      </div>
+    </div>
+
+    <!-- 三工具比較 -->
+    <h3 style="font-family:'Baloo 2',cursive;color:#6b4226;margin-bottom:12px;font-size:1.05rem;">⚔️ 2026 三大工具比較</h3>
+    <table class="compare">
+      <thead>
+        <tr><th>工具</th><th>定位</th><th>核心優勢</th><th>最適場景</th><th>價格</th></tr>
+      </thead>
+      <tbody>
+        <tr class="cursor-row">
+          <td>⚡ Cursor</td>
+          <td>Agent 指揮官</td>
+          <td>Cloud Agents、Automations、Bugbot、1M+ 社群</td>
+          <td>需要最強 agentic 能力、Fortune 500 團隊</td>
+          <td>$20/月起</td>
+        </tr>
+        <tr>
+          <td>🌊 Windsurf<br><small>（前 Codeium）</small></td>
+          <td>AI 協作夥伴</td>
+          <td>Cascade 協作流、即時共同編輯感、預算友善</td>
+          <td>預算有限、偏好 AI 主動參與風格</td>
+          <td>$15/月起</td>
+        </tr>
+        <tr class="claude-row">
+          <td>🖥️ Claude Code</td>
+          <td>Terminal 架構師</td>
+          <td>1M token context、自主執行複雜任務、terminal-native</td>
+          <td>大型重構、跨檔案複雜任務、走開讓 AI 做</td>
+          <td>隨 Claude 訂閱</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.8rem;color:#888;margin-bottom:26px;">💡 頂尖開發者常同時用兩個：Cursor/Windsurf 做快速編輯，Claude Code 做複雜自主任務——兩種風格幾乎不重疊。</p>
+
+    <!-- 小隊 -->
+    <div class="team-box">
+      <h3>💬 Forever-AI 小隊洞見</h3>
+      <div class="msg">
+        <div style="font-size:1.3rem;flex-shrink:0">🐻</div>
+        <div class="msg-bubble">
+          Cursor 最大的轉變是<strong>角色重新定義</strong>——從「我幫你打字」變成「我幫你管理一群 AI 員工」。Cloud Agents 讓你可以同時跑五個 branch 的任務，本機完全不卡，這是傳統 IDE 根本不可能有的能力。
+        </div>
+      </div>
+      <div class="msg right">
+        <div style="font-size:1.3rem;flex-shrink:0">🎨</div>
+        <div class="msg-bubble">
+          Slack emoji 觸發 Automations 讓我眼睛一亮——<strong>工作流摩擦降到零</strong>。以前你要打開 IDE、找到任務、設定 agent；現在貼個 emoji，agent 就去跑了。這種「觸發的便利性」才是真正改變工作習慣的關鍵。
+        </div>
+      </div>
+      <div class="msg">
+        <div style="font-size:1.3rem;flex-shrink:0">🐻</div>
+        <div class="msg-bubble">
+          三工具不是競爭而是互補。數據說明一切：64% Fortune 500 在用 Cursor——但這不代表他們不用 Claude Code。<strong>最常見的組合是兩個都用</strong>，按任務性質切換。這是工具成熟的標誌。
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── 零幻覺引證 ── -->
+  <div id="tab-cite" class="tab-panel">
+    <p style="margin-bottom:18px;font-size:0.85rem;color:#888;">所有引用均有原始 URL 可驗證，無 AI 杜撰。</p>
+    <table class="cite-table">
+      <thead><tr><th>#</th><th>作者 / 機構</th><th>媒體</th><th>日期</th><th>標題</th><th>來源</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td><td>Anysphere（Cursor 官方）</td><td>cursor.com</td><td>2026-04</td>
+          <td>Meet the new Cursor</td>
+          <td><a href="https://cursor.com/blog/cursor-3" target="_blank">cursor.com</a></td>
+        </tr>
+        <tr>
+          <td>2</td><td>Cursor 官方</td><td>cursor.com changelog</td><td>2026-06-18</td>
+          <td>Improvements to Cursor Automations</td>
+          <td><a href="https://cursor.com/changelog/06-18-26" target="_blank">cursor.com</a></td>
+        </tr>
+        <tr>
+          <td>3</td><td>Releasebot</td><td>releasebot.io</td><td>2026-06</td>
+          <td>Cursor Release Notes — June 2026 Latest Updates</td>
+          <td><a href="https://releasebot.io/updates/cursor" target="_blank">releasebot.io</a></td>
+        </tr>
+        <tr>
+          <td>4</td><td>InfoQ 編輯部</td><td>infoq.com</td><td>2026-04</td>
+          <td>Cursor 3 Introduces Agent-First Interface, Moving Beyond the IDE Model</td>
+          <td><a href="https://www.infoq.com/news/2026/04/cursor-3-agent-first-interface/" target="_blank">infoq.com</a></td>
+        </tr>
+        <tr>
+          <td>5</td><td>Latent Space</td><td>latent.space</td><td>2026</td>
+          <td>Cursor's Third Era: Cloud Agents</td>
+          <td><a href="https://www.latent.space/p/cursor-third-era" target="_blank">latent.space</a></td>
+        </tr>
+        <tr>
+          <td>6</td><td>DEV Community</td><td>dev.to</td><td>2026</td>
+          <td>Cursor vs Windsurf vs Claude Code in 2026: The Honest Comparison After Using All Three</td>
+          <td><a href="https://dev.to/pockit_tools/cursor-vs-windsurf-vs-claude-code-in-2026-the-honest-comparison-after-using-all-three-3gof" target="_blank">dev.to</a></td>
+        </tr>
+        <tr>
+          <td>7</td><td>TechCrunch</td><td>techcrunch.com</td><td>2026-03-05</td>
+          <td>Cursor is rolling out a new kind of agentic coding tool</td>
+          <td><a href="https://techcrunch.com/2026/03/05/cursor-is-rolling-out-a-new-system-for-agentic-coding/" target="_blank">techcrunch.com</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
