@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal-Bench：AI Agent 在終端機的真實能力測試 — Roy's Lab</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖥️</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #fdf6e3;
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            background: #1a1a1a;
+            padding: 48px 24px 36px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(232,113,58,0.15) 1px, transparent 1px);
+            background-size: 12px 12px;
+        }
+        .hero-tag {
+            display: inline-block;
+            background: #e8713a;
+            color: #fff;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            color: #fdf6e3;
+            font-weight: 800;
+            line-height: 1.2;
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+            margin: 0 auto 12px;
+        }
+        .hero h1 span { color: #e8713a; }
+        .hero-sub {
+            color: #aaa;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── TERMINAL SVG DIAGRAM ── */
+        .diagram-wrap {
+            max-width: 760px;
+            margin: -1px auto 0;
+            padding: 0 24px;
+            background: #1a1a1a;
+        }
+        .term-diagram {
+            width: 100%;
+            border: 3px solid #e8713a;
+            border-radius: 12px;
+            background: #0d1117;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .term-titlebar {
+            background: #21262d;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-r { background: #ff5f57; }
+        .dot-y { background: #febc2e; }
+        .dot-g { background: #28c840; }
+        .term-body {
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: #c9d1d9;
+        }
+        .term-body .prompt { color: #58a6ff; }
+        .term-body .ok { color: #3fb950; }
+        .term-body .warn { color: #d29922; }
+        .term-body .err { color: #f85149; }
+        .term-body .dim { color: #484f58; }
+        .term-body .hl { color: #e8713a; }
+
+        /* ── MAIN CONTENT ── */
+        .content-wrap {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: #e8713a;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        /* ── TABS ── */
+        .tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 3px solid #1a1a1a; }
+        .tab-btn {
+            padding: 10px 24px;
+            background: #e8d5bb;
+            border: 3px solid #1a1a1a;
+            border-bottom: none;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 10px 10px 0 0;
+            margin-right: -3px;
+            color: #6b4226;
+            transition: background 0.15s;
+        }
+        .tab-btn.active { background: #fdf6e3; color: #e8713a; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── CARDS ── */
+        .section-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #6b4226;
+            margin: 28px 0 12px;
+            padding-left: 12px;
+            border-left: 5px solid #e8713a;
+        }
+        .card {
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 #1a1a1a;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+        .card-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #e8713a;
+            margin-bottom: 8px;
+        }
+        .card p, .card li {
+            font-size: 0.88rem;
+            color: #444;
+            line-height: 1.7;
+        }
+        .card ul { padding-left: 20px; }
+        .card li { margin-bottom: 4px; }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .stat-box {
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 #1a1a1a;
+            padding: 14px 12px;
+            text-align: center;
+        }
+        .stat-num {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #e8713a;
+            line-height: 1;
+        }
+        .stat-label { font-size: 0.72rem; color: #888; margin-top: 4px; }
+
+        /* ── LEADERBOARD ── */
+        .lb-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .lb-table th {
+            background: #1a1a1a;
+            color: #fdf6e3;
+            padding: 8px 12px;
+            text-align: left;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 700;
+        }
+        .lb-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #e8d5bb;
+        }
+        .lb-table tr:nth-child(even) td { background: #fdf6e3; }
+        .lb-table tr:first-child td { background: #fff8e1; }
+        .rank-1 { color: #d4a017; font-weight: 900; }
+        .rank-2 { color: #888; font-weight: 700; }
+        .rank-3 { color: #b87333; font-weight: 700; }
+        .score-bar {
+            display: inline-block;
+            height: 8px;
+            background: #e8713a;
+            border-radius: 4px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        /* ── DOMAINS GRID ── */
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .domain-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            border: 2px solid #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 3px 3px 0 #1a1a1a;
+            padding: 10px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #6b4226;
+        }
+        .domain-chip .icon { font-size: 1.3rem; }
+
+        /* ── HARBOR FLOW ── */
+        .flow-wrap {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0;
+            margin: 12px 0;
+        }
+        .flow-step {
+            background: #fff;
+            border: 2px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-align: center;
+            min-width: 100px;
+            box-shadow: 2px 2px 0 #1a1a1a;
+        }
+        .flow-arrow {
+            font-size: 1.2rem;
+            color: #e8713a;
+            padding: 0 6px;
+            font-weight: 900;
+        }
+        .flow-step.highlight { background: #e8713a; color: #fff; border-color: #1a1a1a; }
+
+        /* ── SCIENCE BOX ── */
+        .science-box {
+            background: linear-gradient(135deg, #0d1117 0%, #1a2744 100%);
+            border: 3px solid #58a6ff;
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 #1a1a1a;
+            padding: 24px;
+            margin: 16px 0;
+            color: #c9d1d9;
+        }
+        .science-box h3 {
+            font-family: 'Baloo 2', cursive;
+            color: #58a6ff;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+        .science-box p { font-size: 0.85rem; line-height: 1.7; }
+        .science-tag {
+            display: inline-block;
+            background: rgba(88,166,255,0.15);
+            border: 1px solid #58a6ff;
+            color: #79c0ff;
+            border-radius: 6px;
+            padding: 2px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin: 4px 3px 0 0;
+        }
+
+        /* ── INSIGHT BOX ── */
+        .insight-box {
+            background: #fff8e1;
+            border: 3px solid #e8713a;
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 #6b4226;
+            padding: 20px 24px;
+            margin: 20px 0;
+            position: relative;
+        }
+        .insight-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #e8713a;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .insight-box p { font-size: 0.88rem; color: #444; line-height: 1.7; }
+
+        /* ── CITATION TABLE ── */
+        .cite-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .cite-table th {
+            background: #6b4226;
+            color: #fdf6e3;
+            padding: 8px 10px;
+            text-align: left;
+            font-family: 'Baloo 2', cursive;
+        }
+        .cite-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e8d5bb;
+            vertical-align: top;
+        }
+        .cite-table tr:nth-child(even) td { background: #fdf6e3; }
+        .cite-table a { color: #e8713a; word-break: break-all; }
+
+        .meta-info {
+            font-size: 0.75rem;
+            color: #bbb;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-tag">🖥️ AI 評測基準</div>
+    <h1>Terminal-Bench：<span>AI Agent</span> 在終端機的<span>真實能力</span>測試</h1>
+    <p class="hero-sub">Stanford × Anthropic × ICLR 2026 ── 89 道真實工作任務，只看「做完了沒」</p>
+</div>
+
+<!-- TERMINAL DEMO -->
+<div class="diagram-wrap">
+    <div class="term-diagram">
+        <div class="term-titlebar">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+            <span style="color:#666;font-size:0.78rem;margin-left:8px;">terminal-bench · task evaluation</span>
+        </div>
+        <div class="term-body">
+            <div><span class="prompt">$</span> <span class="hl">tbench run</span> --model claude-fable-5 --harness terminus2 --task linux-kernel-build</div>
+            <div class="dim">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div><span class="warn">▶ TASK</span>  Compile Linux kernel 6.8 from source with custom config</div>
+            <div><span class="warn">▶ ENV  </span>  Ubuntu 22.04 container │ 8 cores │ 16 GB RAM</div>
+            <div><span class="warn">▶ LIMIT</span>  30 min │ No hints │ Pass/Fail only</div>
+            <div class="dim">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div><span class="prompt">agent&gt;</span> <span style="color:#e8713a">sudo apt-get install -y build-essential libncurses-dev...</span></div>
+            <div class="dim">  [installing dependencies...]</div>
+            <div><span class="prompt">agent&gt;</span> <span style="color:#e8713a">wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.8.tar.xz</span></div>
+            <div class="dim">  [downloading 140 MB...]</div>
+            <div><span class="prompt">agent&gt;</span> <span style="color:#e8713a">make menuconfig && make -j8 && make modules_install</span></div>
+            <div class="dim">  [compiling... 847 steps... 18 min 32 sec]</div>
+            <div><span class="ok">✓ PASS</span>  bzImage generated │ boot test verified │ <span class="hl">RESOLVED</span></div>
+            <div class="dim">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div><span class="prompt">$</span> <span class="hl">tbench score</span> --model claude-fable-5</div>
+            <div><span class="ok">📊  Claude Fable 5 │ v2.1 │ 84.6% resolution rate │ 89 tasks</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content-wrap">
+    <a href="index.html" class="back-link">← 回到知識分享</a>
+    <p class="meta-info">2026-06-30 · AI 晨報 #006 · 作者：Roy's Lab AI 小隊</p>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('main', this)">📊 技術報告</button>
+        <button class="tab-btn" onclick="switchTab('cite', this)">🔍 零幻覺引證</button>
+    </div>
+
+    <!-- TAB: MAIN -->
+    <div id="tab-main" class="tab-panel active">
+
+        <!-- STATS -->
+        <div class="section-title">關鍵數字</div>
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-num">89</div>
+                <div class="stat-label">手工驗證任務數</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">84.6%</div>
+                <div class="stat-label">目前最高分<br>Claude Fable 5</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">6</div>
+                <div class="stat-label">涵蓋技術領域</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">100+</div>
+                <div class="stat-label">Science 版目標<br>任務數</div>
+            </div>
+        </div>
+
+        <!-- WHAT IS -->
+        <div class="section-title">什麼是 Terminal-Bench？</div>
+        <div class="card">
+            <div class="card-title">一句話定義</div>
+            <p>Terminal-Bench 是 2026 年在 ICLR 發表的 AI Agent 評測基準，由 Stanford + Anthropic 合作開發。它的核心問題只有一個：<strong>「AI Agent 能不能在終端機裡完成一個有經驗的工程師每天在做的真實任務？」</strong></p>
+        </div>
+        <div class="card">
+            <div class="card-title">為什麼需要這個 benchmark？</div>
+            <p>現有的 AI 評測有兩個問題：</p>
+            <ul>
+                <li><strong>太學術</strong>：考教科書知識、填充題、問答——但這不等於「會做事」</li>
+                <li><strong>太簡單</strong>：頂級模型很快就接近滿分，失去鑑別力</li>
+            </ul>
+            <p style="margin-top:10px;">Terminal-Bench 的每道題都是端對端任務（End-to-End）：從設定環境、安裝依賴、執行操作，到驗證結果，只看「完成了沒有」，沒有部分分數。</p>
+        </div>
+
+        <!-- DOMAINS -->
+        <div class="section-title">89 道任務涵蓋 6 大領域</div>
+        <div class="domain-grid">
+            <div class="domain-chip"><span class="icon">⚙️</span><span>系統管理<br><small style="font-weight:400;color:#888">Linux kernel、Git server</small></span></div>
+            <div class="domain-chip"><span class="icon">🔐</span><span>資訊安全<br><small style="font-weight:400;color:#888">7z 破解、OpenSSL 憑證</small></span></div>
+            <div class="domain-chip"><span class="icon">📊</span><span>資料科學<br><small style="font-weight:400;color:#888">fastText、資料重新分片</small></span></div>
+            <div class="domain-chip"><span class="icon">🤖</span><span>機器學習<br><small style="font-weight:400;color:#888">模型訓練、環境配置</small></span></div>
+            <div class="domain-chip"><span class="icon">💻</span><span>軟體工程<br><small style="font-weight:400;color:#888">編譯、除錯、部署</small></span></div>
+            <div class="domain-chip"><span class="icon">🔬</span><span>科學計算<br><small style="font-weight:400;color:#888">數值計算 workflow</small></span></div>
+        </div>
+
+        <!-- HARBOR -->
+        <div class="section-title">Harbor 評測框架</div>
+        <div class="card">
+            <div class="card-title">開放、通用、可組合</div>
+            <p>Terminal-Bench 的任務以 Harbor 格式發佈——任何人都能用自己的 Agent Harness 來跑，不綁特定 API。</p>
+            <div style="margin-top:14px;">
+                <div class="flow-wrap">
+                    <div class="flow-step">任務定義<br><small>Harbor 格式</small></div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step highlight">Agent Harness<br><small>Terminus / Codex CLI</small></div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">隔離容器<br><small>獨立環境</small></div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">驗證測試<br><small>Pass / Fail</small></div>
+                </div>
+            </div>
+            <p style="margin-top:12px;font-size:0.82rem;color:#888;">優點：不同廠商、不同策略的分數有橫向比較性。你看到的排行榜是「模型 + Harness 策略」的組合成績。</p>
+        </div>
+
+        <!-- LEADERBOARD -->
+        <div class="section-title">排行榜 — Terminal-Bench v2.1</div>
+        <div class="card" style="padding:0;overflow:hidden;">
+            <table class="lb-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>模型</th>
+                        <th>Harness 配置</th>
+                        <th>分數</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="rank-1">🥇 1</span></td>
+                        <td><strong>Claude Fable 5</strong></td>
+                        <td>Adaptive Reasoning, Max Effort</td>
+                        <td><strong>84.6%</strong><span class="score-bar" style="width:76px"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-1">🥇 1</span></td>
+                        <td><strong>Claude Opus 4.8</strong></td>
+                        <td>Adaptive Reasoning, Max Effort</td>
+                        <td><strong>84.6%</strong><span class="score-bar" style="width:76px"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-2">🥈 3</span></td>
+                        <td>GPT-5.5</td>
+                        <td>xhigh effort</td>
+                        <td>84.3%<span class="score-bar" style="width:75px;opacity:.7"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-3">4</span></td>
+                        <td>Claude Fable 5</td>
+                        <td>標準配置</td>
+                        <td>62.9%<span class="score-bar" style="width:56px;opacity:.5"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-3">5</span></td>
+                        <td>Claude Opus 4.8</td>
+                        <td>Terminus 2</td>
+                        <td>58.3%<span class="score-bar" style="width:52px;opacity:.4"></span></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>GPT-5.4</td>
+                        <td>標準配置</td>
+                        <td>57.6%<span class="score-bar" style="width:51px;opacity:.35"></span></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Codex CLI + GPT-5.2</td>
+                        <td>Terminus 2</td>
+                        <td>63.0%<span class="score-bar" style="width:56px;opacity:.45"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="font-size:0.75rem;color:#888;margin-top:6px;">※ v2.0 分數 &lt; 65%；v2.1 高分組多為「Adaptive Reasoning + Max Effort」配置，Harness 策略對分數影響顯著。</p>
+
+        <!-- KEY INSIGHT -->
+        <div class="insight-box">
+            <div class="insight-label">🔑 核心洞見</div>
+            <p>頂級模型在 v2.1 已能達到 84.6%，但那<strong>剩下的 15%</strong>才是重點——失敗案例多集中在「長鏈依賴」任務（步驟 N 的輸出決定步驟 N+7 的輸入，中間一個出錯全垮）。這是 AI Agent 在 <strong>Context Management + 長程規劃</strong> 上的現實限制，也是 2027-2028 年最值得研究的方向。</p>
+        </div>
+
+        <!-- SCIENCE -->
+        <div class="section-title">Terminal-Bench Science — 下一個大戰場</div>
+        <div class="science-box">
+            <h3>🔬 讓 AI 做真正的科學研究 Workflow</h3>
+            <p>Terminal-Bench Science 的目標：100+ 道任務，全部來自真實科研 workflow，不考教科書，只考「能不能跑完一個研究員每天在做的計算流程」。</p>
+            <br>
+            <p><strong>涵蓋領域：</strong></p>
+            <div style="margin-top:8px;">
+                <span class="science-tag">🧬 生命科學</span>
+                <span class="science-tag">🔭 天文學</span>
+                <span class="science-tag">⚗️ 化學</span>
+                <span class="science-tag">🧠 神經科學</span>
+                <span class="science-tag">🌏 地球科學</span>
+                <span class="science-tag">📐 數學科學</span>
+            </div>
+            <br>
+            <p><strong>貢獻截止日</strong>：2026-08-17 ── 採納者獲論文共同作者資格</p>
+        </div>
+
+        <!-- WHY MATTERS -->
+        <div class="section-title">為什麼這對你有用？</div>
+        <div class="card">
+            <div class="card-title">選 AI Coding Agent 的客觀指標</div>
+            <ul>
+                <li>Terminal-Bench 分數高 = 這個 AI 在真實工程任務上更可靠</li>
+                <li>Claude Opus 4.8 / Fable 5 目前最強，也是 Claude Code 預設模型</li>
+                <li>看排行榜時注意 Harness 配置——「Max Effort」模式成本更高</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="card-title">解讀 AI 能力邊界的新方法</div>
+            <ul>
+                <li>「AI 分數高了多少」不等於「工作效率提高多少」</li>
+                <li>Terminal-Bench 的失敗案例分析才是黃金——真實痛點在哪裡</li>
+                <li>Science 版將成為判斷「AI 能否做研究助理」的黃金標準</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- TAB: CITATION -->
+    <div id="tab-cite" class="tab-panel">
+        <div class="section-title">零幻覺引證表</div>
+        <p style="font-size:0.83rem;color:#888;margin-bottom:16px;">本報告所有技術數據均有原始來源可追溯。</p>
+        <div class="card" style="padding:0;overflow-x:auto;">
+            <table class="cite-table">
+                <thead>
+                    <tr>
+                        <th>作者 / 機構</th>
+                        <th>媒體 / 平台</th>
+                        <th>發佈日期</th>
+                        <th>標題</th>
+                        <th>引用重點</th>
+                        <th>來源連結</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Stanford × Anthropic</td>
+                        <td>arXiv / ICLR 2026</td>
+                        <td>2026-01</td>
+                        <td>Terminal-Bench: Benchmarking Agents on Hard, Realistic Tasks in Command Line Interfaces</td>
+                        <td>89 道任務設計、Harbor 框架、frontier models &lt; 65% 原始數據</td>
+                        <td><a href="https://arxiv.org/abs/2601.11868" target="_blank">arxiv.org/abs/2601.11868</a></td>
+                    </tr>
+                    <tr>
+                        <td>Artificial Analysis</td>
+                        <td>artificialanalysis.ai</td>
+                        <td>2026-06</td>
+                        <td>Terminal-Bench v2.1 Benchmark Leaderboard</td>
+                        <td>Claude Fable 5 / Opus 4.8 = 84.6%、GPT-5.5 = 84.3%</td>
+                        <td><a href="https://artificialanalysis.ai/evaluations/terminalbench-v2-1" target="_blank">artificialanalysis.ai</a></td>
+                    </tr>
+                    <tr>
+                        <td>tbench.ai</td>
+                        <td>官方網站</td>
+                        <td>2026</td>
+                        <td>Terminal-Bench 官方介紹</td>
+                        <td>Harbor 框架說明、版本 1.0/2.0/2.1/3.0（建設中）</td>
+                        <td><a href="https://www.tbench.ai/" target="_blank">tbench.ai</a></td>
+                    </tr>
+                    <tr>
+                        <td>Steven Dillmann (Stanford)</td>
+                        <td>tbench.ai</td>
+                        <td>2026-06</td>
+                        <td>Terminal-Bench Science: Contribute your scientific workflows</td>
+                        <td>100+ 科學任務、截止 2026-08-17、共同作者資格</td>
+                        <td><a href="https://www.tbench.ai/news/tb-science-announcement" target="_blank">tbench.ai/news</a></td>
+                    </tr>
+                    <tr>
+                        <td>AI Wiki</td>
+                        <td>aiwiki.ai</td>
+                        <td>2026</td>
+                        <td>Terminal-Bench | AI Wiki</td>
+                        <td>benchmark 背景與社群資源整理</td>
+                        <td><a href="https://aiwiki.ai/wiki/terminal_bench" target="_blank">aiwiki.ai</a></td>
+                    </tr>
+                    <tr>
+                        <td>CodingFleet</td>
+                        <td>codingfleet.com</td>
+                        <td>2026-06</td>
+                        <td>Terminal-Bench 2.1 Leaderboard: AI CLI Coding Ranked</td>
+                        <td>Harness 配置對分數的影響說明</td>
+                        <td><a href="https://codingfleet.com/blog/terminal-bench-leaderboard-2026/" target="_blank">codingfleet.com</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
