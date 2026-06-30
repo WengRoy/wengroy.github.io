@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndyDevDan — Agentic Engineering 學習資源推薦 | Roy's Lab</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fdf6e3; color: #1a1a1a; min-height: 100vh; }
+
+        /* ── HERO ── */
+        .hero {
+            background: #1a1a1a;
+            padding: 48px 24px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(232,113,58,0.12) 1px, transparent 1px);
+            background-size: 12px 12px;
+        }
+        .hero-avatar {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 4px solid #e8713a;
+            background: linear-gradient(135deg, #6b4226, #e8713a);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem;
+            margin: 0 auto 16px;
+            position: relative; z-index: 1;
+            box-shadow: 4px 4px 0 rgba(232,113,58,0.4);
+        }
+        .hero-tag {
+            display: inline-block;
+            background: #e8713a; color: #fff;
+            padding: 3px 14px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700;
+            margin-bottom: 12px;
+            position: relative; z-index: 1;
+        }
+        .hero h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: clamp(1.8rem, 5vw, 2.6rem);
+            color: #fdf6e3; font-weight: 800;
+            position: relative; z-index: 1;
+            line-height: 1.1;
+        }
+        .hero h1 span { color: #e8713a; }
+        .hero-sub { color: #aaa; font-size: 0.88rem; margin-top: 10px; position: relative; z-index: 1; }
+        .hero-stats {
+            display: flex; gap: 24px; justify-content: center;
+            margin-top: 20px; position: relative; z-index: 1;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat-num { font-family: 'Baloo 2', cursive; font-size: 1.5rem; font-weight: 800; color: #e8713a; }
+        .hero-stat-label { font-size: 0.72rem; color: #888; }
+
+        /* ── CONTENT ── */
+        .wrap { max-width: 740px; margin: 0 auto; padding: 32px 24px 60px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #e8713a; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+
+        .section-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.35rem; font-weight: 800; color: #6b4226;
+            margin: 28px 0 12px;
+            padding-left: 12px;
+            border-left: 5px solid #e8713a;
+        }
+
+        /* ── SPEECH BUBBLE ── */
+        .bubble-wrap { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
+        .bubble-avatar {
+            width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #1a1a1a, #6b4226);
+            border: 3px solid #1a1a1a;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+        }
+        .bubble {
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            border-radius: 14px 14px 14px 4px;
+            box-shadow: 4px 4px 0 #1a1a1a;
+            padding: 14px 18px;
+            font-size: 0.9rem; line-height: 1.7; color: #333;
+            flex: 1;
+        }
+        .bubble strong { color: #e8713a; }
+
+        /* ── CARD ── */
+        .card {
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 #1a1a1a;
+            padding: 20px 22px;
+            margin-bottom: 14px;
+        }
+        .card-title { font-family: 'Baloo 2', cursive; font-size: 1rem; font-weight: 700; color: #e8713a; margin-bottom: 8px; }
+        .card p, .card li { font-size: 0.87rem; color: #444; line-height: 1.7; }
+        .card ul { padding-left: 18px; }
+        .card li { margin-bottom: 4px; }
+
+        /* ── VIDEO CARDS ── */
+        .video-list { display: flex; flex-direction: column; gap: 12px; }
+        .video-card {
+            display: flex; gap: 14px; align-items: flex-start;
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 #1a1a1a;
+            padding: 16px 18px;
+            text-decoration: none; color: inherit;
+            transition: all 0.15s;
+        }
+        .video-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #1a1a1a; }
+        .video-thumb {
+            width: 54px; height: 54px; flex-shrink: 0;
+            background: #1a1a1a;
+            border-radius: 10px;
+            border: 2px solid #1a1a1a;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+        }
+        .video-info { flex: 1; }
+        .video-tag {
+            display: inline-block;
+            padding: 2px 9px; border-radius: 8px;
+            font-size: 0.68rem; font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .tag-hot { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .tag-workflow { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+        .tag-tool { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+        .tag-career { background: #fefce8; color: #854d0e; border: 1px solid #fde047; }
+        .video-title { font-family: 'Baloo 2', cursive; font-size: 0.97rem; font-weight: 700; color: #6b4226; line-height: 1.3; margin-bottom: 4px; }
+        .video-desc { font-size: 0.8rem; color: #888; line-height: 1.5; }
+        .video-date { font-size: 0.7rem; color: #ccc; margin-top: 5px; }
+        .stars { color: #e8713a; font-size: 0.8rem; }
+
+        /* ── PHILOSOPHY BOX ── */
+        .phil-box {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1a0e 100%);
+            border: 3px solid #e8713a;
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 #6b4226;
+            padding: 24px;
+            margin: 16px 0;
+            color: #fdf6e3;
+        }
+        .phil-box h3 { font-family: 'Baloo 2', cursive; color: #e8713a; font-size: 1.05rem; margin-bottom: 10px; }
+        .phil-formula {
+            background: rgba(232,113,58,0.12);
+            border: 1px solid rgba(232,113,58,0.4);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #e8d5bb;
+            margin: 12px 0;
+            text-align: center;
+        }
+        .phil-formula span { color: #e8713a; font-weight: 700; }
+        .phil-box p { font-size: 0.85rem; line-height: 1.7; color: #ccc; }
+
+        /* ── COURSE CHIPS ── */
+        .course-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+        .course-chip {
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 #1a1a1a;
+            padding: 16px;
+        }
+        .course-level { font-size: 0.68rem; font-weight: 700; color: #888; letter-spacing: 1px; margin-bottom: 4px; }
+        .course-name { font-family: 'Baloo 2', cursive; font-size: 0.95rem; font-weight: 700; color: #6b4226; margin-bottom: 6px; }
+        .course-chip p { font-size: 0.78rem; color: #888; line-height: 1.5; }
+
+        /* ── WHY BOX ── */
+        .why-box {
+            background: #fff8e1;
+            border: 3px solid #e8713a;
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 #6b4226;
+            padding: 20px 22px;
+            margin: 20px 0;
+        }
+        .why-label { font-family: 'Baloo 2', cursive; font-size: 0.75rem; font-weight: 800; color: #e8713a; letter-spacing: 1px; margin-bottom: 8px; }
+        .why-box p { font-size: 0.88rem; color: #444; line-height: 1.7; }
+
+        /* ── LINKS ── */
+        .link-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+        .link-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #1a1a1a; color: #fdf6e3;
+            border: 2px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 0.83rem; font-weight: 700;
+            text-decoration: none;
+            box-shadow: 3px 3px 0 #6b4226;
+            transition: all 0.15s;
+        }
+        .link-btn:hover { background: #e8713a; border-color: #e8713a; transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #6b4226; }
+        .link-btn.secondary { background: #fff; color: #1a1a1a; }
+        .link-btn.secondary:hover { background: #fdf6e3; }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-avatar">👨‍💻</div>
+    <div class="hero-tag">🎬 學習資源推薦</div>
+    <h1>IndyDevDan</h1>
+    <h1><span>Agentic Engineering</span> 最值得追的 YTer</h1>
+    <p class="hero-sub">讓 AI Agent 幫你寫程式，你去睡覺 — 每週一 8am CST 更新</p>
+    <div class="hero-stats">
+        <div class="hero-stat">
+            <div class="hero-stat-num">127K</div>
+            <div class="hero-stat-label">訂閱數</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-num">191</div>
+            <div class="hero-stat-label">支影片</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-num">2M+</div>
+            <div class="hero-stat-label">總觀看</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-num">週一</div>
+            <div class="hero-stat-label">固定更新</div>
+        </div>
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="wrap">
+    <a href="index.html" class="back-link">← 回到知識分享</a>
+
+    <!-- WHO IS -->
+    <div class="section-title">他是誰？</div>
+    <div class="bubble-wrap">
+        <div class="bubble-avatar">👨‍💻</div>
+        <div class="bubble">
+            我是 IndyDevDan，15 年資深工程師。我的頻道只做一件事：<strong>教你用 AI Agent 讓軟體自己跑起來，你去做更有意義的事。</strong>
+            <br><br>
+            不追 hype，只分析真實有用的工具和方法。我把這套思維叫做 <strong>Agentic Engineering</strong>——工程師的下一個進化方向。
+        </div>
+    </div>
+
+    <!-- PHILOSOPHY -->
+    <div class="section-title">核心理念</div>
+    <div class="phil-box">
+        <h3>⚡ Agentic Engineering 公式</h3>
+        <div class="phil-formula">
+            <span>Value</span> = (計算規模 × 自主性) ÷ (時間 + 努力 + 成本)
+        </div>
+        <p>傳統工程師一行一行寫程式。Agentic Engineer 寫詳細的 spec prompt，讓 Agent 自己跑完整個任務——包含寫 code、review、測試、修 bug。<br><br>重點不是「你寫多快」，而是「你設計的 Agent 能幫你做多少」。</p>
+    </div>
+
+    <!-- RECENT VIDEOS -->
+    <div class="section-title">近期值得看的影片（2026 年 5-6 月）</div>
+    <div class="video-list">
+
+        <a class="video-card" href="https://www.youtube.com/watch?v=eFf2NszosQo" target="_blank">
+            <div class="video-thumb">🔀</div>
+            <div class="video-info">
+                <span class="video-tag tag-hot">⭐ 最推薦</span>
+                <div class="video-title">Multitasking With Agents: My 2026 Workflow</div>
+                <div class="video-desc">他自己現在怎麼同時跑多個 Agent 的實戰工作流。想學 parallel agent 必看，直接對標 Claude Code 的使用方式。</div>
+                <div class="video-date">2026-04-29</div>
+            </div>
+        </a>
+
+        <a class="video-card" href="https://www.youtube.com/watch?v=2KcITKKJikA" target="_blank">
+            <div class="video-thumb">🚀</div>
+            <div class="video-info">
+                <span class="video-tag tag-career">💼 職涯視角</span>
+                <div class="video-title">Top #1 Opportunity for Senior Engineers: Agentic Engineering</div>
+                <div class="video-desc">同樣的 Agent 和 Token，為什麼不同工程師的結果差這麼多？分析 Agentic Engineering 是 2026 年資深工程師最值得押注的方向。</div>
+                <div class="video-date">2026-05-25</div>
+            </div>
+        </a>
+
+        <a class="video-card" href="https://www.youtube.com/watch?v=ElYxdpYi4U0" target="_blank">
+            <div class="video-thumb">⚙️</div>
+            <div class="video-info">
+                <span class="video-tag tag-workflow">🔧 可直接套用</span>
+                <div class="video-title">The Agentic Engineer Workflow You Need In 2026</div>
+                <div class="video-desc">附贈免費 Agentic Engineer config 檔案，可以直接套用到你的 Claude Code 工作流。</div>
+                <div class="video-date">2026-05-20</div>
+            </div>
+        </a>
+
+        <a class="video-card" href="https://www.youtube.com/watch?v=EnXKysJNz_8" target="_blank">
+            <div class="video-thumb">🔍</div>
+            <div class="video-info">
+                <span class="video-tag tag-tool">🤖 技術深度</span>
+                <div class="video-title">GPT-5.5 VERIFIED Opus 4.7: A Pi Coding Agent That REVIEWS Like YOU</div>
+                <div class="video-desc">「Pi Agent」模式——讓 AI 學會你的 code review 風格，像你一樣審查 PR。結合 GPT-5.5 + Opus 4.7 實測比較。</div>
+                <div class="video-date">2026-05-04</div>
+            </div>
+        </a>
+
+        <a class="video-card" href="https://www.youtube.com/shorts/TQ0psQ9EDrI" target="_blank">
+            <div class="video-thumb">⚡</div>
+            <div class="video-info">
+                <span class="video-tag tag-tool">🛠️ 工具介紹</span>
+                <div class="video-title">同時跑多個 Claude Code Agent（Octigent 工具）</div>
+                <div class="video-desc">開源工具 Octigent 讓你在同一個專案同時跑多個 Claude Code instance，Shorts 短影片，3 分鐘看懂。</div>
+                <div class="video-date">2026-05-09</div>
+            </div>
+        </a>
+
+    </div>
+
+    <!-- BONUS VIDEOS -->
+    <div class="section-title">補課清單（2026 年上半年精華）</div>
+    <div class="video-list">
+        <a class="video-card" href="https://www.youtube.com/watch?v=M30gp1315Y4" target="_blank">
+            <div class="video-thumb">🚫</div>
+            <div class="video-info">
+                <span class="video-tag tag-hot">必看</span>
+                <div class="video-title">One Agent Is NOT ENOUGH: Agentic Coding BEYOND Claude Code</div>
+                <div class="video-desc">單一 Agent 是天花板，大多數工程師還沒意識到這件事。突破 Claude Code 邊界的思維框架。</div>
+                <div class="video-date">2026-03-30</div>
+            </div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=4_2j5wgt_ds" target="_blank">
+            <div class="video-thumb">📋</div>
+            <div class="video-info">
+                <span class="video-tag tag-workflow">進階</span>
+                <div class="video-title">Claude Code Task System: ANTI-HYPE Agentic Coding (Advanced)</div>
+                <div class="video-desc">反 hype 視角深度解析 Claude Code Task System，適合已經在用 Claude Code 想再進一步的人。</div>
+                <div class="video-date">2026-02-02</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- COURSES -->
+    <div class="section-title">他的課程</div>
+    <div class="course-row">
+        <div class="course-chip">
+            <div class="course-level">BEGINNER</div>
+            <div class="course-name">Principled AI Coding</div>
+            <p>AI Coding 入門，從零開始建立正確觀念，適合剛開始用 Claude Code 的工程師。</p>
+        </div>
+        <div class="course-chip">
+            <div class="course-level">ADVANCED</div>
+            <div class="course-name">Tactical Agentic Coding</div>
+            <p>14 模組 × 6.5 小時，涵蓋 12 個 Leverage Points、AFK agents、PITER 多 Agent 模型。生產等級。</p>
+        </div>
+    </div>
+
+    <!-- WHY FOLLOW -->
+    <div class="why-box">
+        <div class="why-label">💡 Roy 的選擇理由</div>
+        <p>大多數 AI coding YouTuber 追新功能、追 hype——IndyDevDan 追的是<strong>可複製的工程思維</strong>。他的影片通常有自己實際跑的 demo，有方法論，有公式。對於想用 Claude Code 做真正產品的工程師，他是目前最值得花時間跟的頻道之一。每週一準時更新，當作技術週報追也很適合。</p>
+    </div>
+
+    <!-- LINKS -->
+    <div class="section-title">連結</div>
+    <div class="link-row">
+        <a class="link-btn" href="https://www.youtube.com/@indydevdan/videos" target="_blank">▶ YouTube 頻道</a>
+        <a class="link-btn secondary" href="https://agenticengineer.com" target="_blank">🌐 agenticengineer.com</a>
+        <a class="link-btn secondary" href="https://agenticengineer.com/tactical-agentic-coding" target="_blank">📚 Tactical Agentic Coding 課程</a>
+        <a class="link-btn secondary" href="https://x.com/indydevdan" target="_blank">𝕏 Twitter / X</a>
+    </div>
+
+</div>
+</body>
+</html>
