@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loop Engineering 進階篇：Harness 工程才是真本事</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===== 外框：漫畫暖色風格 ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: #fdf6e3;
+      background-image: radial-gradient(circle, #d4b896 1px, transparent 1px);
+      background-size: 18px 18px;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .page { max-width: 900px; margin: 0 auto; }
+    .header {
+      border: 3px solid #1a1a1a;
+      border-radius: 14px;
+      background: #fff8ee;
+      box-shadow: 5px 5px 0 #1a1a1a;
+      padding: 28px 32px;
+      margin-bottom: 28px;
+    }
+    .header-badge {
+      display: inline-block;
+      background: #e8713a;
+      color: white;
+      font-family: 'Baloo 2', cursive;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 2px solid #1a1a1a;
+      box-shadow: 2px 2px 0 #1a1a1a;
+      margin-bottom: 12px;
+    }
+    .header h1 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1a1a1a;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+    .header h1 span { color: #e8713a; }
+    .header p { color: #6b4226; font-size: 0.93rem; line-height: 1.65; }
+    .header code {
+      background: #fdf6e3;
+      border: 1.5px solid #d4b896;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.88em;
+      color: #6b4226;
+    }
+    .prev-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      background: #fdf6e3;
+      border: 2px solid #1a1a1a;
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #6b4226;
+      text-decoration: none;
+      box-shadow: 2px 2px 0 #1a1a1a;
+      transition: all 0.12s;
+    }
+    .prev-link:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1a1a1a; }
+    .tab-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tab-btn {
+      font-family: 'Baloo 2', cursive;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 9px 20px;
+      border: 3px solid #1a1a1a;
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      background: #fff8ee;
+      cursor: pointer;
+      transition: all 0.12s;
+      color: #6b4226;
+    }
+    .tab-btn.active { background: #e8713a; color: white; }
+    .tab-btn:hover:not(.active) { background: #fdf6e3; transform: translateY(-2px); }
+    .tab-panel {
+      display: none;
+      border: 3px solid #1a1a1a;
+      border-radius: 0 8px 8px 8px;
+      padding: 28px 28px 32px;
+      background: #fdf6e3;
+      box-shadow: 5px 5px 0 #1a1a1a;
+    }
+    .tab-panel.active { display: block; }
+    .section-title {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #6b4226;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .quote-box {
+      border-left: 5px solid #e8713a;
+      background: #fff8ee;
+      padding: 14px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+      font-size: 0.93rem;
+      line-height: 1.7;
+      color: #333;
+    }
+    .quote-box cite {
+      display: block;
+      font-style: normal;
+      font-weight: 700;
+      color: #e8713a;
+      font-size: 0.8rem;
+      margin-top: 8px;
+    }
+    .quote-box a { color: #e8713a; }
+    .insight {
+      background: #e8713a;
+      color: #fff;
+      border: 3px solid #1a1a1a;
+      border-radius: 10px;
+      padding: 18px 22px;
+      box-shadow: 4px 4px 0 #1a1a1a;
+      margin: 22px 0;
+      font-size: 0.93rem;
+      line-height: 1.65;
+    }
+    .insight strong { display: block; font-size: 1.1rem; margin-bottom: 6px; }
+    /* ===== 內部：丹麥簡約風 SVG 卡片 ===== */
+    .svgcard {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      margin-bottom: 22px;
+      overflow: hidden;
+    }
+    .svgcard figcaption {
+      padding: 12px 20px;
+      font-size: 0.8rem;
+      color: #666;
+      border-top: 1px solid #f0f0f0;
+      line-height: 1.55;
+    }
+    .svgcard figcaption strong { color: #333; }
+    .svgcard figcaption a { color: #e8713a; }
+    .fail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 620px) { .fail-grid { grid-template-columns: 1fr; } }
+    .fail-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+    }
+    .fail-card .fail-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #e74c3c;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .fail-card h4 { font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+    .fail-card p { font-size: 0.83rem; color: #555; line-height: 1.6; }
+    .fail-card .aside { font-size: 0.79rem; color: #999; font-style: italic; margin-top: 6px; line-height: 1.5; }
+    .fail-card .aside a { color: #bbb; }
+    .fail-card .solution {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #f0fdf4;
+      border-left: 3px solid #27ae60;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.82rem;
+      color: #155724;
+      line-height: 1.55;
+    }
+    .fail-card .solution strong {
+      display: block;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+      color: #27ae60;
+    }
+    .vc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+    @media (max-width: 620px) { .vc-grid { grid-template-columns: 1fr; } }
+    .vc-card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      border-left: 4px solid #ccc;
+    }
+    .vc-card h4 { font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+    .vc-card p { font-size: 0.82rem; color: #555; line-height: 1.6; }
+    .vc-card code { display: inline-block; margin-top: 6px; background: #f4f4f4; padding: 3px 8px; border-radius: 4px; font-size: 0.78rem; color: #333; }
+    .sources {
+      background: white;
+      border-radius: 12px;
+      padding: 18px 22px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
+      margin-top: 28px;
+      font-size: 0.8rem;
+      color: #777;
+      line-height: 1.9;
+    }
+    .sources h3 { font-family: 'Baloo 2', cursive; font-size: 0.85rem; color: #6b4226; margin-bottom: 8px; }
+    .sources a { color: #e8713a; text-decoration: none; }
+    .sources a:hover { text-decoration: underline; }
+    footer { text-align: center; margin-top: 18px; color: #bbb; font-size: 0.74rem; }
+    footer a { color: #e8713a; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-badge">⚙️ Loop Engineering 進階篇</div>
+    <h1>Harness 工程才是<span>真本事</span></h1>
+    <p>「你不應該再提示 coding agent。你應該設計 loop 來提示你的 agent。」— Addy Osmani, 2026<br>
+    <strong>迴圈的 <code>while</code> 不難——難的是周圍的 harness。Harness 現在比模型本身更重要。</strong></p>
+    <a href="https://wengroy.github.io/knowledge/2026-06-28-003-loop-engineering-ai-agent.html" class="prev-link" target="_blank">
+      📖 前情提要：Loop Engineering 基礎篇（5 大組件）→
+    </a>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">① Harness &gt; Model</button>
+    <button class="tab-btn" onclick="switchTab(1)">② 四個地雷</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ 版本控管整合</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ Karpathy 心法</button>
+  </div>
+
+  <!-- Tab 1 -->
+  <div class="tab-panel active">
+    <div class="section-title">🏗 模型正在商品化，Harness 才是護城河</div>
+    <div class="quote-box">
+      「I don't prompt Claude anymore. I have loops running that prompt Claude and figuring out what to do.」
+      <cite>— Boris Cherny，Head of Claude Code, Anthropic（引自 <a href="https://addyosmani.com/blog/loop-engineering/" target="_blank">Addy Osmani, Loop Engineering, 2026</a>）</cite>
+    </div>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <rect x="18" y="16" width="356" height="168" rx="10" fill="#fff5f5" stroke="#e74c3c" stroke-width="1.5"/>
+        <text x="196" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#e74c3c">❌ 舊思維：提示工程師</text>
+        <rect x="44" y="50" width="306" height="34" rx="6" fill="#fde8e8"/>
+        <text x="197" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" fill="#c0392b" font-weight="600">人工提示 → AI 執行 → 人工確認</text>
+        <text x="197" y="104" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#888">每一步等你手動觸發</text>
+        <text x="197" y="122" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#888">AI 是工具，你是操作者</text>
+        <text x="197" y="140" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#888">效率上限 = 你的時間</text>
+        <text x="197" y="164" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#c0392b">⚡ 模型換代，prompt 知識就過時了</text>
+        <rect x="406" y="16" width="356" height="168" rx="10" fill="#f0fdf4" stroke="#27ae60" stroke-width="1.5"/>
+        <text x="584" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#27ae60">✅ Harness 思維：迴圈架構師</text>
+        <rect x="432" y="50" width="306" height="34" rx="6" fill="#d5f5e3"/>
+        <text x="585" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" fill="#155724" font-weight="600">設計迴圈 → 自動觸發 → 自動驗收</text>
+        <text x="585" y="104" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#555">你設定成功標準，系統自己跑</text>
+        <text x="585" y="122" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#555">AI 是隊員，你是架構師</text>
+        <text x="585" y="140" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#555">效率上限 = 系統設計能力</text>
+        <text x="585" y="164" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#1e7e34">⚡ 模型換代，Harness 繼續跑，只換一個參數</text>
+      </svg>
+      <figcaption>Osmani：「Loop 改變的是工作槓桿點，不是刪除你的角色。設計 loop 比撰寫提示更難——兩人建造完全相同的 loop 可能得到完全相反的結果。」（<a href="https://addyosmani.com/blog/loop-engineering/" target="_blank">來源</a>）</figcaption>
+    </figure>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 780 152" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="390" y="22" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#333">Harness 六大支柱（Osmani 原文定義）</text>
+        <g transform="translate(10,34)">
+          <rect width="115" height="102" rx="8" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="57" y="30" text-anchor="middle" font-size="20">⚡</text>
+          <text x="57" y="54" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#333">Automations</text>
+          <text x="57" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">/loop、/goal</text>
+          <text x="57" y="86" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">GitHub Actions</text>
+        </g>
+        <g transform="translate(137,34)">
+          <rect width="115" height="102" rx="8" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="57" y="30" text-anchor="middle" font-size="20">🌳</text>
+          <text x="57" y="54" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#333">Worktrees</text>
+          <text x="57" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">隔離並行工作</text>
+          <text x="57" y="86" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">防止檔案衝突</text>
+        </g>
+        <g transform="translate(264,34)">
+          <rect width="115" height="102" rx="8" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="57" y="30" text-anchor="middle" font-size="20">📖</text>
+          <text x="57" y="54" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#333">Skills</text>
+          <text x="57" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">SKILL.md 格式</text>
+          <text x="57" y="86" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">可攜式知識</text>
+        </g>
+        <g transform="translate(391,34)">
+          <rect width="115" height="102" rx="8" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="57" y="30" text-anchor="middle" font-size="20">🔌</text>
+          <text x="57" y="54" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#333">MCP Connectors</text>
+          <text x="57" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">Claude + Codex</text>
+          <text x="57" y="86" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">跨平台可攜</text>
+        </g>
+        <g transform="translate(518,34)">
+          <rect width="115" height="102" rx="8" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="57" y="30" text-anchor="middle" font-size="20">🤖</text>
+          <text x="57" y="54" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#333">Sub-agents</text>
+          <text x="57" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">.claude/agents/</text>
+          <text x="57" y="86" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">maker ≠ checker</text>
+        </g>
+        <g transform="translate(645,34)">
+          <rect width="127" height="102" rx="8" fill="#fff9e6" stroke="#f39c12" stroke-width="1.5"/>
+          <text x="63" y="30" text-anchor="middle" font-size="20">📡</text>
+          <text x="63" y="54" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#333">External State</text>
+          <text x="63" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#777">Markdown / Linear</text>
+          <text x="63" y="86" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#c0392b">⚠ 最常被忽略</text>
+        </g>
+      </svg>
+      <figcaption>Osmani 原文：五大組件 + 第六層「外部記憶」（External State）——因為模型每次執行後不保留 context，需要外部追蹤進度跨 session。<a href="https://addyosmani.com/blog/loop-engineering/" target="_blank">原文</a> / <a href="https://www.oreilly.com/radar/loop-engineering/" target="_blank">O'Reilly Radar</a></figcaption>
+    </figure>
+
+    <div class="insight">
+      <strong>🎯 一句話總結</strong>
+      模型快速商品化（Claude Haiku / GPT-4o mini 等級已成 API 基準線）。Osmani：「設計 loop 比撰寫提示更難——兩人建造完全相同的 loop 可能得到完全相反的結果。」真正的護城河是 harness 的設計能力。
+    </div>
+  </div>
+
+  <!-- Tab 2 -->
+  <div class="tab-panel">
+    <div class="section-title">💣 四個必定壞掉的地方</div>
+    <div class="quote-box" style="margin-bottom:22px;">
+      Osmani 原文點名四個讓 loop 失效的根本原因，O'Reilly Radar 整理：「驗收責任、理解債務、工具安全、Maker vs Checker。」
+      <cite>— <a href="https://addyosmani.com/blog/loop-engineering/" target="_blank">Addy Osmani</a> + <a href="https://www.oreilly.com/radar/loop-engineering/" target="_blank">O'Reilly Radar</a></cite>
+    </div>
+
+    <div class="fail-grid">
+      <div class="fail-card">
+        <div class="fail-num">①</div>
+        <h4>驗收責任仍在你身上</h4>
+        <p>Loop 無人監督時也會無人監督地犯錯。Osmani：「你的工作是發布你確認能運作的程式碼（ship code you confirmed works）。」AI 說完成了 ≠ 真的完成了。</p>
+        <p class="aside">Karpathy 補充：AI 的 "jaggedness"（能力不均）——同一個 AI 展現博士水準的同時，可能在顯而易見的事上完全失敗。需要 checkpoint 擋住基礎錯誤複雜化。</p>
+        <div class="solution">
+          <strong>✅ 解法</strong>
+          加入獨立的 Completion Check：執行測試、驗證 build、確認 side-effect 全發生。讓 CI 說完成，不讓 LLM 說完成。
+        </div>
+      </div>
+
+      <div class="fail-card">
+        <div class="fail-num">②</div>
+        <h4>Comprehension Debt（理解債務）</h4>
+        <p>程式碼寫得越快，你對系統的認知落差越大。Loop 無人值守時累積的決策，你可能完全沒看過——下次要改的時候，才發現完全看不懂。</p>
+        <p class="aside">Osmani：「一人用它加速深度理解的工作，另一人用它迴避理解。Loop 不知道差異，你知道。」</p>
+        <div class="solution">
+          <strong>✅ 解法</strong>
+          設 max_iterations 上限，超過就強制停，人工確認狀態。每輪 commit 留歷程，可回溯哪一輪開始走歪。
+        </div>
+      </div>
+
+      <div class="fail-card">
+        <div class="fail-num">③</div>
+        <h4>工具安全性（Token + 副作用）</h4>
+        <p>給 AI 的工具太強、不可逆，token 使用模式可能「wildly vary」（Osmani 原文）。AI 在修 bug 途中可能誤刪資料、強推 main、打出真實 API 請求。</p>
+        <p class="aside">危險工具：<code style="font-size:0.79rem;background:#f4f4f4;padding:1px 5px;border-radius:3px;">git push --force</code>、<code style="font-size:0.79rem;background:#f4f4f4;padding:1px 5px;border-radius:3px;">DROP TABLE</code>、有 side-effect 的外部 API call。</p>
+        <div class="solution">
+          <strong>✅ 解法</strong>
+          工具「少而精，且冪等」。多次執行結果相同才安全。破壞性工具不放進 Agent 工具箱，或加 dry-run 保護層。
+        </div>
+      </div>
+
+      <div class="fail-card">
+        <div class="fail-num">④</div>
+        <h4>Maker ≠ Checker</h4>
+        <p>「寫程式的模型太容易給自己的功課打高分」（Osmani 原文）。同一個 Agent 既做事又驗收 = 讓學生改自己的考卷。Sub-agent 的核心價值在此。</p>
+        <p class="aside">Osmani：<code>/goal</code> 用<strong>不同模型</strong>判斷完成度，而非原製作 Agent——這是 loop 可以無人值守運行的前提。</p>
+        <div class="solution">
+          <strong>✅ 解法</strong>
+          分離角色：<code>.claude/agents/</code> 定義獨立的 Checker Agent，不共享 context。或讓 CI pipeline 當第三方驗證者。
+        </div>
+      </div>
+    </div>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 780 115" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="390" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#333">Harness 四道防線（缺一不可）</text>
+        <g transform="translate(18,32)">
+          <rect width="170" height="68" rx="8" fill="#f0fdf4" stroke="#27ae60" stroke-width="1.5"/>
+          <text x="85" y="24" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#155724">① Completion Check</text>
+          <text x="85" y="44" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">CI 說完成 &gt; LLM 說完成</text>
+          <text x="85" y="60" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">外部驗證取代自我申報</text>
+        </g>
+        <text x="198" y="69" text-anchor="middle" font-family="Inter,sans-serif" font-size="20" fill="#ccc">→</text>
+        <g transform="translate(208,32)">
+          <rect width="170" height="68" rx="8" fill="#f0fdf4" stroke="#27ae60" stroke-width="1.5"/>
+          <text x="85" y="24" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#155724">② 迴圈上限</text>
+          <text x="85" y="44" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">max_iterations 強制停</text>
+          <text x="85" y="60" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">每輪 commit 留歷程</text>
+        </g>
+        <text x="388" y="69" text-anchor="middle" font-family="Inter,sans-serif" font-size="20" fill="#ccc">→</text>
+        <g transform="translate(398,32)">
+          <rect width="170" height="68" rx="8" fill="#f0fdf4" stroke="#27ae60" stroke-width="1.5"/>
+          <text x="85" y="24" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#155724">③ 冪等工具</text>
+          <text x="85" y="44" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">少而精的工具箱</text>
+          <text x="85" y="60" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">危險操作加 dry-run</text>
+        </g>
+        <text x="578" y="69" text-anchor="middle" font-family="Inter,sans-serif" font-size="20" fill="#ccc">→</text>
+        <g transform="translate(588,32)">
+          <rect width="174" height="68" rx="8" fill="#f0fdf4" stroke="#27ae60" stroke-width="1.5"/>
+          <text x="87" y="24" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#155724">④ Maker ≠ Checker</text>
+          <text x="87" y="44" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">獨立 Checker Agent</text>
+          <text x="87" y="60" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">或 CI 當第三方驗收</text>
+        </g>
+      </svg>
+      <figcaption>Osmani：loop「在無人值守時也會無人監督地犯錯」。這四道防線缺一不可——任何一個缺失，長時間自動迴圈都必定在某時間點失效。</figcaption>
+    </figure>
+  </div>
+
+  <!-- Tab 3 -->
+  <div class="tab-panel">
+    <div class="section-title">🌳 版本控管整合：Worktrees 是護盾</div>
+    <div class="quote-box">
+      Osmani 原文：Worktrees 通過 Git 隔離防止衝突——「兩個 agent 無法同時編輯相同檔案，這是 loop 能平行運行的基礎。」也是防止 Comprehension Debt 擴散到主分支的第一道護盾。
+      <cite>— <a href="https://addyosmani.com/blog/loop-engineering/" target="_blank">Addy Osmani, Loop Engineering (addyosmani.com)</a></cite>
+    </div>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 780 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="390" y="22" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#333">Git Worktree + Agent Loop 標準流程</text>
+        <rect x="18" y="44" width="118" height="44" rx="8" fill="#1a1a1a"/>
+        <text x="77" y="63" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" font-weight="700" fill="white">main branch</text>
+        <text x="77" y="79" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#aaa">永遠可 deploy</text>
+        <line x1="136" y1="66" x2="160" y2="66" stroke="#ccc" stroke-width="1.5"/>
+        <polygon points="160,62 168,66 160,70" fill="#ccc"/>
+        <rect x="168" y="44" width="150" height="44" rx="8" fill="#e8f4fd" stroke="#2980b9" stroke-width="1.5"/>
+        <text x="243" y="63" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#2c3e50">git worktree add</text>
+        <text x="243" y="79" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#666">隔離目錄 /tmp/task-N</text>
+        <line x1="318" y1="66" x2="342" y2="66" stroke="#ccc" stroke-width="1.5"/>
+        <polygon points="342,62 350,66 342,70" fill="#ccc"/>
+        <rect x="350" y="44" width="150" height="44" rx="8" fill="#fdf2e9" stroke="#e67e22" stroke-width="1.5"/>
+        <text x="425" y="63" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#e67e22">🤖 Agent 跑任務</text>
+        <text x="425" y="79" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#666">max iterations，每輪 commit</text>
+        <line x1="425" y1="88" x2="425" y2="112" stroke="#ccc" stroke-width="1.5"/>
+        <polygon points="421,112 425,120 429,112" fill="#ccc"/>
+        <rect x="350" y="120" width="150" height="44" rx="8" fill="#f0fdf4" stroke="#27ae60" stroke-width="1.5"/>
+        <text x="425" y="139" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#155724">✅ Checker 驗收</text>
+        <text x="425" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#555">獨立 Agent（/goal 指令）</text>
+        <line x1="500" y1="136" x2="535" y2="120" stroke="#27ae60" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <rect x="540" y="106" width="222" height="42" rx="8" fill="#d5f5e3" stroke="#27ae60" stroke-width="1.5"/>
+        <text x="651" y="124" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#155724">✅ 通過 → PR Review → merge main</text>
+        <text x="651" y="140" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#555">git worktree remove（清理）</text>
+        <line x1="500" y1="154" x2="535" y2="172" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <rect x="540" y="162" width="222" height="42" rx="8" fill="#fde8e8" stroke="#e74c3c" stroke-width="1.5"/>
+        <text x="651" y="180" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#c0392b">❌ 失敗 → git worktree remove</text>
+        <text x="651" y="196" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">main 完全不受污染</text>
+      </svg>
+      <figcaption>Osmani 強調：「兩個 agent 無法同時編輯相同檔案」讓平行迴圈成為可能。Checker 使用的是 <code>/goal</code> 指令，由不同模型判斷完成度。</figcaption>
+    </figure>
+
+    <div class="section-title" style="font-size:1rem;margin-top:4px;">版本控管 + Agent Loop 四原則</div>
+    <div class="vc-grid">
+      <div class="vc-card" style="border-left-color:#27ae60;">
+        <h4>🔒 主分支永遠可 deploy</h4>
+        <p>Agent 只在 worktree / feature branch 工作。Osmani：「你的工作是發布你確認能運作的程式碼。」</p>
+        <code>git worktree add /tmp/task-1 -b feat/task-1</code>
+      </div>
+      <div class="vc-card" style="border-left-color:#3498db;">
+        <h4>📋 每輪 commit，可回溯 Comprehension Debt</h4>
+        <p>每個 Agent 回合做一次小 commit，git log 可回溯哪一輪開始走歪，diff 找出理解債務發生點。</p>
+      </div>
+      <div class="vc-card" style="border-left-color:#9b59b6;">
+        <h4>🚦 PR Gate 是唯一的人工插入點</h4>
+        <p>Checker Agent 通過後，開 PR 讓人工 review 再 merge。Osmani：這是你「保留工程理解」的最後防線。</p>
+      </div>
+      <div class="vc-card" style="border-left-color:#e67e22;">
+        <h4>🧹 失敗 Worktree 及時清理</h4>
+        <p>累積太多失敗的 worktree 會搞亂 git workspace，同時清理也在清理 Comprehension Debt 的累積。</p>
+        <code>git worktree remove /tmp/task-1</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4 -->
+  <div class="tab-panel">
+    <div class="section-title">🧠 Karpathy 心法：Manifest，不是 Instruct</div>
+    <div class="quote-box" style="font-size:0.95rem;">
+      Karpathy 提出用「<strong>manifest</strong>」（聲明意圖）取代「coding」——工作是聲明目標，讓 agent 自己決定路徑。LLMs 擅長朝著具體目標迭代，<strong>不要給指令，給成功標準，看它跑</strong>。失敗不一定是模型不行——「可能是人還沒找到對的指令方式」。
+      <cite>— Andrej Karpathy（整理自 <a href="https://www.the-ai-corner.com/p/andrej-karpathy-ai-workflow-shift-agentic-era-2026" target="_blank">The AI Corner</a> / <a href="https://insightarea.com/2026/05/08/andrej-karpathy-code-agents-and-the-new-skill-of-managing-ai-loops/" target="_blank">Insight Area</a>）</cite>
+    </div>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 780 196" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <rect x="18" y="16" width="356" height="164" rx="10" fill="#fff5f5" stroke="#e74c3c" stroke-width="1.5"/>
+        <text x="196" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#e74c3c">❌ 指令驅動（逐步 Instruction）</text>
+        <text x="46" y="62" font-family="Inter,sans-serif" font-size="10.5" fill="#555">步驟 1：先讀取檔案 A</text>
+        <text x="46" y="80" font-family="Inter,sans-serif" font-size="10.5" fill="#555">步驟 2：找出所有 TODO 標記</text>
+        <text x="46" y="98" font-family="Inter,sans-serif" font-size="10.5" fill="#555">步驟 3：每個 TODO 依照規則改寫成...</text>
+        <text x="46" y="116" font-family="Inter,sans-serif" font-size="10.5" fill="#555">步驟 4：跑單元測試</text>
+        <text x="46" y="134" font-family="Inter,sans-serif" font-size="10.5" fill="#555">步驟 5：確認通過後 commit</text>
+        <text x="196" y="162" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#c0392b">⚠ 失敗可能是「人還沒找到對的指令方式」</text>
+        <rect x="406" y="16" width="356" height="164" rx="10" fill="#f0fdf4" stroke="#27ae60" stroke-width="1.5"/>
+        <text x="584" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#27ae60">✅ Manifest（聲明成功標準）</text>
+        <rect x="428" y="52" width="312" height="88" rx="6" fill="#d5f5e3"/>
+        <text x="584" y="76" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#155724">「成功標準」</text>
+        <text x="584" y="96" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#333">所有 TODO 被實作完畢，</text>
+        <text x="584" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#333">且 CI 全部 pass，</text>
+        <text x="584" y="132" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#333">沒有新增 failing test。</text>
+        <text x="584" y="162" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#1e7e34">⚡ AI 自己選路徑，harness 判斷完成</text>
+      </svg>
+      <figcaption>Karpathy 的洞見：失敗不一定是模型不行——可能是人還沒找到對的指令方式。解法是轉換視角：從寫指令變成定義可量化的成功標準。</figcaption>
+    </figure>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 780 148" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="390" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#333">Karpathy 的兩個關鍵概念</text>
+        <rect x="18" y="34" width="360" height="100" rx="10" fill="#fff9f0" stroke="#f39c12" stroke-width="1.5"/>
+        <text x="198" y="56" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#e67e22">⚡ Jaggedness（能力不均）</text>
+        <text x="40" y="78" font-family="Inter,sans-serif" font-size="10" fill="#555">同一個 AI 可以展現博士水準的洞察，</text>
+        <text x="40" y="95" font-family="Inter,sans-serif" font-size="10" fill="#555">同時在顯而易見的簡單任務上完全失敗。</text>
+        <text x="40" y="116" font-family="Inter,sans-serif" font-size="10" fill="#c0392b">→ 不能盲目信任 AI，需要 checkpoint 擋住基礎錯誤</text>
+        <text x="40" y="130" font-family="Inter,sans-serif" font-size="9.5" fill="#aaa">（必須在它們複雜化之前攔截）</text>
+        <rect x="402" y="34" width="360" height="100" rx="10" fill="#f0f8ff" stroke="#3498db" stroke-width="1.5"/>
+        <text x="582" y="56" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#2980b9">🔄 AutoResearch 模式</text>
+        <text x="422" y="78" font-family="Inter,sans-serif" font-size="10" fill="#555">讓 agent 優化可量化指標（loss / benchmark），</text>
+        <text x="422" y="95" font-family="Inter,sans-serif" font-size="10" fill="#555">完全移除人在重複迴圈中的角色。</text>
+        <text x="422" y="116" font-family="Inter,sans-serif" font-size="10" fill="#155724">→ 人只需設定目標、邊界、指標設計</text>
+        <text x="422" y="130" font-family="Inter,sans-serif" font-size="9.5" fill="#aaa">（適用於「評估標準客觀」的領域）</text>
+      </svg>
+      <figcaption>"Jaggedness" 解釋了為什麼需要 Completion Check——AI 能力不均讓自我評估完全不可信。AutoResearch 則是 Karpathy 心法的終極應用：人只設目標，agent 自動迭代到達標。</figcaption>
+    </figure>
+
+    <div class="insight">
+      <strong>🏁 進階篇的終極結論</strong>
+      Karpathy：「程式設計的瓶頸從實作速度，轉移到<strong>判斷力、任務分解、指令品質</strong>。」<br>
+      Loop Engineering 不是在學怎麼寫 <code style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:4px;font-size:0.9em;">while</code> loop——是在學如何設計一個系統讓 AI 安全地長期工作，然後你去彈吉他。
+    </div>
+  </div>
+
+  <div class="sources">
+    <h3>📚 原始來源</h3>
+    <a href="https://addyosmani.com/blog/loop-engineering/" target="_blank">Addy Osmani — Loop Engineering (addyosmani.com, 2026)</a><br>
+    <a href="https://www.oreilly.com/radar/loop-engineering/" target="_blank">O'Reilly Radar — Loop Engineering</a><br>
+    <a href="https://insightarea.com/2026/05/08/andrej-karpathy-code-agents-and-the-new-skill-of-managing-ai-loops/" target="_blank">Insight Area — Karpathy, Code Agents, and Managing AI Loops</a><br>
+    <a href="https://www.the-ai-corner.com/p/andrej-karpathy-ai-workflow-shift-agentic-era-2026" target="_blank">The AI Corner — Karpathy AI Workflow Shift, 2026</a>
+  </div>
+
+  <footer>
+    Loop Engineering 進階篇 · 2026-07-02 ·
+    前情提要：<a href="https://wengroy.github.io/knowledge/2026-06-28-003-loop-engineering-ai-agent.html" target="_blank">2026-06-28-003 基礎篇</a>
+  </footer>
+</div>
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+</script>
+</body>
+</html>
