@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>遠端控制網路架構全解析：Claude Code × TeamViewer × AnyDesk × Chrome Remote Desktop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: #fdf6e3;
+      background-image: radial-gradient(circle, #d4b896 1px, transparent 1px);
+      background-size: 18px 18px;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .page { max-width: 940px; margin: 0 auto; }
+
+    /* ===== 外框漫畫暖色 ===== */
+    .header {
+      border: 3px solid #1a1a1a;
+      border-radius: 14px;
+      background: #fff8ee;
+      box-shadow: 5px 5px 0 #1a1a1a;
+      padding: 28px 32px;
+      margin-bottom: 28px;
+    }
+    .header-badge {
+      display: inline-block;
+      background: #e8713a;
+      color: white;
+      font-family: 'Baloo 2', cursive;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 2px solid #1a1a1a;
+      box-shadow: 2px 2px 0 #1a1a1a;
+      margin-bottom: 12px;
+    }
+    .header h1 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #1a1a1a;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+    .header h1 span { color: #e8713a; }
+    .header p { color: #6b4226; font-size: 0.93rem; line-height: 1.65; }
+
+    .tab-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tab-btn {
+      font-family: 'Baloo 2', cursive;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 8px 16px;
+      border: 3px solid #1a1a1a;
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      background: #fff8ee;
+      cursor: pointer;
+      transition: all 0.12s;
+      color: #6b4226;
+    }
+    .tab-btn.active { background: #e8713a; color: white; }
+    .tab-btn:hover:not(.active) { background: #fdf6e3; transform: translateY(-2px); }
+    .tab-panel {
+      display: none;
+      border: 3px solid #1a1a1a;
+      border-radius: 0 8px 8px 8px;
+      padding: 28px 28px 32px;
+      background: #fdf6e3;
+      box-shadow: 5px 5px 0 #1a1a1a;
+    }
+    .tab-panel.active { display: block; }
+
+    .section-title {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #6b4226;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quote-box {
+      border-left: 5px solid #e8713a;
+      background: #fff8ee;
+      padding: 14px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 18px 0;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #333;
+    }
+    .quote-box cite { display: block; font-style: normal; font-weight: 700; color: #e8713a; font-size: 0.78rem; margin-top: 8px; }
+    .quote-box a { color: #e8713a; }
+
+    .insight {
+      background: #e8713a;
+      color: #fff;
+      border: 3px solid #1a1a1a;
+      border-radius: 10px;
+      padding: 18px 22px;
+      box-shadow: 4px 4px 0 #1a1a1a;
+      margin: 22px 0;
+      font-size: 0.93rem;
+      line-height: 1.65;
+    }
+    .insight strong { display: block; font-size: 1.05rem; margin-bottom: 6px; }
+
+    /* ===== 內部丹麥簡約 ===== */
+    .svgcard {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      margin-bottom: 22px;
+      overflow: hidden;
+    }
+    .svgcard figcaption {
+      padding: 12px 20px;
+      font-size: 0.8rem;
+      color: #666;
+      border-top: 1px solid #f0f0f0;
+      line-height: 1.55;
+    }
+    .svgcard figcaption strong { color: #333; }
+    .svgcard figcaption a { color: #e8713a; }
+
+    .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+    @media (max-width: 640px) { .arch-grid { grid-template-columns: 1fr; } }
+
+    .arch-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+    }
+    .arch-card .arch-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .arch-card h4 { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+    .arch-card .arch-model { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 10px; }
+    .arch-card p { font-size: 0.82rem; color: #555; line-height: 1.6; }
+    .arch-card .ports { font-size: 0.78rem; color: #888; margin-top: 8px; font-family: 'Inter', sans-serif; }
+    .arch-card .ports code { background: #f4f4f4; padding: 1px 5px; border-radius: 3px; font-size: 0.76rem; }
+
+    .rec-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    @media (max-width: 720px) { .rec-grid { grid-template-columns: 1fr; } }
+    .rec-card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      border-top: 4px solid #ccc;
+    }
+    .rec-card h4 { font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+    .rec-card p { font-size: 0.8rem; color: #555; line-height: 1.6; }
+    .rec-card .pro { color: #155724; font-size: 0.79rem; }
+    .rec-card .con { color: #c0392b; font-size: 0.79rem; }
+
+    .score-table {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      margin-bottom: 22px;
+    }
+    .score-table table { width: 100%; border-collapse: collapse; }
+    .score-table th { background: #f8f9fa; font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 700; color: #555; padding: 12px 14px; text-align: left; border-bottom: 1px solid #eee; }
+    .score-table td { font-size: 0.82rem; color: #333; padding: 11px 14px; border-bottom: 1px solid #f5f5f5; }
+    .score-table tr:last-child td { border-bottom: none; }
+    .score-table tr:hover td { background: #fafafa; }
+    .badge-s { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; }
+    .badge-green { background: #d5f5e3; color: #155724; }
+    .badge-yellow { background: #fef9c3; color: #854d0e; }
+    .badge-red { background: #fde8e8; color: #c0392b; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .stack-card {
+      background: white;
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      margin-bottom: 18px;
+    }
+    .stack-card h4 { font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; }
+    .stack-card .layer { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .stack-card .layer:last-child { border-bottom: none; }
+    .stack-card .layer-num { font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 800; color: #e8713a; min-width: 32px; line-height: 1; }
+    .stack-card .layer-info h5 { font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 700; color: #333; margin-bottom: 3px; }
+    .stack-card .layer-info p { font-size: 0.8rem; color: #666; line-height: 1.5; }
+    .stack-card .layer-info code { background: #f4f4f4; padding: 1px 6px; border-radius: 3px; font-size: 0.77rem; }
+
+    .sources {
+      background: white; border-radius: 12px; padding: 18px 22px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
+      margin-top: 28px; font-size: 0.8rem; color: #777; line-height: 1.9;
+    }
+    .sources h3 { font-family: 'Baloo 2', cursive; font-size: 0.85rem; color: #6b4226; margin-bottom: 8px; }
+    .sources a { color: #e8713a; text-decoration: none; }
+    .sources a:hover { text-decoration: underline; }
+    footer { text-align: center; margin-top: 18px; color: #bbb; font-size: 0.74rem; }
+    footer a { color: #e8713a; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-badge">🌐 網路架構分析</div>
+    <h1>遠端控制<span>網路架構</span>全解析</h1>
+    <p>Claude Code Remote Control × TeamViewer × AnyDesk × Chrome Remote Desktop——四種「讓兩台電腦找到彼此」的完全不同哲學，以及 headless Mac Studio 在 WiFi 不穩定環境下的最佳方案。</p>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">① 四種架構原理</button>
+    <button class="tab-btn" onclick="switchTab(1)">② 網路拓撲比較</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ Mac Studio 場景</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ 推薦方案</button>
+  </div>
+
+  <!-- Tab 1: 四種架構原理 -->
+  <div class="tab-panel active">
+    <div class="section-title">🏗 四種「讓兩台電腦找到彼此」的哲學</div>
+
+    <div class="arch-grid">
+      <!-- Claude Code -->
+      <div class="arch-card">
+        <div class="arch-icon">🤖</div>
+        <h4>Claude Code Remote Control</h4>
+        <div class="arch-model" style="background:#fde8e8;color:#c0392b;">Outbound-Only HTTPS Relay</div>
+        <p>桌機對 Anthropic API 發出 outbound HTTPS 請求，手機透過同一個 API relay 接入。<strong>不開任何 inbound port</strong>，不需要 VPN，不需要改防火牆——就像瀏覽器載入網頁的連線模式。（2026/02/25 Anthropic 正式發佈）</p>
+        <div class="ports">Port：HTTPS 443 only（outbound）<br>加密：TLS（端對端加密，Anthropic relay 也看不到內容）</div>
+      </div>
+
+      <!-- TeamViewer -->
+      <div class="arch-card">
+        <div class="arch-icon">📡</div>
+        <h4>TeamViewer</h4>
+        <div class="arch-model" style="background:#dbeafe;color:#1e40af;">Master + Router 兩段式</div>
+        <p>兩端先向 <code>master*.teamviewer.com</code> 做金鑰交換與驗證，再連到地理最近的 <code>router*.teamviewer.com</code>。<strong>70% 的情況</strong>可建立 P2P 直連（UDP/TCP）；其餘 30% 經由 router server relay。</p>
+        <div class="ports">Port：5938 (TCP/UDP) 主力，fallback 443/80<br>加密：TLS + RSA 2048（relay 端不可讀）</div>
+      </div>
+
+      <!-- AnyDesk -->
+      <div class="arch-card">
+        <div class="arch-icon">⚡</div>
+        <h4>AnyDesk</h4>
+        <div class="arch-model" style="background:#d5f5e3;color:#155724;">P2P 優先 + Relay 備援</div>
+        <p>透過 AnyDesk 全球網路協商連線，盡量建立 UDP/TCP 直連，不通才走 relay。DeskRT codec 只傳<strong>畫面差異 pixels</strong>（非全畫面），100 kb/s 即可運作，延遲 &lt;16ms。</p>
+        <div class="ports">Port：443、6568（TCP），7070（LAN P2P），50001-50003（UDP discovery）<br>加密：TLS 1.2 + RSA 2048</div>
+      </div>
+
+      <!-- Chrome Remote Desktop -->
+      <div class="arch-card">
+        <div class="arch-icon">🔵</div>
+        <h4>Chrome Remote Desktop</h4>
+        <div class="arch-model" style="background:#fef3c7;color:#92400e;">WebRTC 三模（ICE 協商）</div>
+        <p>基於 WebRTC + ICE 協議，自動嘗試三種模式：<strong>①Direct</strong>（直接 IP）→ <strong>②STUN</strong>（穿 NAT）→ <strong>③TURN/Relay</strong>（走 Google 機房）。UDP 優先於 TCP（效能更好）。</p>
+        <div class="ports">Port：443 + 3478（TCP+UDP），動態 UDP port range<br>加密：DTLS（WebRTC 標準）</div>
+      </div>
+    </div>
+
+    <!-- SVG: 架構哲學比較 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 800 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="400" y="22" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#333">Inbound Port 需求 vs WiFi 斷線恢復速度</text>
+
+        <!-- Claude Code -->
+        <g transform="translate(16,36)">
+          <rect width="178" height="110" rx="10" fill="#fff5f5" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="89" y="24" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#c0392b">🤖 Claude Code RC</text>
+          <rect x="14" y="34" width="150" height="22" rx="4" fill="#d5f5e3"/>
+          <text x="89" y="49" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#155724">✅ 零 inbound port</text>
+          <rect x="14" y="62" width="150" height="22" rx="4" fill="#fde8e8"/>
+          <text x="89" y="77" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#c0392b">⚠ WiFi 斷線 session 超時</text>
+          <rect x="14" y="90" width="150" height="14" rx="3" fill="#f4f4f4"/>
+          <rect x="14" y="90" width="60" height="14" rx="3" fill="#e8713a"/>
+          <text x="89" y="101" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#555">穿透性 ████░░░░░░ 60%</text>
+        </g>
+
+        <!-- TeamViewer -->
+        <g transform="translate(208,36)">
+          <rect width="178" height="110" rx="10" fill="#f0f8ff" stroke="#2980b9" stroke-width="1.5"/>
+          <text x="89" y="24" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#2980b9">📡 TeamViewer</text>
+          <rect x="14" y="34" width="150" height="22" rx="4" fill="#d5f5e3"/>
+          <text x="89" y="49" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#155724">✅ 僅 outbound 5938</text>
+          <rect x="14" y="62" width="150" height="22" rx="4" fill="#fef9c3"/>
+          <text x="89" y="77" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#854d0e">⚡ TCP relay 較穩，但需重連</text>
+          <rect x="14" y="90" width="150" height="14" rx="3" fill="#f4f4f4"/>
+          <rect x="14" y="90" width="110" height="14" rx="3" fill="#3498db"/>
+          <text x="89" y="101" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#fff">穿透性 ████████░░ 80%</text>
+        </g>
+
+        <!-- AnyDesk -->
+        <g transform="translate(400,36)">
+          <rect width="178" height="110" rx="10" fill="#f0fdf4" stroke="#27ae60" stroke-width="1.5"/>
+          <text x="89" y="24" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#27ae60">⚡ AnyDesk</text>
+          <rect x="14" y="34" width="150" height="22" rx="4" fill="#d5f5e3"/>
+          <text x="89" y="49" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#155724">✅ 僅 outbound 443/6568</text>
+          <rect x="14" y="62" width="150" height="22" rx="4" fill="#fef9c3"/>
+          <text x="89" y="77" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#854d0e">⚡ P2P 斷線快，relay 補位</text>
+          <rect x="14" y="90" width="150" height="14" rx="3" fill="#f4f4f4"/>
+          <rect x="14" y="90" width="115" height="14" rx="3" fill="#27ae60"/>
+          <text x="89" y="101" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#fff">穿透性 ████████░░ 82%</text>
+        </g>
+
+        <!-- Chrome -->
+        <g transform="translate(592,36)">
+          <rect width="190" height="110" rx="10" fill="#fffbeb" stroke="#f39c12" stroke-width="1.5"/>
+          <text x="95" y="24" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#e67e22">🔵 Chrome Remote Desktop</text>
+          <rect x="14" y="34" width="162" height="22" rx="4" fill="#d5f5e3"/>
+          <text x="95" y="49" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#155724">✅ 僅 outbound 443/3478</text>
+          <rect x="14" y="62" width="162" height="22" rx="4" fill="#fde8e8"/>
+          <text x="95" y="77" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#c0392b">⚠ WebRTC ICE 重協商較慢</text>
+          <rect x="14" y="90" width="162" height="14" rx="3" fill="#f4f4f4"/>
+          <rect x="14" y="90" width="90" height="14" rx="3" fill="#f39c12"/>
+          <text x="95" y="101" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#fff">穿透性 ██████░░░░ 70%</text>
+        </g>
+      </svg>
+      <figcaption>所有四種工具都只需 outbound 連線，不需要在 Mac Studio 開 inbound port。差異在 WiFi 斷線重連的恢復速度——TCP-based（TeamViewer/AnyDesk）比 WebRTC UDP（Chrome）穩定，但兩者都需要重新建立連線。</figcaption>
+    </figure>
+  </div>
+
+  <!-- Tab 2: 網路拓撲比較 -->
+  <div class="tab-panel">
+    <div class="section-title">🌐 三種網路拓撲模型</div>
+
+    <!-- SVG: 三種模型 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 820 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="410" y="22" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#333">三種連線拓撲（Relay vs P2P vs Outbound-API）</text>
+
+        <!-- Model A: Outbound-Only Relay (Claude Code) -->
+        <g transform="translate(10,40)">
+          <rect x="0" y="0" width="245" height="185" rx="10" fill="#fff5f5" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="122" y="18" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#c0392b">A. Outbound-Only（Claude Code）</text>
+
+          <!-- Mac -->
+          <rect x="10" y="30" width="80" height="38" rx="6" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="50" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#333">🖥 Mac Studio</text>
+          <!-- API box -->
+          <rect x="82" y="98" width="80" height="38" rx="6" fill="#fde8e8" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="122" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#c0392b">Anthropic</text>
+          <text x="122" y="126" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#c0392b">API Relay</text>
+          <!-- Phone -->
+          <rect x="155" y="30" width="80" height="38" rx="6" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="195" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#333">📱 手機</text>
+          <!-- Arrows -->
+          <path d="M50,68 Q50,117 82,117" stroke="#e74c3c" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+          <text x="42" y="98" font-family="Inter,sans-serif" font-size="8" fill="#e74c3c">HTTPS out</text>
+          <path d="M195,68 Q195,117 162,117" stroke="#e74c3c" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+          <text x="160" y="95" font-family="Inter,sans-serif" font-size="8" fill="#e74c3c">HTTPS out</text>
+          <!-- Label -->
+          <text x="122" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#888">雙方都是 outbound</text>
+          <text x="122" y="168" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#888">API 做雙向路由</text>
+          <text x="122" y="181" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#e74c3c">零 inbound port</text>
+        </g>
+
+        <!-- Model B: P2P + Relay (TeamViewer/AnyDesk) -->
+        <g transform="translate(288,40)">
+          <rect x="0" y="0" width="245" height="185" rx="10" fill="#f0f8ff" stroke="#2980b9" stroke-width="1.5"/>
+          <text x="122" y="18" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#2980b9">B. P2P + Relay（TeamViewer/AnyDesk）</text>
+
+          <!-- Mac -->
+          <rect x="10" y="30" width="80" height="38" rx="6" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="50" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#333">🖥 Mac Studio</text>
+          <!-- Master/Router -->
+          <rect x="82" y="92" width="80" height="30" rx="5" fill="#dbeafe" stroke="#2980b9" stroke-width="1.5"/>
+          <text x="122" y="109" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" font-weight="600" fill="#2980b9">Master + Router</text>
+          <!-- Other -->
+          <rect x="155" y="30" width="80" height="38" rx="6" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="195" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#333">💻 控制端</text>
+          <!-- P2P direct -->
+          <path d="M90,49 L155,49" stroke="#27ae60" stroke-width="2" fill="none"/>
+          <text x="122" y="44" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#27ae60">✅ P2P 直連（70%）</text>
+          <!-- via relay -->
+          <path d="M50,68 Q50,107 82,107" stroke="#3498db" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+          <path d="M195,68 Q195,107 162,107" stroke="#3498db" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+          <text x="122" y="152" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#888">先 Master 握手驗證</text>
+          <text x="122" y="165" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#888">再嘗試 P2P，失敗走 Router relay</text>
+          <text x="122" y="180" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#3498db">via relay（30%）</text>
+        </g>
+
+        <!-- Model C: WebRTC ICE (Chrome) -->
+        <g transform="translate(566,40)">
+          <rect x="0" y="0" width="245" height="185" rx="10" fill="#fffbeb" stroke="#f39c12" stroke-width="1.5"/>
+          <text x="122" y="18" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#e67e22">C. WebRTC ICE（Chrome Remote Desktop）</text>
+
+          <rect x="10" y="30" width="80" height="38" rx="6" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="50" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#333">🖥 Mac Studio</text>
+
+          <rect x="155" y="30" width="80" height="38" rx="6" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+          <text x="195" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#333">💻 控制端</text>
+
+          <!-- Three paths -->
+          <text x="12" y="82" font-family="Inter,sans-serif" font-size="8" fill="#27ae60">① Direct IP</text>
+          <path d="M90,49 L155,49" stroke="#27ae60" stroke-width="1.5" fill="none"/>
+
+          <rect x="82" y="90" width="80" height="22" rx="4" fill="#fef9c3" stroke="#f39c12" stroke-width="1"/>
+          <text x="122" y="105" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#854d0e">② STUN 穿 NAT</text>
+          <path d="M50,68 L50,101 L82,101" stroke="#f39c12" stroke-width="1.5" fill="none" stroke-dasharray="3,3"/>
+          <path d="M195,68 L195,101 L162,101" stroke="#f39c12" stroke-width="1.5" fill="none" stroke-dasharray="3,3"/>
+
+          <rect x="82" y="124" width="80" height="22" rx="4" fill="#fde8e8" stroke="#e74c3c" stroke-width="1"/>
+          <text x="122" y="139" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#c0392b">③ TURN Relay (Google)</text>
+
+          <text x="122" y="162" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#888">ICE 自動協商最佳路徑</text>
+          <text x="122" y="176" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#888">UDP 優先、TCP fallback</text>
+        </g>
+      </svg>
+      <figcaption><strong>架構選擇的核心邏輯：</strong>Model A（Claude Code）最安全但依賴第三方 relay；Model B（TeamViewer/AnyDesk）多數情況 P2P 直連效能最好；Model C（Chrome/WebRTC）標準化但 ICE 協商重連較慢。</figcaption>
+    </figure>
+
+    <!-- 比較評分表 -->
+    <div class="score-table">
+      <table>
+        <thead>
+          <tr>
+            <th>工具</th>
+            <th>核心協議</th>
+            <th>Headless 支援</th>
+            <th>WiFi 斷線恢復</th>
+            <th>純 Terminal 適用</th>
+            <th>零設定難度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Claude Code RC</strong></td>
+            <td>HTTPS relay</td>
+            <td><span class="badge-s badge-green">✅ 佳</span></td>
+            <td><span class="badge-s badge-yellow">⚠ 易 timeout</span></td>
+            <td><span class="badge-s badge-green">✅ 最適合</span></td>
+            <td><span class="badge-s badge-green">✅ 最簡單</span></td>
+          </tr>
+          <tr>
+            <td><strong>TeamViewer</strong></td>
+            <td>TCP relay/P2P</td>
+            <td><span class="badge-s badge-green">✅ 有</span></td>
+            <td><span class="badge-s badge-yellow">⚡ 重連數秒</span></td>
+            <td><span class="badge-s badge-red">❌ 畫面傳輸</span></td>
+            <td><span class="badge-s badge-green">✅ 簡單</span></td>
+          </tr>
+          <tr>
+            <td><strong>AnyDesk</strong></td>
+            <td>P2P/relay DeskRT</td>
+            <td><span class="badge-s badge-green">✅ 有</span></td>
+            <td><span class="badge-s badge-yellow">⚡ 重連數秒</span></td>
+            <td><span class="badge-s badge-red">❌ 畫面傳輸</span></td>
+            <td><span class="badge-s badge-green">✅ 簡單</span></td>
+          </tr>
+          <tr>
+            <td><strong>Chrome Remote Desktop</strong></td>
+            <td>WebRTC ICE</td>
+            <td><span class="badge-s badge-yellow">⚡ 需設定</span></td>
+            <td><span class="badge-s badge-red">❌ ICE 重協商慢</span></td>
+            <td><span class="badge-s badge-red">❌ 畫面傳輸</span></td>
+            <td><span class="badge-s badge-green">✅ 簡單</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tailscale + mosh + tmux</strong></td>
+            <td>WireGuard + UDP</td>
+            <td><span class="badge-s badge-green">✅ 專為此設計</span></td>
+            <td><span class="badge-s badge-green">✅ 自動重連</span></td>
+            <td><span class="badge-s badge-green">✅ 最佳</span></td>
+            <td><span class="badge-s badge-yellow">⚡ 需安裝3工具</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: Mac Studio 場景 -->
+  <div class="tab-panel">
+    <div class="section-title">🖥 場景：headless Mac Studio + 不穩定 WiFi + 手機控制 Claude Code</div>
+
+    <div class="quote-box">
+      關鍵限制：headless（無螢幕）、WiFi 常斷線重連、目標是跑 Claude Code（純 terminal）、控制端是手機或另一台電腦。
+      這個組合讓「畫面傳輸型」工具（TeamViewer/AnyDesk/Chrome Remote Desktop）全部不是最佳選擇——它們是拿大砲打蚊子。
+    </div>
+
+    <!-- SVG: 失敗模式分析 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 820 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="410" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#333">WiFi 斷線 → 重連後各工具的行為</text>
+
+        <!-- Claude Code RC -->
+        <g transform="translate(10,34)">
+          <rect width="190" height="112" rx="8" fill="#fde8e8" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="95" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#c0392b">🤖 Claude Code RC（裸跑）</text>
+          <text x="16" y="40" font-family="Inter,sans-serif" font-size="9" fill="#555">WiFi 斷 30 秒後…</text>
+          <text x="16" y="57" font-family="Inter,sans-serif" font-size="9" fill="#c0392b">✗ session timeout，任務中止</text>
+          <text x="16" y="74" font-family="Inter,sans-serif" font-size="9" fill="#c0392b">✗ 手機端 app 顯示連線失敗</text>
+          <text x="16" y="91" font-family="Inter,sans-serif" font-size="9" fill="#c0392b">✗ 需要重新開始任務</text>
+          <text x="16" y="108" font-family="Inter,sans-serif" font-size="8.5" fill="#888">（WiFi 不穩環境不推薦裸跑）</text>
+        </g>
+
+        <!-- TeamViewer/AnyDesk -->
+        <g transform="translate(214,34)">
+          <rect width="190" height="112" rx="8" fill="#fef9c3" stroke="#f39c12" stroke-width="1.5"/>
+          <text x="95" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#e67e22">📡 TeamViewer / AnyDesk</text>
+          <text x="16" y="40" font-family="Inter,sans-serif" font-size="9" fill="#555">WiFi 斷 30 秒後…</text>
+          <text x="16" y="57" font-family="Inter,sans-serif" font-size="9" fill="#e67e22">⚡ 畫面凍結，但保持連線嘗試</text>
+          <text x="16" y="74" font-family="Inter,sans-serif" font-size="9" fill="#e67e22">⚡ 重連後需 5-15 秒重握手</text>
+          <text x="16" y="91" font-family="Inter,sans-serif" font-size="9" fill="#155724">✓ terminal session 通常不中斷</text>
+          <text x="16" y="108" font-family="Inter,sans-serif" font-size="8.5" fill="#888">（但傳畫面對 terminal 是浪費）</text>
+        </g>
+
+        <!-- Chrome Remote Desktop -->
+        <g transform="translate(418,34)">
+          <rect width="190" height="112" rx="8" fill="#fde8e8" stroke="#e74c3c" stroke-width="1.5"/>
+          <text x="95" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#c0392b">🔵 Chrome Remote Desktop</text>
+          <text x="16" y="40" font-family="Inter,sans-serif" font-size="9" fill="#555">WiFi 斷 30 秒後…</text>
+          <text x="16" y="57" font-family="Inter,sans-serif" font-size="9" fill="#c0392b">✗ WebRTC ICE 需重新協商</text>
+          <text x="16" y="74" font-family="Inter,sans-serif" font-size="9" fill="#c0392b">✗ 重連等待 15-30 秒以上</text>
+          <text x="16" y="91" font-family="Inter,sans-serif" font-size="9" fill="#c0392b">✗ 若 IP 改變需完全重建</text>
+          <text x="16" y="108" font-family="Inter,sans-serif" font-size="8.5" fill="#888">（不穩 WiFi 最糟選擇）</text>
+        </g>
+
+        <!-- Tailscale + mosh + tmux -->
+        <g transform="translate(622,34)">
+          <rect width="190" height="112" rx="8" fill="#d5f5e3" stroke="#27ae60" stroke-width="2"/>
+          <text x="95" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#155724">🏆 Tailscale + mosh + tmux</text>
+          <text x="16" y="40" font-family="Inter,sans-serif" font-size="9" fill="#555">WiFi 斷 30 秒後…</text>
+          <text x="16" y="57" font-family="Inter,sans-serif" font-size="9" fill="#155724">✅ WireGuard 自動重連</text>
+          <text x="16" y="74" font-family="Inter,sans-serif" font-size="9" fill="#155724">✅ mosh 無縫跨 IP 切換</text>
+          <text x="16" y="91" font-family="Inter,sans-serif" font-size="9" fill="#155724">✅ tmux session 完全不受影響</text>
+          <text x="16" y="108" font-family="Inter,sans-serif" font-size="8.5" fill="#155724">✅ Claude Code 繼續跑，等你回來</text>
+        </g>
+      </svg>
+      <figcaption>WiFi 斷線是這個場景的核心考驗。mosh（mobile shell）的設計哲學就是「假設網路永遠不穩定，用 UDP 心跳讓 session 無縫跨 IP 切換」——這正是 Roy 的使用情境。</figcaption>
+    </figure>
+
+    <!-- 工具說明 -->
+    <div class="section-title" style="font-size:1rem;margin-top:4px;">推薦組合的三層架構說明</div>
+    <div class="stack-card">
+      <h4>🏆 最佳組合：Tailscale + mosh + tmux + Claude Code RC</h4>
+      <div class="layer">
+        <div class="layer-num">L3</div>
+        <div class="layer-info">
+          <h5>Claude Code（任務執行層）</h5>
+          <p>在 tmux session 裡跑 <code>claude</code> 指令或 Remote Control，任務本身與網路連線完全解耦。就算 mosh 斷了重連，Claude Code 在 Mac Studio 上繼續跑，不會知道連線曾中斷過。</p>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">L2</div>
+        <div class="layer-info">
+          <h5>tmux（session 持久層）</h5>
+          <p>讓所有 terminal session 在 server 端永久存活。<code>tmux new -s claude</code> 建立 session，離線重連後 <code>tmux attach -t claude</code> 就能看到 Claude Code 繼續在跑的畫面。</p>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">L1</div>
+        <div class="layer-info">
+          <h5>mosh（連線韌性層）</h5>
+          <p>Mobile Shell，UDP-based，專為不穩定網路設計。<code>mosh user@mac-studio-tailscale-ip</code> 替代 SSH。WiFi 斷掉、IP 換掉，mosh 都能自動重連——不像 SSH 斷線就得重開。</p>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">L0</div>
+        <div class="layer-info">
+          <h5>Tailscale（網路穿透層）</h5>
+          <p>基於 WireGuard 的 mesh VPN。Mac Studio 安裝 Tailscale 後自動有固定 IP（100.x.x.x），不管 WiFi 切換幾次、IP 怎麼變，Tailscale IP 永遠不變。手機 / 電腦安裝 Tailscale app 後直接存取。免費版支援 100 台裝置。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4: 推薦方案 -->
+  <div class="tab-panel">
+    <div class="section-title">🏁 根據情境選架構</div>
+
+    <!-- SVG: 決策流程 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="410" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#333">架構選擇決策樹</text>
+
+        <!-- Start -->
+        <rect x="320" y="30" width="180" height="38" rx="8" fill="#1a1a1a"/>
+        <text x="410" y="53" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="white">需要遠端控制 Mac</text>
+
+        <!-- Q1: Need GUI? -->
+        <line x1="410" y1="68" x2="410" y2="88" stroke="#ccc" stroke-width="1.5"/>
+        <polygon points="406,88 410,96 414,88" fill="#ccc"/>
+        <rect x="280" y="96" width="260" height="34" rx="8" fill="#e8f4fd" stroke="#2980b9" stroke-width="1.5"/>
+        <text x="410" y="117" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#2c3e50">需要<strong>看畫面/操作 GUI</strong>嗎？</text>
+
+        <!-- Yes: GUI needed -->
+        <line x1="280" y1="113" x2="180" y2="140" stroke="#27ae60" stroke-width="1.5"/>
+        <text x="198" y="133" font-family="Inter,sans-serif" font-size="9" fill="#27ae60">是</text>
+        <rect x="80" y="140" width="200" height="68" rx="8" fill="#f0fdf4" stroke="#27ae60" stroke-width="1.5"/>
+        <text x="180" y="160" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#155724">AnyDesk / TeamViewer</text>
+        <text x="180" y="176" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#555">headless Mac 需先</text>
+        <text x="180" y="190" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#555">設定虛擬螢幕（BVNC）</text>
+        <text x="180" y="204" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">WiFi 不穩→ 加 Tailscale</text>
+
+        <!-- No: Terminal only -->
+        <line x1="540" y1="113" x2="640" y2="140" stroke="#e74c3c" stroke-width="1.5"/>
+        <text x="572" y="133" font-family="Inter,sans-serif" font-size="9" fill="#e74c3c">否（純 terminal）</text>
+        <!-- Q2: WiFi stable? -->
+        <rect x="540" y="140" width="220" height="34" rx="8" fill="#e8f4fd" stroke="#2980b9" stroke-width="1.5"/>
+        <text x="650" y="161" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#2c3e50">WiFi <strong>穩定</strong>嗎？</text>
+
+        <!-- Yes: Stable -->
+        <line x1="650" y1="174" x2="580" y2="200" stroke="#27ae60" stroke-width="1.5"/>
+        <text x="590" y="193" font-family="Inter,sans-serif" font-size="9" fill="#27ae60">穩</text>
+        <rect x="490" y="200" width="180" height="16" rx="5" fill="#d5f5e3" stroke="#27ae60" stroke-width="1"/>
+        <text x="580" y="212" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" font-weight="600" fill="#155724">Claude Code RC + SSH</text>
+
+        <!-- No: Unstable -->
+        <line x1="760" y1="157" x2="780" y2="174" stroke="#e74c3c" stroke-width="1.5"/>
+        <text x="748" y="170" font-family="Inter,sans-serif" font-size="9" fill="#e74c3c">不穩</text>
+        <rect x="680" y="174" width="130" height="42" rx="6" fill="#fde8e8" stroke="#e8713a" stroke-width="2"/>
+        <text x="745" y="192" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#e8713a">Tailscale</text>
+        <text x="745" y="207" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#e8713a">+ mosh + tmux</text>
+      </svg>
+      <figcaption>Roy 的情境走「否（純 terminal）→ WiFi 不穩」路徑，直接到右下角：<strong>Tailscale + mosh + tmux</strong>。</figcaption>
+    </figure>
+
+    <!-- 三個方案卡片 -->
+    <div class="rec-grid">
+      <div class="rec-card" style="border-top-color:#27ae60;">
+        <h4>🏆 方案 A（推薦）<br>Tailscale + mosh + tmux</h4>
+        <p class="pro">✅ WiFi 斷線自動重連<br>✅ Claude Code session 永遠存活<br>✅ 手機 / 電腦都能控制<br>✅ 免費、開源<br>✅ headless 零問題</p>
+        <p class="con">⚠ 需安裝三個工具<br>⚠ Mac Studio 要保持 Tailscale 開機自啟</p>
+        <p style="margin-top:10px;font-size:0.79rem;color:#888;"><strong>安裝：</strong><code style="background:#f4f4f4;padding:1px 5px;border-radius:3px;font-size:0.75rem;">brew install tailscale mosh tmux</code></p>
+      </div>
+
+      <div class="rec-card" style="border-top-color:#e8713a;">
+        <h4>⚡ 方案 B（Claude Code 原生）<br>Claude Code RC + Tailscale</h4>
+        <p class="pro">✅ 官方支援，最少設定<br>✅ 手機 Claude app 直接控制<br>✅ Tailscale 確保固定 IP<br>✅ 加 tmux 防 session 中斷</p>
+        <p class="con">⚠ 依賴 Anthropic API 可用性<br>⚠ session 仍可能 timeout（加 tmux 緩解）<br>⚠ 需要 Claude app（非瀏覽器）</p>
+        <p style="margin-top:10px;font-size:0.79rem;color:#888;">WiFi 不穩建議 Tailscale 墊底，<br>再跑 Claude Code RC over SSH tunnel。</p>
+      </div>
+
+      <div class="rec-card" style="border-top-color:#aaa;">
+        <h4>❌ 方案 C（不推薦）<br>TeamViewer / AnyDesk / Chrome RD</h4>
+        <p class="con">❌ 設計目的是傳送畫面<br>❌ headless Mac 需額外設定虛擬螢幕<br>❌ 對純 terminal 用途是資源浪費<br>❌ Chrome RD 在 WiFi 不穩時 ICE 重協商最慢<br>❌ 商業工具有授權費用</p>
+        <p style="margin-top:10px;font-size:0.79rem;color:#888;">例外：如果你同時需要看 Mac Studio 的 GUI 畫面，AnyDesk 是最輕量的選擇（加 Tailscale 穩定連線）。</p>
+      </div>
+    </div>
+
+    <div class="insight">
+      <strong>🎯 Roy 的場景最終建議</strong>
+      Mac Studio（headless + WiFi 不穩）→ 手機 / 電腦控制 Claude Code<br><br>
+      <strong>Layer 0：Tailscale</strong> — Mac Studio 固定 100.x.x.x IP，手機/電腦都裝 Tailscale app<br>
+      <strong>Layer 1：mosh</strong> — <code style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:3px;font-size:0.88em;">mosh user@100.x.x.x</code> 替代 SSH，WiFi 斷了自動重連<br>
+      <strong>Layer 2：tmux</strong> — 所有 Claude Code session 在 tmux 裡，離線不中斷<br>
+      <strong>Layer 3：Claude Code</strong> — 在 tmux 裡跑，WiFi 抖動對它完全透明<br><br>
+      安裝完後，WiFi 斷 30 秒、IP 換掉、手機切 WiFi 到 5G——mosh 會自動重連，你打開手機繼續接著用。
+    </div>
+  </div>
+
+  <div class="sources">
+    <h3>📚 原始來源</h3>
+    <a href="https://www.zbuild.io/resources/news/claude-code-remote-control-mobile-terminal-handoff-guide-2026" target="_blank">ZBuild — Claude Code Remote Control: Complete Guide (2026)</a><br>
+    <a href="https://community.teamviewer.com/English/kb/articles/4139-ports-used-by-teamviewer" target="_blank">TeamViewer — Ports Used by TeamViewer (官方文件)</a><br>
+    <a href="https://www.quora.com/What-is-the-underlying-architecture-of-Teamviewer-like-What-networking-protocols-does-it-use" target="_blank">Quora — TeamViewer 架構（Master + Router Server 說明）</a><br>
+    <a href="https://blog.usro.net/2025/06/how-anydesk-works-across-devices-ports/" target="_blank">usro.net — How AnyDesk Works Across Devices &amp; Ports (2025)</a><br>
+    <a href="https://support.google.com/chrome/a/answer/16364503" target="_blank">Google — Network Guide for Chrome Remote Desktop (官方文件)</a><br>
+    <a href="https://tailscale.com/kb/1463/troubleshoot-connectivity" target="_blank">Tailscale Docs — Device Connectivity Troubleshooting</a>
+  </div>
+
+  <footer>
+    遠端控制網路架構全解析 · 2026-07-03 · headless Mac Studio 場景分析
+  </footer>
+</div>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+</script>
+</body>
+</html>
