@@ -206,6 +206,7 @@
     <button class="tab-btn" onclick="switchTab(1)">② 資料保護技術</button>
     <button class="tab-btn" onclick="switchTab(2)">③ 主權 AI 與保存</button>
     <button class="tab-btn" onclick="switchTab(3)">④ 洞見與啟示</button>
+    <button class="tab-btn" onclick="switchTab(4)">⑤ 領域案例</button>
   </div>
 
   <!-- Tab 1: 政策地圖 -->
@@ -526,6 +527,118 @@
     </div>
   </div>
 
+  <!-- Tab 5: 領域案例 -->
+  <div class="tab-panel">
+    <div class="section-title">🏥 領域實例：政策落地的成功案例</div>
+
+    <div class="quote-box">
+      日本的資料保護政策不是紙上談兵——醫療、教育、政府、企業四個領域都有「專業資料不出門，AI 照樣用得上」的實際部署。共同模式：<strong>加工分級制度 + 國產 LLM + on-premise 部署</strong>。
+    </div>
+
+    <!-- SVG: 四領域案例 2x2 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">四大領域落地案例（專業資料保護 × AI 應用並存）</text>
+
+        <!-- 醫療 -->
+        <g transform="translate(12,46)">
+          <rect width="405" height="205" rx="12" fill="#fff5f5" stroke="#e74c3c" stroke-width="2"/>
+          <text x="202" y="32" text-anchor="middle" font-family="Inter,sans-serif" font-size="15.5" font-weight="700" fill="#c0392b">🏥 醫療：次世代醫療基盤法</text>
+          <text x="26" y="62" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 認定「匿名加工醫療資訊作成事業者」制度</text>
+          <text x="26" y="90" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 153 家醫療機構參與供資（2025/2 統計）</text>
+          <text x="26" y="118" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 三重大學醫院×NTT West：tsuzumi 做</text>
+          <text x="26" y="144" font-family="Inter,sans-serif" font-size="13.5" fill="#333">　護理／醫師紀錄摘要，加速交班</text>
+          <text x="26" y="180" font-family="Inter,sans-serif" font-size="13" fill="#888">→ 病歷經認定機構匿名化後才供研究使用</text>
+        </g>
+
+        <!-- 教育 -->
+        <g transform="translate(423,46)">
+          <rect width="405" height="205" rx="12" fill="#eff6ff" stroke="#2980b9" stroke-width="2"/>
+          <text x="202" y="32" text-anchor="middle" font-family="Inter,sans-serif" font-size="15.5" font-weight="700" fill="#1e40af">🎓 教育：東京通信大學</text>
+          <text x="26" y="62" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 導入 NTT tsuzumi 當校內 LLM 平台</text>
+          <text x="26" y="90" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 課程問答、教材製作、個別化學生輔導</text>
+          <text x="26" y="118" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 單顆 GPU 就能跑（tsuzumi 2 = 30B 參數</text>
+          <text x="26" y="144" font-family="Inter,sans-serif" font-size="13.5" fill="#333">　一張 H100 搞定），省下 GPU 叢集與電費</text>
+          <text x="26" y="180" font-family="Inter,sans-serif" font-size="13" fill="#888">→ on-premise 部署，學術資料不出校門</text>
+        </g>
+
+        <!-- 政府 -->
+        <g transform="translate(12,266)">
+          <rect width="405" height="205" rx="12" fill="#f0fdf4" stroke="#27ae60" stroke-width="2"/>
+          <text x="202" y="32" text-anchor="middle" font-family="Inter,sans-serif" font-size="15.5" font-weight="700" fill="#155724">🏛 政府：源內 Gennai 平台</text>
+          <text x="26" y="62" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 2026/3 選定 7 家供應商模型：</text>
+          <text x="26" y="90" font-family="Inter,sans-serif" font-size="13.5" fill="#333">　NTT tsuzumi 2、KDDI/ELYZA 70B、</text>
+          <text x="26" y="118" font-family="Inter,sans-serif" font-size="13.5" fill="#333">　PFN PLaMo 2.0、NEC cotomi v3…</text>
+          <text x="26" y="144" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 部署給約 18 萬名公務員（FY2026）</text>
+          <text x="26" y="180" font-family="Inter,sans-serif" font-size="13" fill="#888">→ 背後是 5 年 1 兆日圓 AI＋半導體投資</text>
+        </g>
+
+        <!-- 企業前沿 -->
+        <g transform="translate(423,266)">
+          <rect width="405" height="205" rx="12" fill="#fdf2f8" stroke="#8e44ad" stroke-width="2"/>
+          <text x="202" y="32" text-anchor="middle" font-family="Inter,sans-serif" font-size="15.5" font-weight="700" fill="#6b21a8">🏢 企業前沿：Sakana AI</text>
+          <text x="26" y="62" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• Namazu 模型系列＋Sakana Chat：</text>
+          <text x="26" y="90" font-family="Inter,sans-serif" font-size="13.5" fill="#333">　首個日本本土 frontier lab 的大眾產品</text>
+          <text x="26" y="118" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 金融、國防專用企業版</text>
+          <text x="26" y="144" font-family="Inter,sans-serif" font-size="13.5" fill="#333">　預計 2026 下半年推出</text>
+          <text x="26" y="180" font-family="Inter,sans-serif" font-size="13" fill="#888">→ 高機敏產業用「日本製模型」保資料主權</text>
+        </g>
+      </svg>
+      <figcaption><strong>共同模式：</strong>四個領域都沒有把資料丟給外國雲端 API——醫療靠認定匿名化機構、教育靠 on-premise 輕量 LLM、政府靠自建平台＋國產模型、高機敏企業靠本土 frontier lab。「保護與保存」是靠架構實現的，不只是法條。</figcaption>
+    </figure>
+
+    <div class="section-title" style="font-size:1.15rem;">案例細節對照表</div>
+    <div class="score-table">
+      <table>
+        <thead>
+          <tr>
+            <th>領域</th>
+            <th>案例</th>
+            <th>資料保護手法</th>
+            <th>成果／規模</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>醫療研究</strong></td>
+            <td>次世代醫療基盤法認定事業者（LDI、J-MIMO、FAST-HDJ）</td>
+            <td>認定機構統一格式＋匿名加工後才供研究</td>
+            <td>153 家醫療機構供資；LDI 提供 45 件研究案</td>
+          </tr>
+          <tr>
+            <td><strong>臨床現場</strong></td>
+            <td>三重大學醫院 × NTT West</td>
+            <td>國產 tsuzumi 於院內處理病歷</td>
+            <td>護理／醫師紀錄自動摘要，交班效率提升</td>
+          </tr>
+          <tr>
+            <td><strong>教育</strong></td>
+            <td>東京通信大學校內 LLM</td>
+            <td>on-premise 部署，學術資料不出校</td>
+            <td>課程問答＋教材製作＋學生輔導；單 GPU 營運</td>
+          </tr>
+          <tr>
+            <td><strong>政府</strong></td>
+            <td>數位廳 Gennai（源內）</td>
+            <td>自建平台＋7 家國產模型解耦切換</td>
+            <td>FY2026 部署 18 萬公務員</td>
+          </tr>
+          <tr>
+            <td><strong>高機敏企業</strong></td>
+            <td>Sakana AI Namazu 企業版</td>
+            <td>日本本土 frontier 模型，資料留境內</td>
+            <td>金融／國防版 2026 下半年推出</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight">
+      <strong>📌 案例帶來的補充洞見</strong>
+      醫療案例揭露了誠實的一面：制度 2017 年就有，但到 2025 年初認定事業者只有 3 家、累計研究供資僅數十件——<strong>「有法可用」不等於「馬上遍地開花」</strong>，資料標準化與機構信任的建立需要時間。反而是 2023 年後的國產 LLM（tsuzumi 單 GPU 可跑）把 on-premise 門檻降到大學等級組織都負擔得起，落地速度才真正加快。啟示：<strong>輕量國產模型 × 自建部署，比法規本身更能推動專業資料的 AI 活用</strong>。
+    </div>
+  </div>
+
   <div class="sources">
     <h3>📚 原始來源</h3>
     <a href="https://fpf.org/blog/understanding-japans-ai-promotion-act-an-innovation-first-blueprint-for-ai-regulation/" target="_blank">Future of Privacy Forum — Understanding Japan's AI Promotion Act</a><br>
@@ -536,7 +649,12 @@
     <a href="https://asiatimes.com/2025/09/inside-japans-struggle-to-build-sovereign-ai/" target="_blank">Asia Times — Inside Japan's struggle to build sovereign AI</a><br>
     <a href="https://global.fujitsu/en-global/pr/news/2026/02/12-01" target="_blank">Fujitsu — Sovereign AI servers made in Japan</a><br>
     <a href="https://anonym.legal/blog/ppc-japan-appi-privacy-compliance-guide-2025" target="_blank">anonym.legal — Japan PPC APPI AI Training Data Compliance</a><br>
-    <a href="https://www.private-ai.com/en/blog/appi-japan" target="_blank">Private AI — Unlocking Compliance with APPI（匿名／假名加工）</a>
+    <a href="https://www.private-ai.com/en/blog/appi-japan" target="_blank">Private AI — Unlocking Compliance with APPI（匿名／假名加工）</a><br>
+    <a href="https://ubiehealth.com/company/blog/next-generation-medical-infrastructure-act" target="_blank">Ubie — Japan Healthcare Factbook：次世代醫療基盤法</a><br>
+    <a href="https://pharmaboardroom.com/articles/japans-next-generation-medical-infrastructure-law-appropriate-use-of-individual-medical-information/" target="_blank">PharmaBoardroom — Japan's Next-Generation Medical Infrastructure Law</a><br>
+    <a href="https://group.ntt/en/newsrelease/2025/10/20/251020a.html" target="_blank">NTT — tsuzumi 2 官方發佈（高安全純國產 LLM）</a><br>
+    <a href="https://www.artificialintelligence-news.com/news/lightweight-llm-enterprise-deployment-single-gpu/" target="_blank">AI News — Lightweight LLM powers Japanese enterprise deployments（東京通信大學案例）</a><br>
+    <a href="https://aiinasia.com/life/sakana-namazu-japan-sovereign-chatbot-explainer-2026-06-02" target="_blank">AI in Asia — Sakana Namazu：Japan-first 主權聊天機器人</a>
   </div>
 
   <footer>
