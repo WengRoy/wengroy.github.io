@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日本 AI 政策全解析：專業資料的保護與保存</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: #fdf6e3;
+      background-image: radial-gradient(circle, #d4b896 1px, transparent 1px);
+      background-size: 18px 18px;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 24px 16px;
+      font-size: 17px;
+    }
+    .page { max-width: 980px; margin: 0 auto; }
+
+    /* ===== 外框漫畫暖色 ===== */
+    .header {
+      border: 3px solid #1a1a1a;
+      border-radius: 14px;
+      background: #fff8ee;
+      box-shadow: 5px 5px 0 #1a1a1a;
+      padding: 30px 34px;
+      margin-bottom: 28px;
+    }
+    .header-badge {
+      display: inline-block;
+      background: #e8713a;
+      color: white;
+      font-family: 'Baloo 2', cursive;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 5px 16px;
+      border-radius: 20px;
+      border: 2px solid #1a1a1a;
+      box-shadow: 2px 2px 0 #1a1a1a;
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #1a1a1a;
+      line-height: 1.28;
+      margin-bottom: 12px;
+    }
+    .header h1 span { color: #e8713a; }
+    .header p { color: #6b4226; font-size: 1.05rem; line-height: 1.75; }
+
+    .tab-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tab-btn {
+      font-family: 'Baloo 2', cursive;
+      font-weight: 700;
+      font-size: 0.98rem;
+      padding: 10px 18px;
+      border: 3px solid #1a1a1a;
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      background: #fff8ee;
+      cursor: pointer;
+      transition: all 0.12s;
+      color: #6b4226;
+    }
+    .tab-btn.active { background: #e8713a; color: white; }
+    .tab-btn:hover:not(.active) { background: #fdf6e3; transform: translateY(-2px); }
+    .tab-panel {
+      display: none;
+      border: 3px solid #1a1a1a;
+      border-radius: 0 8px 8px 8px;
+      padding: 30px 30px 34px;
+      background: #fdf6e3;
+      box-shadow: 5px 5px 0 #1a1a1a;
+    }
+    .tab-panel.active { display: block; }
+
+    .section-title {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #6b4226;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quote-box {
+      border-left: 5px solid #e8713a;
+      background: #fff8ee;
+      padding: 16px 22px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+      font-size: 1.02rem;
+      line-height: 1.8;
+      color: #333;
+    }
+    .quote-box cite { display: block; font-style: normal; font-weight: 700; color: #e8713a; font-size: 0.9rem; margin-top: 8px; }
+
+    .insight {
+      background: #e8713a;
+      color: #fff;
+      border: 3px solid #1a1a1a;
+      border-radius: 10px;
+      padding: 22px 26px;
+      box-shadow: 4px 4px 0 #1a1a1a;
+      margin: 24px 0;
+      font-size: 1.05rem;
+      line-height: 1.85;
+    }
+    .insight strong { display: block; font-size: 1.2rem; margin-bottom: 8px; }
+
+    /* ===== 內部丹麥簡約 ===== */
+    .svgcard {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .svgcard figcaption {
+      padding: 14px 22px;
+      font-size: 0.98rem;
+      color: #555;
+      border-top: 1px solid #f0f0f0;
+      line-height: 1.7;
+    }
+    .svgcard figcaption strong { color: #333; }
+
+    .law-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+    @media (max-width: 680px) { .law-grid { grid-template-columns: 1fr; } }
+
+    .law-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      border-top: 5px solid #ccc;
+    }
+    .law-card .law-icon { font-size: 2rem; margin-bottom: 8px; }
+    .law-card h4 { font-family: 'Inter', sans-serif; font-size: 1.12rem; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; line-height: 1.4; }
+    .law-card .law-date { font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; color: #999; margin-bottom: 10px; }
+    .law-card p { font-size: 0.98rem; color: #444; line-height: 1.75; }
+    .law-card ul { margin: 8px 0 0 20px; font-size: 0.95rem; color: #444; line-height: 1.8; }
+    .law-card code { background: #f4f4f4; padding: 1px 6px; border-radius: 3px; font-size: 0.88rem; }
+
+    .score-table {
+      background: white;
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      margin-bottom: 24px;
+    }
+    .score-table table { width: 100%; border-collapse: collapse; min-width: 640px; }
+    .score-table th { background: #f8f9fa; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 700; color: #555; padding: 14px 16px; text-align: left; border-bottom: 1px solid #eee; }
+    .score-table td { font-size: 0.98rem; color: #333; padding: 13px 16px; border-bottom: 1px solid #f5f5f5; line-height: 1.6; }
+    .score-table tr:last-child td { border-bottom: none; }
+    .score-table tr:hover td { background: #fafafa; }
+    .badge-s { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; white-space: nowrap; }
+    .badge-green { background: #d5f5e3; color: #155724; }
+    .badge-yellow { background: #fef9c3; color: #854d0e; }
+    .badge-red { background: #fde8e8; color: #c0392b; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .stack-card {
+      background: white;
+      border-radius: 12px;
+      padding: 26px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+    .stack-card h4 { font-family: 'Inter', sans-serif; font-size: 1.12rem; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; }
+    .stack-card .layer { display: flex; align-items: flex-start; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f0f0f0; }
+    .stack-card .layer:last-child { border-bottom: none; }
+    .stack-card .layer-num { font-size: 1.7rem; min-width: 46px; line-height: 1.2; }
+    .stack-card .layer-info h5 { font-family: 'Inter', sans-serif; font-size: 1.02rem; font-weight: 700; color: #333; margin-bottom: 5px; }
+    .stack-card .layer-info p { font-size: 0.95rem; color: #555; line-height: 1.75; }
+    .stack-card .layer-info code { background: #f4f4f4; padding: 1px 7px; border-radius: 3px; font-size: 0.9rem; }
+
+    .sources {
+      background: white; border-radius: 12px; padding: 20px 26px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
+      margin-top: 28px; font-size: 0.95rem; color: #666; line-height: 2.1;
+    }
+    .sources h3 { font-family: 'Baloo 2', cursive; font-size: 1.05rem; color: #6b4226; margin-bottom: 8px; }
+    .sources a { color: #e8713a; text-decoration: none; }
+    .sources a:hover { text-decoration: underline; }
+    footer { text-align: center; margin-top: 20px; color: #aaa; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-badge">🇯🇵 AI 政策研究</div>
+    <h1>日本 AI 政策全解析：<span>專業資料的保護與保存</span></h1>
+    <p>AI 推進法（零罰則的 AI 基本法）× APPI 個資法 2026 修正（訓練資料大鬆綁 + 首創課徵金）× 著作權 30-4 條（全球最寬鬆 TDM 例外）× 主權 AI（政府開源自建平台「源內」）——拆解日本「訓練端寬、輸出端嚴、保存端自主」的三層策略。</p>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">① 政策地圖</button>
+    <button class="tab-btn" onclick="switchTab(1)">② 資料保護技術</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ 主權 AI 與保存</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ 洞見與啟示</button>
+  </div>
+
+  <!-- Tab 1: 政策地圖 -->
+  <div class="tab-panel active">
+    <div class="section-title">🗾 四大政策支柱</div>
+
+    <div class="law-grid">
+      <div class="law-card" style="border-top-color:#e8713a;">
+        <div class="law-icon">📜</div>
+        <h4>AI 推進法（AI Promotion Act）</h4>
+        <div class="law-date">2025/5/28 國會通過 · 2025/6/4 施行</div>
+        <p>日本第一部 AI 基本法，目標是成為「世界上最 AI 友善的國家」。</p>
+        <ul>
+          <li><strong>零罰則</strong>：只有「努力配合義務」＋ Name and Shame（公布不配合企業）</li>
+          <li>AI 戰略本部：首相任本部長、全體閣員參加</li>
+          <li>哲學：「僵硬的事前管制很快過時、阻礙創新」</li>
+        </ul>
+      </div>
+
+      <div class="law-card" style="border-top-color:#2980b9;">
+        <div class="law-icon">🔐</div>
+        <h4>APPI 個資法 2026 修正案</h4>
+        <div class="law-date">2026/4/14 國會通過 · 最遲 2028 全面施行</div>
+        <p>AI 訓練資料大鬆綁 + 日本首創課徵金制度，一鬆一緊。</p>
+        <ul>
+          <li>第 30-2 條：公開敏感個資可<strong>免同意</strong>用於「統計製作」（含 AI 訓練），輸出須排除可識別資訊</li>
+          <li>課徵金（148-3）：罰金＝違法所得；累犯 ×1.5；自首減半</li>
+          <li>16 歲以下需家長同意，未成年人有特別刪除權</li>
+        </ul>
+      </div>
+
+      <div class="law-card" style="border-top-color:#27ae60;">
+        <div class="law-icon">©️</div>
+        <h4>著作權法 30-4 條（TDM 例外）</h4>
+        <div class="law-date">2019 施行 · 文化廳 2024-2025 更新見解</div>
+        <p>全球最寬鬆的 AI 訓練著作權例外：非「享受」著作物思想感情目的的利用不需授權。</p>
+        <ul>
+          <li>三要件：非享受目的、必要範圍內、不得不當損害著作權人利益</li>
+          <li>文化廳新方向：訓練豁免維持，但<strong>模仿特定創作者風格的輸出</strong>加強審視</li>
+        </ul>
+      </div>
+
+      <div class="law-card" style="border-top-color:#8e44ad;">
+        <div class="law-icon">🏯</div>
+        <h4>主權 AI 三件套</h4>
+        <div class="law-date">GENIAC 2024/2 啟動 · 源內 2026/4/24 開源</div>
+        <p>用國家力量確保專業資料「用得到、留得住、不出境」。</p>
+        <ul>
+          <li>GENIAC：METI 補助算力，兩輪 30 個國產 LLM／基礎模型專案</li>
+          <li>數位廳「源內 Gennai」開源：18 萬公務員 FY2026 使用</li>
+          <li>Fujitsu 2026/3 起產「日本製」主權 AI 伺服器</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SVG: 三層策略 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">日本的三層策略：訓練端寬 × 輸出端嚴 × 保存端自主</text>
+
+        <!-- Layer 1 訓練端 -->
+        <g transform="translate(20,54)">
+          <rect width="800" height="100" rx="12" fill="#f0fdf4" stroke="#27ae60" stroke-width="2"/>
+          <text x="24" y="36" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#155724">🟢 訓練端：大開</text>
+          <text x="24" y="64" font-family="Inter,sans-serif" font-size="13.5" fill="#333">著作權 30-4（AI 訓練不需授權）＋ APPI 2026（公開敏感個資免同意做統計/訓練）</text>
+          <text x="24" y="88" font-family="Inter,sans-serif" font-size="13.5" fill="#555">→ 全球最寬鬆的訓練資料環境，吸引外國模型公司來日訓練</text>
+        </g>
+
+        <!-- Layer 2 輸出端 -->
+        <g transform="translate(20,166)">
+          <rect width="800" height="100" rx="12" fill="#fffbeb" stroke="#f39c12" stroke-width="2"/>
+          <text x="24" y="36" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#b45309">🟡 輸出端：把關</text>
+          <text x="24" y="64" font-family="Inter,sans-serif" font-size="13.5" fill="#333">文化廳盯「模仿特定創作者風格」的輸出 ＋ APPI 課徵金罰濫用 ＋ 統計輸出禁含可識別資訊</text>
+          <text x="24" y="88" font-family="Inter,sans-serif" font-size="13.5" fill="#555">→ 保護落點從「輸入管制」移到「輸出問責」</text>
+        </g>
+
+        <!-- Layer 3 保存端 -->
+        <g transform="translate(20,278)">
+          <rect width="800" height="100" rx="12" fill="#fdf2f8" stroke="#8e44ad" stroke-width="2"/>
+          <text x="24" y="36" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#6b21a8">🟣 保存端：自主</text>
+          <text x="24" y="64" font-family="Inter,sans-serif" font-size="13.5" fill="#333">GENIAC 算力補助 ＋ 源內 Gennai 開源自建平台（self-hosted RAG）＋ 國產主權 AI 伺服器</text>
+          <text x="24" y="88" font-family="Inter,sans-serif" font-size="13.5" fill="#555">→ 政府與企業的專業資料留在自家基礎設施，不外流第三方 API</text>
+        </g>
+      </svg>
+      <figcaption><strong>核心洞察：</strong>日本不是「管 AI」，而是設計一條資料流水線——上游材料大方供給、中游加工分級、下游出口把關、倉儲留在自家。</figcaption>
+    </figure>
+
+    <div class="quote-box">
+      「僵硬的事前管制很快就會過時，反而可能阻礙創新」（rigid, ex-ante regulations are likely to quickly become obsolete and may hinder innovation）——AI 推進法的立法哲學。對比 EU AI Act 最高罰 3,500 萬歐元或全球營收 7%，日本選擇零罰則 + 聲譽機制。
+      <cite>— Future of Privacy Forum, "Understanding Japan's AI Promotion Act"</cite>
+    </div>
+  </div>
+
+  <!-- Tab 2: 資料保護技術 -->
+  <div class="tab-panel">
+    <div class="section-title">🛠 對應技術：資料加工分級 + PETs</div>
+
+    <!-- SVG: 資料加工三級制 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">日本的資料加工三級制：識別性越低 → 流通自由度越高</text>
+
+        <!-- 原始個資 -->
+        <g transform="translate(20,56)">
+          <rect width="800" height="104" rx="12" fill="#fde8e8" stroke="#e74c3c" stroke-width="2"/>
+          <text x="24" y="34" font-family="Inter,sans-serif" font-size="15.5" font-weight="700" fill="#c0392b">🔴 原始個人資料（個人情報）</text>
+          <text x="24" y="62" font-family="Inter,sans-serif" font-size="13.5" fill="#333">姓名、病歷、臉部掃描（新類別「特定生體識別個人情報」）</text>
+          <text x="24" y="88" font-family="Inter,sans-serif" font-size="13.5" fill="#c0392b">原則需同意；2026 修正後「公開資料做統計/AI 訓練」例外免同意，但輸出禁含識別資訊</text>
+        </g>
+
+        <!-- 仮名加工 -->
+        <g transform="translate(20,172)">
+          <rect width="800" height="104" rx="12" fill="#fffbeb" stroke="#f39c12" stroke-width="2"/>
+          <text x="24" y="34" font-family="Inter,sans-serif" font-size="15.5" font-weight="700" fill="#b45309">🟡 假名加工資訊（仮名加工情報）</text>
+          <text x="24" y="62" font-family="Inter,sans-serif" font-size="13.5" fill="#333">移除直接識別符（姓名→編號），持對照 key 仍可還原——「中間類別」</text>
+          <text x="24" y="88" font-family="Inter,sans-serif" font-size="13.5" fill="#555">適合企業內部分析、跨部門利用；不可提供第三方</text>
+        </g>
+
+        <!-- 匿名加工 -->
+        <g transform="translate(20,288)">
+          <rect width="800" height="104" rx="12" fill="#f0fdf4" stroke="#27ae60" stroke-width="2"/>
+          <text x="24" y="34" font-family="Inter,sans-serif" font-size="15.5" font-weight="700" fill="#155724">🟢 匿名加工資訊（匿名加工情報）</text>
+          <text x="24" y="62" font-family="Inter,sans-serif" font-size="13.5" fill="#333">再識別「技術上不可能」＋ 需第三方確認——這一點比 GDPR 更嚴（GDPR 該審查是選配）</text>
+          <text x="24" y="88" font-family="Inter,sans-serif" font-size="13.5" fill="#155724">可自由流通、供 AI 訓練、跨組織共享</text>
+        </g>
+      </svg>
+      <figcaption><strong>職人式把關：</strong>日本在「材料大方用」的同時，用「匿名化需第三方確認」這種比 GDPR 更嚴的工藝標準守住底線。PPC 2024 指引明確要求：AI 訓練集必須完全匿名化，或有合法依據。</figcaption>
+    </figure>
+
+    <div class="section-title" style="font-size:1.15rem;">隱私強化技術（PETs）對照表</div>
+    <div class="score-table">
+      <table>
+        <thead>
+          <tr>
+            <th>技術</th>
+            <th>原理</th>
+            <th>適用場景</th>
+            <th>資料出境？</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>聯邦學習</strong></td>
+            <td>模型動、資料不動——各機構本地訓練，只交換模型參數</td>
+            <td>跨醫院醫療 AI、跨銀行風控</td>
+            <td><span class="badge-s badge-green">✅ 不出境</span></td>
+          </tr>
+          <tr>
+            <td><strong>差分隱私</strong></td>
+            <td>加入數學雜訊，讓單一個體無法被反推</td>
+            <td>統計發佈、政府開放資料</td>
+            <td><span class="badge-s badge-green">✅ 輸出已去識別</span></td>
+          </tr>
+          <tr>
+            <td><strong>秘密計算</strong></td>
+            <td>資料加密狀態下直接運算（MPC / 同態加密）</td>
+            <td>跨企業聯合分析、供應鏈</td>
+            <td><span class="badge-s badge-green">✅ 全程加密</span></td>
+          </tr>
+          <tr>
+            <td><strong>零知識證明</strong></td>
+            <td>證明「我知道」但不揭露內容</td>
+            <td>身分驗證、資格審查</td>
+            <td><span class="badge-s badge-green">✅ 不揭露原始資料</span></td>
+          </tr>
+          <tr>
+            <td><strong>Self-hosted RAG</strong></td>
+            <td>知識庫向量化留在自家雲，LLM 可自帶（源內模式）</td>
+            <td>政府 / 企業內部知識問答</td>
+            <td><span class="badge-s badge-green">✅ 留在自家機房</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: 主權 AI 與保存 -->
+  <div class="tab-panel">
+    <div class="section-title">🏯 主權 AI：讓專業資料「留得住」的基礎設施</div>
+
+    <div class="quote-box">
+      日本數位廳 2026/4/24 把政府內部使用的生成式 AI 平台「源內（Gennai）」開源——程式碼 MIT 授權、文件 CC BY 4.0，「商用、修改、再散布都可以」。FY2026 目標讓約 18 萬名公務員使用。名字取自江戶時代博物學家平賀源內。
+      <cite>— lilting.ch, "Japan's Digital Agency open-sources its government AI Gennai"</cite>
+    </div>
+
+    <!-- SVG: Gennai 架構 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">「源內 Gennai」開源架構：LLM 完全解耦的政府 AI 平台</text>
+
+        <!-- Frontend -->
+        <rect x="290" y="52" width="260" height="52" rx="10" fill="#1a1a1a"/>
+        <text x="420" y="74" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="white">genai-web（職員前端）</text>
+        <text x="420" y="94" text-anchor="middle" font-family="Inter,sans-serif" font-size="12.5" fill="#ccc">React / TypeScript · MIT 授權</text>
+
+        <line x1="420" y1="104" x2="420" y2="126" stroke="#bbb" stroke-width="2"/>
+        <polygon points="415,126 420,135 425,126" fill="#bbb"/>
+
+        <!-- API layer -->
+        <rect x="290" y="135" width="260" height="52" rx="10" fill="#e8713a"/>
+        <text x="420" y="157" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="white">genai-ai-api（AI 微服務）</text>
+        <text x="420" y="177" text-anchor="middle" font-family="Inter,sans-serif" font-size="12.5" fill="#ffe">三雲模板 · LLM 解耦自帶</text>
+
+        <line x1="420" y1="187" x2="170" y2="222" stroke="#bbb" stroke-width="2"/>
+        <line x1="420" y1="187" x2="420" y2="222" stroke="#bbb" stroke-width="2"/>
+        <line x1="420" y1="187" x2="670" y2="222" stroke="#bbb" stroke-width="2"/>
+
+        <!-- AWS -->
+        <g transform="translate(40,222)">
+          <rect width="260" height="120" rx="10" fill="#fff8e6" stroke="#f39c12" stroke-width="2"/>
+          <text x="130" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="14.5" font-weight="700" fill="#b45309">AWS 模板</text>
+          <text x="130" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#333">政府營運 RAG</text>
+          <text x="130" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#555">S3 + OpenSearch</text>
+          <text x="130" y="106" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#555">文件向量化檢索</text>
+        </g>
+
+        <!-- Azure -->
+        <g transform="translate(310,222)">
+          <rect width="220" height="120" rx="10" fill="#eff6ff" stroke="#2980b9" stroke-width="2"/>
+          <text x="110" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="14.5" font-weight="700" fill="#1e40af">Azure 模板</text>
+          <text x="110" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#333">Self-hosted LLM 專用</text>
+          <text x="110" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#555">自帶 Llama / Qwen</text>
+          <text x="110" y="106" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#555">/ LLM-jp（國產）</text>
+        </g>
+
+        <!-- GCP -->
+        <g transform="translate(540,222)">
+          <rect width="260" height="120" rx="10" fill="#f0fdf4" stroke="#27ae60" stroke-width="2"/>
+          <text x="130" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="14.5" font-weight="700" fill="#155724">Google Cloud 模板</text>
+          <text x="130" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#333">法規 AI 專用</text>
+          <text x="130" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#555">整合「現行法資料」</text>
+          <text x="130" y="106" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#555">法遵 / 法規應用</text>
+        </g>
+
+        <text x="420" y="378" text-anchor="middle" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#8e44ad">🔒 不開源的部分：內部手冊、LLM 模型本體、生產日誌 → 敏感資料留在自家基礎設施</text>
+        <text x="420" y="406" text-anchor="middle" font-family="Inter,sans-serif" font-size="13.5" fill="#888">LLM 完全解耦 = 防 vendor lock-in ＋ 敏感資料不流向外部 API</text>
+      </svg>
+      <figcaption><strong>對台灣做政府 AI 的意義：</strong>源內 = 政府 self-hosted AI 平台的國家級開源驗證。三雲模板 + LLM 解耦的設計，直接可作為同路線（如 botrun）的參考架構。</figcaption>
+    </figure>
+
+    <div class="stack-card">
+      <h4>🏯 主權 AI 三件套 + 現實挑戰</h4>
+      <div class="layer">
+        <div class="layer-num">💰</div>
+        <div class="layer-info">
+          <h5>GENIAC（METI，2024/2 啟動）</h5>
+          <p>6 個月一輪的加速計畫，兩輪支援 30 個專案：日文特化 LLM、日本路況自駕、基礎模型技術。補助算力給 GMO、Sakura Internet、SoftBank、KDDI、東京大學等。</p>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">🖥</div>
+        <div class="layer-info">
+          <h5>國產硬體（Fujitsu，2026/3 投產）</h5>
+          <p>「日本製」主權 AI 伺服器在笠嶋工廠開始製造，支援關鍵任務。IDC 統計：私有 AI 基礎設施已占日本 AI 用量 20–30%。</p>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">⚠️</div>
+        <div class="layer-info">
+          <h5>現實挑戰</h5>
+          <p>METI 推估 2040 年 AI／機器人人才缺口 <strong>320 萬人</strong>；日文訓練語料量遠落後英文與中文；算力仍依賴 NVIDIA。所以日本選擇「規則開放借外力、基礎設施留主權」的柔道式策略。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4: 洞見與啟示 -->
+  <div class="tab-panel">
+    <div class="section-title">💡 洞見：保護的落點正在移動</div>
+
+    <!-- SVG: 對比 EU vs 日本 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">兩種哲學：EU「輸入端築牆」 vs 日本「輸出端問責」</text>
+
+        <!-- EU -->
+        <g transform="translate(20,56)">
+          <rect width="390" height="280" rx="12" fill="#fff5f5" stroke="#b23b3b" stroke-width="2"/>
+          <text x="195" y="36" text-anchor="middle" font-family="Inter,sans-serif" font-size="15.5" font-weight="700" fill="#b23b3b">❌ EU AI Act：輸入端築牆</text>
+          <text x="30" y="74" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 四級風險分類，高風險事前審查</text>
+          <text x="30" y="104" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 罰款最高 3,500 萬歐元</text>
+          <text x="30" y="134" font-family="Inter,sans-serif" font-size="13.5" fill="#333">　或全球營收 7%</text>
+          <text x="30" y="164" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 訓練資料需詳盡揭露與授權</text>
+          <text x="30" y="194" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 保護基本權為最高目標</text>
+          <text x="30" y="236" font-family="Inter,sans-serif" font-size="13" fill="#b23b3b">代價：合規成本高，新創與研究</text>
+          <text x="30" y="260" font-family="Inter,sans-serif" font-size="13" fill="#b23b3b">出走，模型公司繞道</text>
+        </g>
+
+        <!-- Japan -->
+        <g transform="translate(430,56)">
+          <rect width="390" height="280" rx="12" fill="#f0fdf4" stroke="#4a7c59" stroke-width="2.5"/>
+          <text x="195" y="36" text-anchor="middle" font-family="Inter,sans-serif" font-size="15.5" font-weight="700" fill="#2d5a3d">✅ 日本：輸出端問責</text>
+          <text x="30" y="74" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 訓練端全球最寬鬆（30-4 + APPI）</text>
+          <text x="30" y="104" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 罰「濫用」不罰「使用」：</text>
+          <text x="30" y="134" font-family="Inter,sans-serif" font-size="13.5" fill="#333">　課徵金＝違法所得、自首減半</text>
+          <text x="30" y="164" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 輸出侵權／再識別才追責</text>
+          <text x="30" y="194" font-family="Inter,sans-serif" font-size="13.5" fill="#333">• 主權基礎設施保存專業資料</text>
+          <text x="30" y="236" font-family="Inter,sans-serif" font-size="13" fill="#2d5a3d">目標：吸引全球模型公司來日訓練，</text>
+          <text x="30" y="260" font-family="Inter,sans-serif" font-size="13" fill="#2d5a3d">同時把資料主權留在國內</text>
+        </g>
+      </svg>
+      <figcaption>媒體對 APPI 2026 修正的評語：「日本剛讓 AI 用個資訓練合法化——矽谷正在抄筆記」（Silicon Valley is taking notes）。這不是放棄保護，而是把保護的落點從輸入移到輸出。</figcaption>
+    </figure>
+
+    <div class="insight">
+      <strong>🎯 五大洞見</strong>
+      <strong style="display:inline;font-size:1.02rem;">1. 三層策略</strong> — 訓練端寬（材料大方給）× 輸出端嚴（出口把關）× 保存端自主（倉儲留自家）。<br>
+      <strong style="display:inline;font-size:1.02rem;">2. 罰則哲學</strong> — 罰「濫用」不罰「使用」：課徵金＝違法所得、累犯 ×1.5、自首減半，鼓勵企業自我揭露。<br>
+      <strong style="display:inline;font-size:1.02rem;">3. 加工分級</strong> — 匿名／假名兩級加工制度讓「保護」變成可操作的工程規格，而不是模糊的法律恐懼。<br>
+      <strong style="display:inline;font-size:1.02rem;">4. 柔道式策略</strong> — 面對人才缺口 320 萬與日文語料劣勢，用開放規則借外力、用主權基礎設施留資料。<br>
+      <strong style="display:inline;font-size:1.02rem;">5. 對台灣的啟示</strong> — 政府 self-hosted AI 路線被日本國家級驗證且開源（源內）；資料治理的談判語言應從「能不能用」轉為「怎麼分級加工、怎麼留在境內、濫用怎麼罰」。
+    </div>
+
+    <div class="quote-box">
+      🐻 肉乙：「別跟客戶辯論『能不能用資料』，要展示『資料怎麼被加工分級、怎麼留在自家機房、濫用怎麼罰』。」<br>
+      🎨 卡拉：「日本把資料當公共財的原料而不是隱私炸彈，但用和菓子職人的工藝精神把關——材料大方用，成品出手前要過師傅的眼。」
+      <cite>— Forever-AI 團隊討論，2026-07-06</cite>
+    </div>
+  </div>
+
+  <div class="sources">
+    <h3>📚 原始來源</h3>
+    <a href="https://fpf.org/blog/understanding-japans-ai-promotion-act-an-innovation-first-blueprint-for-ai-regulation/" target="_blank">Future of Privacy Forum — Understanding Japan's AI Promotion Act</a><br>
+    <a href="https://www.morihamada.com/en/insights/newsletters/138006" target="_blank">Mori Hamada — Proposed Amendments to Japan's APPI (2026)</a><br>
+    <a href="https://v45.diplomacy.edu/updates/japan-appi-personal-data-ai-fines" target="_blank">Digital Watch — Japan approves APPI amendment bill (AI training &amp; fines)</a><br>
+    <a href="https://www.techpolicy.press/ai-training-and-copyright-infringement-solutions-from-asia/" target="_blank">TechPolicy.Press — AI Training and Copyright: Solutions from Asia（著作權 30-4）</a><br>
+    <a href="https://lilting.ch/en/articles/digital-agency-gennai-oss-government-ai" target="_blank">lilting.ch — Japan's Digital Agency open-sources Gennai（源內開源）</a><br>
+    <a href="https://asiatimes.com/2025/09/inside-japans-struggle-to-build-sovereign-ai/" target="_blank">Asia Times — Inside Japan's struggle to build sovereign AI</a><br>
+    <a href="https://global.fujitsu/en-global/pr/news/2026/02/12-01" target="_blank">Fujitsu — Sovereign AI servers made in Japan</a><br>
+    <a href="https://anonym.legal/blog/ppc-japan-appi-privacy-compliance-guide-2025" target="_blank">anonym.legal — Japan PPC APPI AI Training Data Compliance</a><br>
+    <a href="https://www.private-ai.com/en/blog/appi-japan" target="_blank">Private AI — Unlocking Compliance with APPI（匿名／假名加工）</a>
+  </div>
+
+  <footer>
+    日本 AI 政策全解析 · 2026-07-06 · 專業資料的保護與保存
+  </footer>
+</div>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+</script>
+</body>
+</html>
