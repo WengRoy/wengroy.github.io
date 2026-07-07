@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>吉他和弦大師（22 格）— Roy's Lab</title>
+    <title>吉他和弦大師（22 格）— 和弦 × 音階 × 即興 Solo — Roy's Lab</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎸</text></svg>">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -190,6 +190,24 @@
         }
         .tab-card-body svg { display: block; }
 
+        /* SOLO GUIDE（即興 Solo 模式引導卡） */
+        .solo-guide { margin-top: 12px; }
+        .solo-guide-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .sg-item {
+            background: #fef9ef; border: 2px solid #f0e6d2; border-radius: 10px;
+            padding: 10px 12px; display: flex; flex-direction: column; gap: 3px;
+        }
+        .sg-k { font-size: 0.72rem; font-weight: 700; color: #999; }
+        .sg-v { font-family: 'Baloo 2', cursive; font-size: 1.05rem; font-weight: 700; color: var(--warm-brown); line-height: 1.15; }
+        .sg-sub { font-size: 0.74rem; color: var(--warm-blue); letter-spacing: 0.5px; }
+        .sg-hint {
+            margin-top: 10px; background: #fff8e6; border-left: 4px solid var(--warm-orange);
+            border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 0.86rem;
+            color: var(--warm-brown); line-height: 1.65;
+        }
+        .sg-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .degree-toggle-wrap { margin-top: 12px; }
+
         /* LEGEND */
         .legend {
             display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;
@@ -226,7 +244,7 @@
         <img src="botroy-guitar.jpg" alt="波特人羅伊" class="header-img">
         <div class="header-text">
             <h1><span>吉他和弦</span>大師</h1>
-            <p><i data-lucide="guitar"></i> Guitar Chord Master — 和弦指板 × 進行編排（22 格）</p>
+            <p><i data-lucide="guitar"></i> Guitar Chord Master — 和弦 × 音階 × 即興 Solo（22 格）</p>
         </div>
     </div>
 
@@ -238,6 +256,7 @@
         <div class="mode-toggle" id="mainTab" style="margin-bottom:12px; width:fit-content;">
             <button class="active" onclick="switchTab('chord')">和弦 Chord</button>
             <button onclick="switchTab('scale')">音階 Scale</button>
+            <button onclick="switchTab('solo')">即興 Solo</button>
         </div>
 
         <div class="sel-label"><i data-lucide="key-round"></i> 根音 Key</div>
@@ -255,6 +274,15 @@
             <div class="sel-row" id="scaleRow"></div>
         </div>
 
+        <!-- 即興 Solo 模式引導 -->
+        <div id="soloSection" style="display:none;">
+            <div class="solo-guide" id="soloGuide"></div>
+            <div class="mode-toggle degree-toggle-wrap" id="degreeToggleWrap" style="width:fit-content;">
+                <button class="active" data-mode="degree" onclick="setLabelMode('degree')">顯示級數 1·♭3·5</button>
+                <button data-mode="note" onclick="setLabelMode('note')">顯示音名 E·G·B</button>
+            </div>
+        </div>
+
         <div class="chord-info" id="chordInfo">
             <span class="chord-name" id="chordName">C</span>
             <span class="chord-notes" id="chordNotes">C E G</span>
@@ -265,13 +293,21 @@
     <!-- 指板 -->
     <div class="panel">
         <div class="panel-title"><i data-lucide="align-horizontal-space-between"></i> 吉他指板</div>
-        <div class="legend">
+        <div class="legend" id="chordLegend">
             <span class="legend-item"><span class="legend-dot" style="background:var(--warm-red)"></span>根音 R</span>
             <span class="legend-item"><span class="legend-dot" style="background:var(--warm-blue)"></span>三度</span>
             <span class="legend-item"><span class="legend-dot" style="background:var(--warm-green)"></span>五度</span>
             <span class="legend-item"><span class="legend-dot" style="background:var(--warm-purple)"></span>七度</span>
             <span class="legend-item"><span class="legend-dot" style="background:var(--warm-gold)"></span>延伸音</span>
             <span class="legend-item" style="font-weight:700; color:var(--warm-orange);">◎ = 已選取</span>
+        </div>
+        <div class="legend" id="soloLegend" style="display:none;">
+            <span class="legend-item"><span class="legend-dot" style="background:var(--warm-red)"></span>1 根音</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--warm-blue)"></span>3 三度</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--warm-green)"></span>5 五度</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--warm-purple)"></span>♭7 七度</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#d9b451; width:9px; height:9px;"></span>延伸音（小圈）</span>
+            <span class="legend-item" style="font-weight:700; color:var(--comic-black);">⌇ 虛線圈 = 1·5·♭7 簡化和弦</span>
         </div>
         <div class="fretboard-wrap">
             <svg id="fretboardSvg"></svg>
@@ -383,6 +419,33 @@ const SCALE_TYPES = [
 // 音階用的顏色（依音階度數循環）
 const SCALE_COLORS = ['#c0392b','#e8713a','#d4a853','#27ae60','#2e86ab','#8e44ad','#1abc9c','#e74c3c','#f39c12','#3498db','#9b59b6','#16a085'];
 
+// === 即興 Solo：級數標籤（半音 → 級數）===
+const DEGREE_LABELS = { 0:'1', 1:'♭2', 2:'2', 3:'♭3', 4:'3', 5:'4', 6:'♭5', 7:'5', 8:'♭6', 9:'6', 10:'♭7', 11:'7' };
+const SOLO_PASSING_COLOR = '#d9b451'; // 延伸音（非和弦音）顏色
+
+// === 和弦↔音階配對表（chord-scale theory）===
+// 以和弦 suffix 為 key：si=建議音階半音, pent=五聲名, pi=五聲半音, shell=簡化和弦半音(1-5-♭7 之類), scale=音階名, hint=提示
+const CHORD_SCALE_MAP = {
+    '':     { scale:'Ionian（大調音階）',   si:[0,2,4,5,7,9,11], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,4,7],  hint:'大三和弦 → 大調音階／大調五聲。Solo 多繞 3、5 度，明亮又穩。' },
+    'm':    { scale:'Aeolian（自然小調）',   si:[0,2,3,5,7,8,10], pent:'小調五聲', pi:[0,3,5,7,10], shell:[0,3,7],  hint:'小三和弦 → 自然小調／小調五聲，加一顆 ♭7 味道立刻濃。' },
+    '6':    { scale:'Ionian（大調音階）',   si:[0,2,4,5,7,9,11], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,7,9],  hint:'大六和弦 → 大調音階，6 度是甜味來源。' },
+    'm6':   { scale:'Dorian',              si:[0,2,3,5,7,9,10], pent:'小調五聲', pi:[0,3,5,7,10], shell:[0,7,9],  hint:'小六和弦 → Dorian，大六度(6)是它的招牌色。' },
+    'dim':  { scale:'半全減音階',           si:[0,2,3,5,6,8,9,11], pent:'減和弦分解', pi:[0,3,6,9], shell:[0,3,6],  hint:'減三和弦 → 減音階，緊張感強，通常要往下解決。' },
+    'aug':  { scale:'全音音階',             si:[0,2,4,6,8,10],   pent:'全音音階', pi:[0,2,4,6,8],  shell:[0,4,8],  hint:'增三和弦 → 全音音階，夢幻懸浮、沒有解決感。' },
+    '7':    { scale:'Mixolydian',          si:[0,2,4,5,7,9,10], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,7,10], hint:'屬七和弦 → Mixolydian，♭7 是靈魂；藍調可再加 ♭5。' },
+    'maj7': { scale:'Ionian（大調音階）',   si:[0,2,4,5,7,9,11], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,7,11], hint:'大七和弦 → Ionian（或 Lydian），避免久留在 4 度。' },
+    'm7':   { scale:'Dorian',              si:[0,2,3,5,7,9,10], pent:'小調五聲', pi:[0,3,5,7,10], shell:[0,7,10], hint:'Roy 的最愛！Em7 → E Dorian／E 小調五聲，1-5-♭7 shell 超好用。' },
+    'dim7': { scale:'全減音階',             si:[0,2,3,5,6,8,9,11], pent:'減七分解', pi:[0,3,6,9],  shell:[0,3,6],  hint:'減七和弦 → 對稱減音階，每 3 格重複一次，把位好記。' },
+    '9':    { scale:'Mixolydian',          si:[0,2,4,5,7,9,10], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,7,10], hint:'九和弦（屬 family）→ Mixolydian，9 度增添色彩。' },
+    'maj9': { scale:'Ionian（大調音階）',   si:[0,2,4,5,7,9,11], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,7,11], hint:'大九和弦 → Ionian／Lydian，色彩明亮。' },
+    'm9':   { scale:'Dorian',              si:[0,2,3,5,7,9,10], pent:'小調五聲', pi:[0,3,5,7,10], shell:[0,7,10], hint:'小九和弦 → Dorian，溫暖帶爵士味。' },
+    '11':   { scale:'Mixolydian',          si:[0,2,4,5,7,9,10], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,7,10], hint:'十一和弦 → Mixolydian，11(4)度是張力點。' },
+    '13':   { scale:'Mixolydian',          si:[0,2,4,5,7,9,10], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,7,10], hint:'十三和弦 → Mixolydian，13(6)度很爵士。' },
+    'sus2': { scale:'Mixolydian',          si:[0,2,4,5,7,9,10], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,2,7],  hint:'Sus2 → 2 度取代 3 度，空靈；大調系音階皆可。' },
+    'sus4': { scale:'Mixolydian',          si:[0,2,4,5,7,9,10], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,5,7],  hint:'Sus4 → 4 度取代 3 度，帶懸念、想解決回 3。' },
+    'add9': { scale:'Ionian（大調音階）',   si:[0,2,4,5,7,9,11], pent:'大調五聲', pi:[0,2,4,7,9],  shell:[0,4,7],  hint:'Add9 → 大調音階，9 度增色但不加 7。' },
+};
+
 // === STATE ===
 let currentKey = 0; // index into NOTES
 let currentType = 0; // index into CHORD_TYPES
@@ -394,6 +457,7 @@ let isProgressionPlaying = false;
 let progressionTimeout = null;
 let playMode = 'strum'; // 'strum' | 'arpeggio'
 let loopPlay = false;
+let labelMode = 'degree'; // 'degree' | 'note'（即興 Solo 模式的指板標籤）
 
 // === AUDIO ===
 let pluckSynth = null;
@@ -459,20 +523,54 @@ function getNoteRole(noteIdx, keyIdx, typeIdx) {
 function switchTab(tab) {
     currentTab = tab;
     selectedNotes = [];
-    document.getElementById('chordSection').style.display = tab === 'chord' ? '' : 'none';
+    // 和弦種類選擇器：在「和弦」與「即興 Solo」模式都要顯示（solo 也是先選和弦）
+    document.getElementById('chordSection').style.display = (tab === 'chord' || tab === 'solo') ? '' : 'none';
     document.getElementById('scaleSection').style.display = tab === 'scale' ? '' : 'none';
-    document.querySelectorAll('#mainTab button').forEach(b => {
-        b.classList.toggle('active', b.textContent.includes(tab === 'chord' ? '和弦' : '音階'));
-    });
+    document.getElementById('soloSection').style.display = tab === 'solo' ? '' : 'none';
+
+    const order = ['chord', 'scale', 'solo'];
+    document.querySelectorAll('#mainTab button').forEach((b, i) => b.classList.toggle('active', order[i] === tab));
+
+    // 圖例切換
+    const cl = document.getElementById('chordLegend');
+    const sl = document.getElementById('soloLegend');
+    if (cl) cl.style.display = tab === 'solo' ? 'none' : '';
+    if (sl) sl.style.display = tab === 'solo' ? '' : 'none';
+
     update();
+}
+
+// 取得當前和弦對應的音階配對資料
+function getSoloData() {
+    const suffix = CHORD_TYPES[currentType].suffix;
+    return CHORD_SCALE_MAP[suffix] || CHORD_SCALE_MAP[''];
+}
+
+// 即興 Solo 模式：判斷某音在「和弦音 / 延伸音」中的角色與級數
+function getSoloNoteInfo(noteIdx) {
+    const semis = (noteIdx - currentKey + 12) % 12;
+    const map = getSoloData();
+    if (!map.si.includes(semis)) return null; // 不在建議音階內
+    const chordSemis = CHORD_TYPES[currentType].intervals.map(x => x % 12);
+    const shellSemis = map.shell.map(x => x % 12);
+    const isChord = chordSemis.includes(semis);
+    const isShell = shellSemis.includes(semis);
+    let role;
+    if (semis === 0) role = 'root';
+    else if (isChord) role = getNoteRole(noteIdx, currentKey, currentType) || 'ext';
+    else role = 'passing';
+    return { semis, isChord, isShell, role, degree: DEGREE_LABELS[semis] };
 }
 
 // === 取得當前顯示的音符（和弦或音階） ===
 function getCurrentIntervals() {
     if (currentTab === 'chord') {
         return CHORD_TYPES[currentType].intervals;
-    } else {
+    } else if (currentTab === 'scale') {
         return SCALE_TYPES[currentScale].intervals;
+    } else {
+        // 即興 Solo：顯示整個建議音階（和弦音＋延伸音都畫出來）
+        return getSoloData().si;
     }
 }
 
@@ -482,11 +580,11 @@ function getCurrentNoteIndices() {
 }
 
 function getCurrentDisplayName() {
-    if (currentTab === 'chord') {
-        return NOTES[currentKey] + CHORD_TYPES[currentType].suffix;
-    } else {
+    if (currentTab === 'scale') {
         return NOTES[currentKey] + ' ' + SCALE_TYPES[currentScale].name;
     }
+    // 和弦 & 即興 Solo 都用和弦全名
+    return NOTES[currentKey] + CHORD_TYPES[currentType].suffix;
 }
 
 function getCurrentFormula() {
@@ -550,6 +648,17 @@ function updateSelectors() {
 }
 
 function updateChordInfo() {
+    if (currentTab === 'solo') {
+        const chordName = NOTES[currentKey] + CHORD_TYPES[currentType].suffix;
+        const map = getSoloData();
+        const shellNotes = map.shell.map(iv => NOTES[(currentKey + iv) % 12]);
+        const shellDeg = map.shell.map(iv => DEGREE_LABELS[iv % 12]).join('-');
+        document.getElementById('chordName').textContent = chordName;
+        document.getElementById('chordNotes').textContent = NOTES[currentKey] + ' ' + map.scale;
+        document.getElementById('chordFormula').textContent = '簡化 shell：' + shellNotes.join('-') + '（' + shellDeg + '）';
+        renderSoloGuide(chordName, map, shellNotes, shellDeg);
+        return;
+    }
     const name = getCurrentDisplayName();
     const noteIndices = getCurrentNoteIndices();
     const noteNames = noteIndices.map(i => NOTES[i]);
@@ -557,6 +666,57 @@ function updateChordInfo() {
     document.getElementById('chordName').textContent = name;
     document.getElementById('chordNotes').textContent = noteNames.join('  ');
     document.getElementById('chordFormula').textContent = formula;
+}
+
+// 即興 Solo 引導卡
+function renderSoloGuide(chordName, map, shellNotes, shellDeg) {
+    const el = document.getElementById('soloGuide');
+    if (!el) return;
+    const scaleNotes = map.si.map(iv => NOTES[(currentKey + iv) % 12]).join(' ');
+    const pentNotes = map.pi.map(iv => NOTES[(currentKey + iv) % 12]).join(' ');
+    el.innerHTML =
+        '<div class="solo-guide-grid">' +
+          '<div class="sg-item"><span class="sg-k">🎯 建議音階</span><span class="sg-v">' + NOTES[currentKey] + ' ' + map.scale + '</span><span class="sg-sub">' + scaleNotes + '</span></div>' +
+          '<div class="sg-item"><span class="sg-k">⭐ 簡化五聲（好上手）</span><span class="sg-v">' + map.pent + '</span><span class="sg-sub">' + pentNotes + '</span></div>' +
+          '<div class="sg-item"><span class="sg-k">🔲 簡化和弦 shell</span><span class="sg-v">' + shellNotes.join(' - ') + '</span><span class="sg-sub">' + shellDeg + '</span></div>' +
+        '</div>' +
+        '<div class="sg-hint">💡 ' + map.hint + '</div>' +
+        '<div class="sg-actions">' +
+          '<button class="action-btn btn-arp" onclick="playSoloDemo()"><i data-lucide="sparkles"></i> 示範：先彈 ' + chordName + ' → 再走音階</button>' +
+          '<button class="action-btn btn-listen" onclick="playPentRun()"><i data-lucide="activity"></i> 聽五聲跑句</button>' +
+        '</div>';
+    lucide.createIcons({ nodes: el.querySelectorAll('i') });
+}
+
+// 切換指板標籤：級數 / 音名
+function setLabelMode(m) {
+    labelMode = m;
+    document.querySelectorAll('#degreeToggleWrap button').forEach(b =>
+        b.classList.toggle('active', b.dataset.mode === m));
+    buildFretboard();
+}
+
+// 示範：先刷和弦，再由根音走一遍建議音階
+async function playSoloDemo() {
+    await Tone.start();
+    initAudio();
+    const root = 48 + currentKey;
+    const chordMidis = CHORD_TYPES[currentType].intervals.map(i => root + i);
+    playNotes(chordMidis, true);
+    const seq = getSoloData().si.concat([12]);
+    const start = Tone.now() + 1.15;
+    seq.forEach((iv, k) => pluckSynth.triggerAttackRelease(midiToFreq(root + iv), '8n', start + k * 0.19));
+}
+
+// 五聲上行 + 下行跑句
+async function playPentRun() {
+    await Tone.start();
+    initAudio();
+    const root = 48 + currentKey;
+    const pent = getSoloData().pi.concat([12]);
+    const seq = [...pent, ...pent.slice(0, -1).reverse()];
+    const start = Tone.now() + 0.05;
+    seq.forEach((iv, k) => pluckSynth.triggerAttackRelease(midiToFreq(root + iv), '8n', start + k * 0.16));
 }
 
 // === SVG 指板繪製（參考 guitar-modes 風格）===
@@ -635,13 +795,15 @@ function buildFretboard() {
 
             if (!chordNoteIndices.includes(noteIdx)) continue;
 
-            let role, color, isRoot;
+            let role, color, isRoot, labelText, textColor = 'white', radius, fillOpacity = 1, isShell = false;
             if (currentTab === 'chord') {
                 role = getNoteRole(noteIdx, currentKey, currentType);
                 if (!role) continue;
                 color = ROLE_COLORS[role];
                 isRoot = role === 'root';
-            } else {
+                labelText = NOTES[noteIdx];
+                radius = isRoot ? NR + 2 : NR;
+            } else if (currentTab === 'scale') {
                 role = getScaleNoteRole(noteIdx);
                 if (!role) continue;
                 isRoot = role === 'root';
@@ -651,11 +813,31 @@ function buildFretboard() {
                     const degIdx = parseInt(role.split('-')[1]);
                     color = SCALE_COLORS[degIdx % SCALE_COLORS.length];
                 }
+                labelText = NOTES[noteIdx];
+                radius = isRoot ? NR + 2 : NR;
+            } else {
+                // 即興 Solo：和弦音（大圈、角色色）＋ 延伸音（小圈、金色半透明）
+                const info = getSoloNoteInfo(noteIdx);
+                if (!info) continue;
+                isRoot = info.role === 'root';
+                isShell = info.isShell;
+                if (info.isChord) {
+                    color = ROLE_COLORS[info.role] || '#c0392b';
+                    radius = isRoot ? NR + 2 : NR;
+                    textColor = 'white';
+                    fillOpacity = 1;
+                } else {
+                    color = SOLO_PASSING_COLOR;
+                    radius = NR - 3;
+                    textColor = '#5a4a2a';
+                    fillOpacity = 0.72;
+                }
+                labelText = labelMode === 'degree' ? info.degree : NOTES[noteIdx];
             }
 
             const cx = getNoteX(f);
             const cy = getStringY(si);
-            const r = isRoot ? NR + 2 : NR;
+            const r = radius;
             const isSelected = selectedNotes.some(n => n.string === si && n.fret === f);
 
             // 選取狀態外圈
@@ -664,18 +846,22 @@ function buildFretboard() {
                 svg += `<circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="white" stroke-width="2" opacity="0.6"/>`;
             }
 
+            // shell（1·5·♭7 簡化和弦）虛線外圈
+            if (isShell) {
+                svg += `<circle cx="${cx}" cy="${cy}" r="${r + 5}" fill="none" stroke="#1a1a1a" stroke-width="1.6" stroke-dasharray="2.5,2.5" opacity="0.75"/>`;
+            }
+
             // 光暈
-            svg += `<circle cx="${cx}" cy="${cy}" r="${r + 3}" fill="${color}" opacity="0.2"/>`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="${r + 3}" fill="${color}" opacity="0.18"/>`;
             // 主圓
-            svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" stroke="rgba(255,255,255,0.3)" stroke-width="2" class="note-circle" data-si="${si}" data-fret="${f}" data-note="${noteIdx}" data-midi="${midi}"/>`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" fill-opacity="${fillOpacity}" stroke="rgba(255,255,255,0.3)" stroke-width="2" class="note-circle" data-si="${si}" data-fret="${f}" data-note="${noteIdx}" data-midi="${midi}"/>`;
             // 根音白環
             if (isRoot) {
-                svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="white" stroke-width="3" opacity="0.4"/>`;
+                svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="white" stroke-width="3" opacity="0.5"/>`;
             }
-            // 音名文字
-            const noteName = NOTES[noteIdx];
-            const fs = noteName.length > 1 ? 10 : 12;
-            svg += `<text x="${cx}" y="${cy + 4.5}" text-anchor="middle" fill="white" font-size="${fs}" font-weight="bold" font-family="-apple-system,sans-serif" pointer-events="none">${noteName}</text>`;
+            // 標籤（級數或音名）
+            const fs = labelText.length > 1 ? 10 : 12;
+            svg += `<text x="${cx}" y="${cy + 4.5}" text-anchor="middle" fill="${textColor}" font-size="${fs}" font-weight="bold" font-family="-apple-system,sans-serif" pointer-events="none">${labelText}</text>`;
         }
     });
 
@@ -735,12 +921,20 @@ function playArpeggio(midiNotes) {
 }
 
 // === LISTEN ===
+// 預設試聽的音（solo 模式沒選音時用「和弦音」而非整個音階）
+function getDefaultListenMidis() {
+    if (currentTab === 'solo') {
+        return CHORD_TYPES[currentType].intervals.map(i => 48 + currentKey + i);
+    }
+    return getCurrentNoteIndices().map(n => 48 + n);
+}
+
 async function listenChord() {
     await Tone.start();
     initAudio();
     const midis = selectedNotes.length > 0
         ? selectedNotes.map(n => n.midi)
-        : getCurrentNoteIndices().map(n => 48 + n);
+        : getDefaultListenMidis();
     playNotes(midis);
 }
 
@@ -749,7 +943,7 @@ async function listenArpeggio() {
     initAudio();
     const midis = selectedNotes.length > 0
         ? selectedNotes.map(n => n.midi)
-        : getCurrentNoteIndices().map(n => 48 + n);
+        : getDefaultListenMidis();
     playArpeggio(midis);
 }
 
