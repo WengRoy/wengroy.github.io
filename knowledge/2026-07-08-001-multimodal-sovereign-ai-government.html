@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多模態全機敏年代：政府已進入「資料不出門」的地端 AI 時代</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: #fdf6e3;
+      background-image: radial-gradient(circle, #d4b896 1px, transparent 1px);
+      background-size: 18px 18px;
+      color: #1a1a1a; min-height: 100vh; padding: 24px 16px; font-size: 17px;
+    }
+    .page { max-width: 980px; margin: 0 auto; }
+    .back-link { display: inline-block; margin-bottom: 16px; color: #e8713a; text-decoration: none; font-size: 0.85rem; font-weight: 700; }
+    .back-link:hover { text-decoration: underline; }
+
+    /* ===== 外框漫畫暖色 ===== */
+    .header { border: 3px solid #1a1a1a; border-radius: 14px; background: #fff8ee; box-shadow: 5px 5px 0 #1a1a1a; padding: 30px 34px; margin-bottom: 20px; }
+    .header-badge { display: inline-block; background: #e8713a; color: white; font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.88rem; padding: 5px 16px; border-radius: 20px; border: 2px solid #1a1a1a; box-shadow: 2px 2px 0 #1a1a1a; margin-bottom: 14px; }
+    .header .kicker { font-family:'Baloo 2',cursive; font-size:0.9rem; color:#6b4226; font-weight:700; margin-bottom:6px; }
+    .header h1 { font-family: 'Baloo 2', cursive; font-size: 2.05rem; font-weight: 800; color: #1a1a1a; line-height: 1.28; margin-bottom: 12px; }
+    .header h1 span { color: #e8713a; }
+    .header p { color: #6b4226; font-size: 1.05rem; line-height: 1.75; }
+    .series-nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px; }
+    .series-pill { font-family:'Baloo 2',cursive; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:20px; border:2px solid #1a1a1a; text-decoration:none; color:#6b4226; background:#fff8ee; box-shadow:2px 2px 0 #1a1a1a; }
+    .series-pill.current { background:#1a1a1a; color:#fff; }
+    .series-pill:hover:not(.current){ background:#fdf6e3; }
+
+    .tab-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tab-btn { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.96rem; padding: 10px 16px; border: 3px solid #1a1a1a; border-bottom: none; border-radius: 10px 10px 0 0; background: #fff8ee; cursor: pointer; transition: all 0.12s; color: #6b4226; }
+    .tab-btn.active { background: #e8713a; color: white; }
+    .tab-btn:hover:not(.active) { background: #fdf6e3; transform: translateY(-2px); }
+    .tab-panel { display: none; border: 3px solid #1a1a1a; border-radius: 0 8px 8px 8px; padding: 30px 30px 34px; background: #fdf6e3; box-shadow: 5px 5px 0 #1a1a1a; }
+    .tab-panel.active { display: block; }
+
+    .section-title { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; color: #6b4226; margin: 4px 0 20px; display: flex; align-items: center; gap: 8px; }
+    .lead { font-size: 1.02rem; color:#5a4a38; line-height:1.85; margin-bottom:20px; }
+
+    .quote-box { border-left: 5px solid #e8713a; background: #fff8ee; padding: 16px 22px; border-radius: 0 8px 8px 0; margin: 20px 0; font-size: 1.02rem; line-height: 1.8; color: #333; }
+    .quote-box cite { display: block; font-style: normal; font-weight: 700; color: #e8713a; font-size: 0.9rem; margin-top: 8px; }
+    .quote-box .src { font-size:0.82rem; }
+    .quote-box .src a { color:#c2571f; }
+
+    .insight { background: #e8713a; color: #fff; border: 3px solid #1a1a1a; border-radius: 10px; padding: 22px 26px; box-shadow: 4px 4px 0 #1a1a1a; margin: 24px 0; font-size: 1.02rem; line-height: 1.85; }
+    .insight strong.h { display: block; font-size: 1.2rem; margin-bottom: 8px; }
+
+    /* ===== 內部丹麥簡約 ===== */
+    .svgcard { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 24px; overflow: hidden; }
+    .svgcard figcaption { padding: 14px 22px; font-size: 0.96rem; color: #555; border-top: 1px solid #f0f0f0; line-height: 1.7; }
+    .svgcard figcaption strong { color: #333; }
+
+    .law-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+    @media (max-width: 680px) { .law-grid { grid-template-columns: 1fr; } }
+    .law-card { background: white; border-radius: 12px; padding: 22px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); border-top: 5px solid #ccc; }
+    .law-card .law-icon { font-size: 1.9rem; margin-bottom: 6px; }
+    .law-card h4 { font-family: 'Inter','Noto Sans TC', sans-serif; font-size: 1.08rem; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; line-height: 1.4; }
+    .law-card .law-date { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; color: #999; margin-bottom: 10px; }
+    .law-card p { font-size: 0.95rem; color: #444; line-height: 1.7; }
+    .law-card .src { margin-top:10px; font-size:0.8rem; }
+    .law-card .src a { color:#c2571f; text-decoration:none; }
+    .law-card .src a:hover { text-decoration:underline; }
+
+    .score-table { background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 24px; }
+    .score-table table { width: 100%; border-collapse: collapse; min-width: 640px; }
+    .score-table th { background: #f8f9fa; font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 0.92rem; font-weight: 700; color: #555; padding: 13px 16px; text-align: left; border-bottom: 1px solid #eee; }
+    .score-table td { font-size: 0.95rem; color: #333; padding: 12px 16px; border-bottom: 1px solid #f5f5f5; line-height: 1.6; }
+    .score-table tr:last-child td { border-bottom: none; }
+    .score-table tr:hover td { background: #fafafa; }
+    .badge-s { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; white-space: nowrap; }
+    .badge-green { background: #d5f5e3; color: #155724; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-purple { background: #ede9fe; color: #6b21a8; }
+
+    /* 影片卡 */
+    .video-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:680px){ .video-grid{ grid-template-columns:1fr; } }
+    .video-card { background:white; border-radius:12px; padding:18px 20px; box-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(0,0,0,0.06); display:flex; flex-direction:column; }
+    .video-card .vtop { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+    .chan { font-family:'Inter',sans-serif; font-size:0.74rem; font-weight:700; padding:2px 9px; border-radius:20px; }
+    .chan-gary { background:#fee2e2; color:#b91c1c; }
+    .chan-official { background:#e0e7ff; color:#3730a3; }
+    .chan-creator { background:#dcfce7; color:#166534; }
+    .video-card h4 { font-family:'Inter','Noto Sans TC',sans-serif; font-size:1rem; font-weight:700; color:#1a1a1a; line-height:1.45; margin-bottom:8px; }
+    .video-card p { font-size:0.9rem; color:#555; line-height:1.65; flex:1; }
+    .watch { display:inline-flex; align-items:center; gap:6px; margin-top:12px; align-self:flex-start; text-decoration:none; background:#1a1a1a; color:#fff; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:700; padding:7px 14px; border-radius:8px; }
+    .watch:hover { background:#e8713a; }
+    .video-note { background:#fff8ee; border:2px dashed #e0b088; border-radius:10px; padding:14px 18px; font-size:0.9rem; color:#6b4226; line-height:1.7; margin-bottom:18px; }
+
+    .stack-card { background: white; border-radius: 12px; padding: 24px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .stack-card h4 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; }
+    .stack-card .layer { display: flex; align-items: flex-start; gap: 16px; padding: 13px 0; border-bottom: 1px solid #f0f0f0; }
+    .stack-card .layer:last-child { border-bottom: none; }
+    .stack-card .layer-num { font-size: 1.6rem; min-width: 42px; line-height: 1.2; }
+    .stack-card .layer-info h5 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1rem; font-weight: 700; color: #333; margin-bottom: 5px; }
+    .stack-card .layer-info p { font-size: 0.94rem; color: #555; line-height: 1.7; }
+
+    .sources { background: white; border-radius: 12px; padding: 20px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05); margin-top: 26px; font-size: 0.92rem; color: #666; line-height: 2.0; }
+    .sources h3 { font-family: 'Baloo 2', cursive; font-size: 1.05rem; color: #6b4226; margin-bottom: 8px; }
+    .sources a { color: #e8713a; text-decoration: none; }
+    .sources a:hover { text-decoration: underline; }
+    footer { text-align: center; margin-top: 20px; color: #aaa; font-size: 0.85rem; line-height:1.7; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">← 回到知識分享</a>
+
+  <header class="header">
+    <div class="header-badge">🔐 政府 AI 三部曲 · 001</div>
+    <div class="kicker">Bowen 的 3 分鐘技術定調</div>
+    <h1>多模態全機敏年代：<span>政府已進入「資料不出門」的地端 AI 時代</span></h1>
+    <p>多模態 OCR、ASR、視覺推論的開源權重模型，如今已成熟到能在<strong>一張消費級 GPU</strong> 地端跑到 <strong>90%+ 準確度</strong>。這代表政府處理機敏資料——個資、卷證、國防——在技術上完全可以「資料不出門」自主完成。這一頁拆解：技術為何已到位、六個民主國家怎麼押注主權地端 AI、以及美國大廠大佬怎麼定調「原生多模態」。</p>
+  </header>
+
+  <div class="series-nav">
+    <a class="series-pill current" href="2026-07-08-001-multimodal-sovereign-ai-government.html">① 多模態全機敏</a>
+    <a class="series-pill" href="2026-07-08-002-loop-engineering-agentic-era.html">② 迴圈工程</a>
+    <a class="series-pill" href="2026-07-08-003-evals-high-taste-benchmark.html">③ 高品味題庫自我驗測</a>
+  </div>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">① 技術重點</button>
+    <button class="tab-btn" onclick="switchTab(1)">② 📺 影片參考</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ 🌏 國際政策</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ 🇺🇸 大廠語錄</button>
+    <button class="tab-btn" onclick="switchTab(4)">⑤ 💡 洞見 × 台灣</button>
+  </div>
+
+  <!-- Tab 1: 技術重點 -->
+  <div class="tab-panel active">
+    <div class="section-title">🧠 四個你上台能講的技術重點</div>
+    <p class="lead">核心訊息只有一句：<strong>「能地端跑的多模態，準確度與硬體門檻都已跨過可用線」</strong>。以下四個概念，就是你把這句話講清楚的骨架。</p>
+
+    <!-- SVG 1: 原生 vs 拼接 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">概念 1：原生多模態（early fusion） vs 拼接式（late fusion）</text>
+        <!-- 拼接式 -->
+        <g transform="translate(20,54)">
+          <rect width="390" height="236" rx="12" fill="#fff5f5" stroke="#e07a5f" stroke-width="2"/>
+          <text x="195" y="34" text-anchor="middle" font-family="Inter,sans-serif" font-size="15" font-weight="700" fill="#c0392b">🧩 拼接式：事後縫合</text>
+          <rect x="30" y="56" width="100" height="40" rx="8" fill="#fde8e8"/><text x="80" y="81" text-anchor="middle" font-size="12.5" fill="#333">視覺編碼器</text>
+          <rect x="145" y="56" width="100" height="40" rx="8" fill="#fde8e8"/><text x="195" y="81" text-anchor="middle" font-size="12.5" fill="#333">語音模型</text>
+          <rect x="260" y="56" width="100" height="40" rx="8" fill="#fde8e8"/><text x="310" y="81" text-anchor="middle" font-size="12.5" fill="#333">文字模型</text>
+          <text x="195" y="128" text-anchor="middle" font-size="13" fill="#888">↓ 各自轉向量，再用 adapter 硬接</text>
+          <rect x="95" y="146" width="200" height="40" rx="8" fill="#f6d5cc"/><text x="195" y="171" text-anchor="middle" font-size="13" font-weight="700" fill="#a03b26">語言模型（接收縫合結果）</text>
+          <text x="195" y="214" text-anchor="middle" font-size="12.5" fill="#a03b26">三個零件拼起來 · 跨模態理解較弱</text>
+        </g>
+        <!-- 原生 -->
+        <g transform="translate(430,54)">
+          <rect width="390" height="236" rx="12" fill="#f0fdf4" stroke="#4a7c59" stroke-width="2.5"/>
+          <text x="195" y="34" text-anchor="middle" font-family="Inter,sans-serif" font-size="15" font-weight="700" fill="#2d5a3d">🧠 原生多模態：同一顆腦</text>
+          <rect x="30" y="56" width="100" height="40" rx="8" fill="#dcfce7"/><text x="80" y="81" text-anchor="middle" font-size="12.5" fill="#333">圖 → patch</text>
+          <rect x="145" y="56" width="100" height="40" rx="8" fill="#dcfce7"/><text x="195" y="81" text-anchor="middle" font-size="12.5" fill="#333">音 → token</text>
+          <rect x="260" y="56" width="100" height="40" rx="8" fill="#dcfce7"/><text x="310" y="81" text-anchor="middle" font-size="12.5" fill="#333">字 → token</text>
+          <text x="195" y="128" text-anchor="middle" font-size="13" fill="#2d5a3d">↓ 第一層就混進同一條序列</text>
+          <rect x="60" y="146" width="270" height="40" rx="8" fill="#bbf7d0"/><text x="195" y="171" text-anchor="middle" font-size="13" font-weight="700" fill="#166534">同一個 Transformer 一起學</text>
+          <text x="195" y="214" text-anchor="middle" font-size="12.5" fill="#166534">從輸入就跨模態推理 · 理解更強</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>早期是「三個模型縫起來」；現在主流（Gemini、Llama 4、GPT-4o）是「圖、音、字在第一層就混成同一條序列，同一顆腦一起想」。這就是為什麼新一代模型能一句話裡同時看圖、聽音、讀字。</figcaption>
+    </figure>
+
+    <div class="section-title" style="font-size:1.12rem;">概念 2：地端可用的開源權重模型「現在真的能落地」</div>
+    <p class="lead">重點不是實驗室 demo，而是<strong>有開放授權、能下載到自家機房跑</strong>的成熟模型。這張表是你證明「地端可行」的彈藥庫：</p>
+    <div class="score-table">
+      <table>
+        <thead><tr><th>模型</th><th>來源／授權</th><th>能力</th><th>地端部署</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Qwen2.5-VL</strong>（3B/7B/72B）</td><td>阿里巴巴 · Apache-2.0</td><td>視覺理解＋OCR（32 語）、耐低光/模糊/傾斜</td><td><span class="badge-s badge-green">✅ Ollama 本機可跑</span></td></tr>
+          <tr><td><strong>Qwen3-VL</strong></td><td>阿里巴巴 · 開源</td><td>新一代多模態</td><td><span class="badge-s badge-green">✅ GitHub 開源</span></td></tr>
+          <tr><td><strong>Gemma 3</strong>（4B/12B/27B）</td><td>Google · 開放權重</td><td>影像輸入（SigLIP）＋128K 長脈絡</td><td><span class="badge-s badge-green">✅ vLLM / Ollama</span></td></tr>
+          <tr><td><strong>Whisper</strong> large-v3</td><td>OpenAI · 開源</td><td>語音辨識 ASR（99 語）</td><td><span class="badge-s badge-green">✅ 可自架離線</span></td></tr>
+          <tr><td><strong>DeepSeek-OCR / PaddleOCR-VL</strong></td><td>開源</td><td>文件 OCR（2025 爆發）</td><td><span class="badge-s badge-green">✅ 離線部署</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SVG 2: 硬體門檻 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">概念 3：準確度已到「可上業務」、門檻低到一張桌機顯卡</text>
+        <!-- 準確度 -->
+        <g transform="translate(20,52)">
+          <rect width="390" height="220" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="195" y="32" text-anchor="middle" font-size="14.5" font-weight="700" fill="#334155">📊 準確度（開源模型）</text>
+          <text x="30" y="66" font-size="13" fill="#333">OCR · OmniDocBench（CVPR 2025）</text>
+          <rect x="30" y="76" width="330" height="16" rx="8" fill="#e2e8f0"/><rect x="30" y="76" width="312" height="16" rx="8" fill="#27ae60"/>
+          <text x="350" y="89" text-anchor="end" font-size="12" font-weight="700" fill="#166534">GLM-OCR 94.6%</text>
+          <text x="30" y="122" font-size="13" fill="#333">ASR · Whisper large-v3（LibriSpeech clean）</text>
+          <rect x="30" y="132" width="330" height="16" rx="8" fill="#e2e8f0"/><rect x="30" y="132" width="321" height="16" rx="8" fill="#2980b9"/>
+          <text x="350" y="145" text-anchor="end" font-size="12" font-weight="700" fill="#1e40af">字錯率僅 2.7%</text>
+          <text x="30" y="182" font-size="12.5" fill="#64748b">→ 多家開源模型文件解析破 90%，Whisper</text>
+          <text x="30" y="202" font-size="12.5" fill="#64748b">　已被 MLPerf 納入正式 ASR 推論基準</text>
+        </g>
+        <!-- 硬體 -->
+        <g transform="translate(430,52)">
+          <rect width="390" height="220" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="195" y="32" text-anchor="middle" font-size="14.5" font-weight="700" fill="#b45309">🖥 硬體門檻（Gemma 3 用 QAT 4-bit 壓縮）</text>
+          <text x="30" y="70" font-size="13.5" fill="#333">🔸 <tspan font-weight="700">27B</tspan>：54GB → <tspan font-weight="700" fill="#b45309">14.1GB</tspan> → 單張 RTX 3090（24GB）</text>
+          <text x="30" y="104" font-size="13.5" fill="#333">🔸 <tspan font-weight="700">12B</tspan>：→ <tspan font-weight="700" fill="#b45309">6.6GB</tspan> → RTX 4060 筆電（8GB）</text>
+          <text x="30" y="138" font-size="13.5" fill="#333">🔸 <tspan font-weight="700">Qwen2.5-VL 7B</tspan>：只要 8GB+ VRAM</text>
+          <line x1="30" y1="158" x2="360" y2="158" stroke="#fcd34d" stroke-width="1"/>
+          <text x="30" y="184" font-size="12.5" fill="#92400e">→ 機關用一台平價工作站等級 GPU，</text>
+          <text x="30" y="204" font-size="12.5" fill="#92400e">　就能地端跑多模態推論。不必上雲。</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>準確度（OCR 94%、ASR 字錯率 2.7%）＋ 硬體門檻（27B 塞進一張 RTX 3090）——兩條線一起跨過，「地端可用」才從口號變成工程事實。</figcaption>
+    </figure>
+
+    <div class="quote-box">
+      <strong>概念 4：為什麼「機敏 / sovereign / on-prem」是關鍵</strong><br>
+      政府處理的是國民個資、偵查卷證、國防與關鍵基礎設施資料。只要送上公有雲，資料就可能落入外國司法管轄——2025 年 7 月有公開報導指出，連微軟主管都承認：在美國《CLOUD Act》下，無法保證歐洲客戶資料不被美國政府調取。這正是各國推「主權 AI / 地端 LLM」的核心動機：<strong>地端部署讓「資料不出門」，同時滿足稽核軌跡與在地法規。</strong>
+      <cite>— 資料主權與地端 LLM 的核心論點</cite>
+    </div>
+  </div>
+
+  <!-- Tab 2: 影片 -->
+  <div class="tab-panel">
+    <div class="section-title">📺 參考影片：先看這幾支，就知道怎麼講</div>
+    <div class="video-note">🎬 <strong>Gary Talks Stuff（@garytalksstuff）</strong> 在本主題只有「語音輸入（ASR）」一支切題，其餘用官方頻道（OpenAI／Google／AI Engineer）與地端實測頻道補足。<strong>所有連結都經 YouTube oEmbed／RSS 實抓驗證，非搜尋摘要。</strong></div>
+    <div class="video-grid">
+      <div class="video-card">
+        <div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+        <h4>語音輸入 x AI 怎麼用？AI 時代最被低估的工作技能！ft. Typeless</h4>
+        <p>講語音輸入（ASR）如何搭 AI 變成日常工作流——本主題「語音辨識」面向唯一命中 Gary 的影片。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=5XeVLt9WejM" target="_blank">▶ 看影片</a>
+      </div>
+      <div class="video-card">
+        <div class="vtop"><span class="chan chan-official">OpenAI 官方</span></div>
+        <h4>Live demo of GPT-4o vision capabilities</h4>
+        <p>官方 GPT-4o omni 現場示範，鏡頭即時視覺辨識——「原生多模態 vision」的代表作。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=RI-BxtCx32s" target="_blank">▶ 看影片</a>
+      </div>
+      <div class="video-card">
+        <div class="vtop"><span class="chan chan-official">OpenAI 官方</span></div>
+        <h4>Live demo of GPT-4o realtime conversational speech</h4>
+        <p>即時語音對話示範，展示 omni 的語音輸入輸出（ASR＋TTS 端到端）。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=1uM8jhcqDP0" target="_blank">▶ 看影片</a>
+      </div>
+      <div class="video-card">
+        <div class="vtop"><span class="chan chan-official">Google 官方</span></div>
+        <h4>The capabilities of multimodal AI | Gemini Demo</h4>
+        <p>Gemini 原生多模態示範（文字/影像/聲音/影片一起推理）。註：此片當年被討論「有剪接美化」，但內容真實存在，可當概念示意。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=UIZAiXYceBI" target="_blank">▶ 看影片</a>
+      </div>
+      <div class="video-card">
+        <div class="vtop"><span class="chan chan-official">AI Engineer</span></div>
+        <h4>Any-to-Any: Building Native Multimodal Agents — Patrick Löber, Google DeepMind</h4>
+        <p>研討會上 Google DeepMind 工程師談如何打造原生多模態 agent，技術深度足。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=GIRpQEfYf3U" target="_blank">▶ 看影片</a>
+      </div>
+      <div class="video-card">
+        <div class="vtop"><span class="chan chan-creator">Venelin Valkov</span></div>
+        <h4>Qwen Local Test with Ollama | Coding, OCR, Data Extraction, Image Understanding</h4>
+        <p>地端用 Ollama 跑 open-weight 的 Qwen，實測 OCR、資料抽取、看圖——正中「地端多模態＋OCR」。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=6y66Wa7bYRA" target="_blank">▶ 看影片</a>
+      </div>
+      <div class="video-card">
+        <div class="vtop"><span class="chan chan-creator">Digital Spaceport</span></div>
+        <h4>Ollama Local AI Vision: Qwen 2.5 VL and Gemma 3 QAT Test</h4>
+        <p>地端同時測 Qwen2.5-VL 與 Gemma 3 視覺模型，open-weight on-prem 推論實戰，貼合「機敏地端」訴求。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=1kchCV0lWBU" target="_blank">▶ 看影片</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 3: 國際政策 -->
+  <div class="tab-panel">
+    <div class="section-title">🌏 六個民主國家，全部押注「主權／地端／多模態」</div>
+    <p class="lead">與台灣背景相近的六個民主自由國家，不約而同把「主權地端 AI」寫進<strong>國家級計畫</strong>。這不是法規管制，而是<strong>發展政策</strong>——用國家力量確保「資料留得住、模型自己有」。</p>
+    <div class="law-grid">
+      <div class="law-card" style="border-top-color:#bc002d;">
+        <div class="law-icon">🇯🇵</div>
+        <h4>GENIAC 生成式 AI 加速挑戰</h4>
+        <div class="law-date">經產省 METI · 2024/2 啟動 · 已至第四輪</div>
+        <p>三大支柱之一是「補助 GPU 運算資源費用」，扶植<strong>國產</strong>基礎模型（日語 LLM 與基礎模型），降低對外國 AI 平台依賴、強化數位主權。第四輪選出 16 個專案。</p>
+        <div class="src"><a href="https://www.meti.go.jp/english/policy/mono_info_service/geniac/index.html" target="_blank">METI · GENIAC ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#003478;">
+        <div class="law-icon">🇰🇷</div>
+        <h4>主權 AI 基礎模型專案</h4>
+        <div class="law-date">科學技術情通部 MSIT · 2025 推動</div>
+        <p>明訂 2027 年前發展<strong>主權 LLM 與多模態模型</strong>，以錦標賽方式篩選 Naver、SKT、LG、NCSoft、Upstage 五大聯盟，減少技術、文化、經濟與安全上的對外依賴。</p>
+        <div class="src"><a href="https://www.computerweekly.com/news/366638132/South-Korea-debuts-foundation-model-in-sovereign-AI-push" target="_blank">ComputerWeekly ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#ef3340;">
+        <div class="law-icon">🇸🇬</div>
+        <h4>NAIS 2.0 + 國家多模態 LLM 計畫 + SEA-LION</h4>
+        <div class="law-date">MDDI · 2023/12</div>
+        <p>框架下投入約 5,000 萬美元發展<strong>多模態 LLM</strong>；SEA-LION 為涵蓋 11 種東南亞語言的開源在地大模型，規劃擴展含 text-to-image、text-to-speech，培養主權級在地 AI。</p>
+        <div class="src"><a href="https://developer.nvidia.com/blog/regional-llms-sea-lion-and-seallm-serve-languages-and-cultures-of-southeast-asia/" target="_blank">NVIDIA · SEA-LION ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#003399;">
+        <div class="law-icon">🇪🇺</div>
+        <h4>AI Continent Action Plan + AI Gigafactories</h4>
+        <div class="law-date">歐盟執委會 · 2025/4</div>
+        <p>目標蓋能訓練「兆級參數」模型的 AI Gigafactory（單座集結超過 10 萬顆先進 AI 處理器），搭配「buy European」與<strong>開源 AI</strong> 作為數位主權關鍵；von der Leyen 宣布 2,000 億歐元投資目標。</p>
+        <div class="src"><a href="https://digital-strategy.ec.europa.eu/en/factpages/ai-continent-action-plan" target="_blank">EU · AI Continent ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#0055a4;">
+        <div class="law-icon">🇫🇷</div>
+        <h4>France 2030 國家 AI 戰略（國家冠軍 Mistral）</h4>
+        <div class="law-date">2025/2 AI Action Summit · 約 1,090 億歐元</div>
+        <p>Mistral 開放權重模型「可在地端部署、資料不離開主權基礎設施」，正是主權目標、歐盟自主基礎模型、企業地端需求的交會點；已啟用含 18,000 顆 NVIDIA GB200 的主權資料中心。</p>
+        <div class="src"><a href="https://blogs.nvidia.com/blog/france-sovereign-ai-infrastructure/" target="_blank">NVIDIA · France Sovereign AI ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#012169;">
+        <div class="law-icon">🇬🇧</div>
+        <h4>AI Opportunities Action Plan + AIRR 主權運算</h4>
+        <div class="law-date">2025/1 · 政府採納 50 項建議</div>
+        <p>劃設 5 個 AI Growth Zone（每區至少 500MW 電力）；<strong>主權運算目標 2030 前擴增 20 倍</strong>，2025 年已從 2 增至 21 ExaFLOPs，並於布里斯托啟用 Isambard-AI 超級電腦，建立國家自有 AI 運算底座。</p>
+        <div class="src"><a href="https://www.gov.uk/government/publications/ai-opportunities-action-plan" target="_blank">GOV.UK · Action Plan ↗</a></div>
+      </div>
+    </div>
+    <div class="insight">
+      <strong class="h">🧭 一句話看懂六國</strong>
+      六個國家的共同語言是「<strong>主權（sovereign）</strong>」——不是要不要用 AI，而是「模型與資料的控制權在誰手上」。日韓扶植國產基礎模型、星歐推開源與算力、法國押 Mistral、英國蓋主權超算。台灣做政府 AI，賣的正是同一份「資料我作主」的安心感。
+    </div>
+  </div>
+
+  <!-- Tab 4: 大廠語錄 -->
+  <div class="tab-panel">
+    <div class="section-title">🇺🇸 美國大廠：原生多模態的定調原話</div>
+    <p class="lead">以下三家的引言<strong>都已回原始出處逐字比對</strong>。這些是你上台時可以直接引用的「大佬原話」。</p>
+
+    <div class="quote-box">
+      「It was built from the ground up to be multimodal, which means it can generalize and seamlessly understand, operate across and combine different types of information including text, code, audio, image and video.」<br>
+      <span style="color:#6b4226;">（Gemini 從一開始就設計成多模態——能通用地理解、跨模態運作並結合文字、程式碼、音訊、影像與影片。）</span>
+      <cite>— Demis Hassabis，Google DeepMind 執行長 · 2023/12/6「Introducing Gemini」官方公告</cite>
+      <div class="src"><a href="https://blog.google/innovation-and-ai/technology/ai/google-gemini-ai/" target="_blank">🔗 blog.google ↗</a></div>
+    </div>
+
+    <div class="quote-box" style="border-left-color:#10a37f;">
+      「GPT-4o reasons across voice, text and vision.」<br>
+      <span style="color:#6b4226;">（GPT-4o 能橫跨語音、文字與視覺一起推理。）</span>
+      <cite>— Mira Murati，OpenAI 技術長（CTO）· 2024/5/13 GPT-4o 發表直播</cite>
+      <div class="src"><a href="https://techcrunch.com/2024/05/13/openais-newest-model-is-gpt-4o/" target="_blank">🔗 TechCrunch 現場報導 ↗</a></div>
+    </div>
+
+    <div class="quote-box" style="border-left-color:#10a37f;">
+      「It feels like AI from the movies… It is fast, smart, fun, natural, and helpful.」「Talking to a computer has never felt really natural for me; now it does.」<br>
+      <span style="color:#6b4226;">（這感覺像電影裡的 AI……快、聰明、有趣、自然又好用。跟電腦講話從來沒讓我覺得自然過，現在有了。）</span>
+      <cite>— Sam Altman，OpenAI 執行長（CEO）· 2024/5 個人部落格談 GPT-4o</cite>
+      <div class="src"><a href="https://blog.samaltman.com/gpt-4o" target="_blank">🔗 blog.samaltman.com ↗</a></div>
+    </div>
+
+    <div class="quote-box" style="border-left-color:#d97757;">
+      「They can process a wide range of visual formats, including photos, charts, graphs and technical diagrams.」「some of whom have up to 50% of their knowledge bases encoded in various formats such as PDFs, flowcharts, or presentation slides.」<br>
+      <span style="color:#6b4226;">（能處理照片、圖表、技術圖等各種視覺格式；有些企業客戶多達 50% 的知識庫是 PDF、流程圖、簡報這類格式。）</span>
+      <cite>— Anthropic 官方 · 2024/3/4 Claude 3 家族公告（機構原文，非具名個人）</cite>
+      <div class="src"><a href="https://www.anthropic.com/news/claude-3-family" target="_blank">🔗 anthropic.com ↗</a> · <span style="color:#999;">誠實標註：查無 Dario Amodei 具名談視覺的可驗證引言，故用官方公告。</span></div>
+    </div>
+  </div>
+
+  <!-- Tab 5: 洞見 × 台灣 -->
+  <div class="tab-panel">
+    <div class="section-title">💡 洞見與台灣啟示</div>
+
+    <div class="insight">
+      <strong class="h">🎯 三段式結論</strong>
+      <strong style="display:inline;font-size:1rem;">1. 技術到位</strong>——開源多模態 OCR／ASR／視覺推論，已能在單張消費級 GPU 地端跑到 90%+ 準確度。<br>
+      <strong style="display:inline;font-size:1rem;">2. 政策共識</strong>——日、韓、星、歐、法、英六國全部把「主權／地端／多模態」寫進國家級發展計畫。<br>
+      <strong style="display:inline;font-size:1rem;">3. 產業轉向</strong>——Google、OpenAI 用具名原話確認產業已全面走向「原生多模態單一模型」。<br>
+      → 交會結論：<strong>政府處理機敏資料，如今在技術上完全可以「資料不出門」地端自主完成。</strong>
+    </div>
+
+    <div class="quote-box">
+      🐻 <strong>肉乙</strong>：技術上最硬的證據是「單張消費級 GPU 就能跑」——Gemma 3 QAT 把 27B 壓到 14GB 塞進 RTX 3090，OCR 破 94%、Whisper 英語字錯率 2.7%。這不是 demo，是可上正式業務的等級。政府「資料不出門」在技術上已完全成立。<br><br>
+      🎨 <strong>卡拉</strong>：我聯想到「主權」這個詞的溫度。連微軟主管都承認 CLOUD Act 下無法保證資料不被調取——所以六國全把「地端／主權」寫進國家計畫。這不只是技術選擇，是一個國家「我的資料我作主」的尊嚴。台灣做政府 AI 的人，賣的其實是這份安心感。
+      <cite>— Forever-AI 團隊討論，2026-07-08</cite>
+    </div>
+
+    <div class="stack-card">
+      <h4>🇹🇼 對台灣做政府 AI 的三個實戰啟示</h4>
+      <div class="layer"><div class="layer-num">1️⃣</div><div class="layer-info"><h5>談判語言換掉</h5><p>別再跟機關辯論「能不能用雲端 AI」，改成展示「地端跑得動、資料不出境、準確度可驗證」。技術門檻已經不是理由。</p></div></div>
+      <div class="layer"><div class="layer-num">2️⃣</div><div class="layer-info"><h5>先鎖定文件與語音場景</h5><p>OCR（公文、卷證、報表）與 ASR（會議、質詢、通報）是準確度最成熟、最好落地的兩個入口，用開源模型地端做即可。</p></div></div>
+      <div class="layer"><div class="layer-num">3️⃣</div><div class="layer-info"><h5>對標日本「源內」路線</h5><p>日本數位廳已把政府自建 AI 平台（Gennai）開源、18 萬公務員要用。政府 self-hosted + LLM 解耦，就是 botrun 在做的事——國家級已驗證這條路可行。</p></div></div>
+    </div>
+  </div>
+
+  <div class="sources">
+    <h3>📚 原始來源</h3>
+    <a href="https://www.emergentmind.com/topics/native-multimodal-models-nmms" target="_blank">原生多模態模型（NMM）定義與 early-fusion 機制</a><br>
+    <a href="https://ai.meta.com/blog/llama-4-multimodal-intelligence/" target="_blank">Meta Llama 4 · 原生多模態、early fusion 官方說明</a><br>
+    <a href="https://qwenlm.github.io/blog/qwen2.5-vl/" target="_blank">Qwen2.5-VL 官方部落格</a> · <a href="https://github.com/qwenlm/qwen3-vl" target="_blank">Qwen3-VL GitHub</a><br>
+    <a href="https://developers.googleblog.com/en/gemma-3-quantized-aware-trained-state-of-the-art-ai-to-consumer-gpus/" target="_blank">Google · Gemma 3 QAT（27B 塞進 RTX 3090）</a><br>
+    <a href="https://github.com/opendatalab/OmniDocBench" target="_blank">OmniDocBench（CVPR 2025）OCR 基準</a> · <a href="https://www.e2enetworks.com/blog/complete-guide-open-source-ocr-models-2025" target="_blank">開源 OCR 模型總覽 2025</a><br>
+    <a href="https://mlcommons.org/2025/09/whisper-inferencev5-1/" target="_blank">MLPerf · Whisper 納入 ASR 推論基準</a> · <a href="https://vexascribe.com/how-accurate-is-whisper" target="_blank">Whisper WER 資料</a><br>
+    <a href="https://www.gooddata.ai/blog/data-sovereignty-and-ai-analytics-keep-your-llm-on-premise/" target="_blank">資料主權、CLOUD Act 風險與地端 LLM</a><br>
+    <a href="https://blog.google/innovation-and-ai/technology/ai/google-gemini-ai/" target="_blank">Google · Introducing Gemini（Hassabis 引言）</a> · <a href="https://techcrunch.com/2024/05/13/openais-newest-model-is-gpt-4o/" target="_blank">TechCrunch · GPT-4o（Murati 引言）</a><br>
+    <a href="https://blog.samaltman.com/gpt-4o" target="_blank">Sam Altman · GPT-4o 部落格</a> · <a href="https://www.anthropic.com/news/claude-3-family" target="_blank">Anthropic · Claude 3 family</a>
+  </div>
+
+  <footer>
+    政府 AI 三部曲 · 001 多模態全機敏年代 · 2026-07-08<br>
+    技術與應用為主、法規為輔 · 所有影片連結經 oEmbed/RSS 驗證、引言回原始出處逐字比對
+  </footer>
+</div>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

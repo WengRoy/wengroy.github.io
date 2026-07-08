@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高品味題庫自我驗測年代：機關有自我驗測能力，才生得出高品味 AI</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: #fdf6e3; background-image: radial-gradient(circle, #d4b896 1px, transparent 1px); background-size: 18px 18px; color: #1a1a1a; min-height: 100vh; padding: 24px 16px; font-size: 17px; }
+    .page { max-width: 980px; margin: 0 auto; }
+    .back-link { display: inline-block; margin-bottom: 16px; color: #e8713a; text-decoration: none; font-size: 0.85rem; font-weight: 700; }
+    .back-link:hover { text-decoration: underline; }
+    .header { border: 3px solid #1a1a1a; border-radius: 14px; background: #fff8ee; box-shadow: 5px 5px 0 #1a1a1a; padding: 30px 34px; margin-bottom: 20px; }
+    .header-badge { display: inline-block; background: #e8713a; color: white; font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.88rem; padding: 5px 16px; border-radius: 20px; border: 2px solid #1a1a1a; box-shadow: 2px 2px 0 #1a1a1a; margin-bottom: 14px; }
+    .header .kicker { font-family:'Baloo 2',cursive; font-size:0.9rem; color:#6b4226; font-weight:700; margin-bottom:6px; }
+    .header h1 { font-family: 'Baloo 2', cursive; font-size: 2.05rem; font-weight: 800; color: #1a1a1a; line-height: 1.28; margin-bottom: 12px; }
+    .header h1 span { color: #e8713a; }
+    .header p { color: #6b4226; font-size: 1.05rem; line-height: 1.75; }
+    .series-nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px; }
+    .series-pill { font-family:'Baloo 2',cursive; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:20px; border:2px solid #1a1a1a; text-decoration:none; color:#6b4226; background:#fff8ee; box-shadow:2px 2px 0 #1a1a1a; }
+    .series-pill.current { background:#1a1a1a; color:#fff; }
+    .series-pill:hover:not(.current){ background:#fdf6e3; }
+    .tab-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tab-btn { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.96rem; padding: 10px 16px; border: 3px solid #1a1a1a; border-bottom: none; border-radius: 10px 10px 0 0; background: #fff8ee; cursor: pointer; transition: all 0.12s; color: #6b4226; }
+    .tab-btn.active { background: #e8713a; color: white; }
+    .tab-btn:hover:not(.active) { background: #fdf6e3; transform: translateY(-2px); }
+    .tab-panel { display: none; border: 3px solid #1a1a1a; border-radius: 0 8px 8px 8px; padding: 30px 30px 34px; background: #fdf6e3; box-shadow: 5px 5px 0 #1a1a1a; }
+    .tab-panel.active { display: block; }
+    .section-title { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; color: #6b4226; margin: 4px 0 20px; display: flex; align-items: center; gap: 8px; }
+    .lead { font-size: 1.02rem; color:#5a4a38; line-height:1.85; margin-bottom:20px; }
+    .quote-box { border-left: 5px solid #e8713a; background: #fff8ee; padding: 16px 22px; border-radius: 0 8px 8px 0; margin: 20px 0; font-size: 1.02rem; line-height: 1.8; color: #333; }
+    .quote-box cite { display: block; font-style: normal; font-weight: 700; color: #e8713a; font-size: 0.9rem; margin-top: 8px; }
+    .quote-box .src { font-size:0.82rem; margin-top:4px; }
+    .quote-box .src a { color:#c2571f; }
+    .insight { background: #e8713a; color: #fff; border: 3px solid #1a1a1a; border-radius: 10px; padding: 22px 26px; box-shadow: 4px 4px 0 #1a1a1a; margin: 24px 0; font-size: 1.02rem; line-height: 1.85; }
+    .insight strong.h { display: block; font-size: 1.2rem; margin-bottom: 8px; }
+    .svgcard { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 24px; overflow: hidden; }
+    .svgcard figcaption { padding: 14px 22px; font-size: 0.96rem; color: #555; border-top: 1px solid #f0f0f0; line-height: 1.7; }
+    .svgcard figcaption strong { color: #333; }
+    .law-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+    @media (max-width: 680px) { .law-grid { grid-template-columns: 1fr; } }
+    .law-card { background: white; border-radius: 12px; padding: 22px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); border-top: 5px solid #ccc; }
+    .law-card .law-icon { font-size: 1.9rem; margin-bottom: 6px; }
+    .law-card h4 { font-family: 'Inter','Noto Sans TC', sans-serif; font-size: 1.08rem; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; line-height: 1.4; }
+    .law-card .law-date { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; color: #999; margin-bottom: 10px; }
+    .law-card p { font-size: 0.95rem; color: #444; line-height: 1.7; }
+    .law-card .src { margin-top:10px; font-size:0.8rem; }
+    .law-card .src a { color:#c2571f; text-decoration:none; }
+    .law-card .src a:hover { text-decoration:underline; }
+    .video-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:680px){ .video-grid{ grid-template-columns:1fr; } }
+    .video-card { background:white; border-radius:12px; padding:18px 20px; box-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(0,0,0,0.06); display:flex; flex-direction:column; }
+    .video-card .vtop { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+    .chan { font-family:'Inter',sans-serif; font-size:0.74rem; font-weight:700; padding:2px 9px; border-radius:20px; }
+    .chan-official { background:#e0e7ff; color:#3730a3; }
+    .chan-creator { background:#dcfce7; color:#166534; }
+    .video-card h4 { font-family:'Inter','Noto Sans TC',sans-serif; font-size:1rem; font-weight:700; color:#1a1a1a; line-height:1.45; margin-bottom:8px; }
+    .video-card p { font-size:0.9rem; color:#555; line-height:1.65; flex:1; }
+    .watch { display:inline-flex; align-items:center; gap:6px; margin-top:12px; align-self:flex-start; text-decoration:none; background:#1a1a1a; color:#fff; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:700; padding:7px 14px; border-radius:8px; }
+    .watch:hover { background:#e8713a; }
+    .video-note { background:#fff8ee; border:2px dashed #e0b088; border-radius:10px; padding:14px 18px; font-size:0.9rem; color:#6b4226; line-height:1.7; margin-bottom:18px; }
+    .stack-card { background: white; border-radius: 12px; padding: 24px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .stack-card h4 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; }
+    .stack-card .layer { display: flex; align-items: flex-start; gap: 16px; padding: 13px 0; border-bottom: 1px solid #f0f0f0; }
+    .stack-card .layer:last-child { border-bottom: none; }
+    .stack-card .layer-num { font-size: 1.6rem; min-width: 42px; line-height: 1.2; }
+    .stack-card .layer-info h5 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1rem; font-weight: 700; color: #333; margin-bottom: 5px; }
+    .stack-card .layer-info p { font-size: 0.94rem; color: #555; line-height: 1.7; }
+    .sources { background: white; border-radius: 12px; padding: 20px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05); margin-top: 26px; font-size: 0.92rem; color: #666; line-height: 2.0; }
+    .sources h3 { font-family: 'Baloo 2', cursive; font-size: 1.05rem; color: #6b4226; margin-bottom: 8px; }
+    .sources a { color: #e8713a; text-decoration: none; }
+    .sources a:hover { text-decoration: underline; }
+    footer { text-align: center; margin-top: 20px; color: #aaa; font-size: 0.85rem; line-height:1.7; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">← 回到知識分享</a>
+
+  <header class="header">
+    <div class="header-badge">🎯 政府 AI 三部曲 · 003</div>
+    <div class="kicker">Bowen 的技術定調 · 三部曲收尾</div>
+    <h1>高品味題庫自我驗測年代：<span>機關有自我驗測能力，才生得出高品味 AI</span></h1>
+    <p>在人人都能接模型的年代，真正的門檻不是模型本身，而是 <strong>evals（評測）</strong>——高品味的題庫，加上機關「自我驗測」的能力。沒有好的驗測能力，就分不出 AI 好壞，也生不出高品味 AI。這一頁拆解：為何 evals 是新護城河、六國怎麼把「評測」當國家基礎建設、以及大佬們一致喊出的原話。</p>
+  </header>
+
+  <div class="series-nav">
+    <a class="series-pill" href="2026-07-08-001-multimodal-sovereign-ai-government.html">① 多模態全機敏</a>
+    <a class="series-pill" href="2026-07-08-002-loop-engineering-agentic-era.html">② 迴圈工程</a>
+    <a class="series-pill current" href="2026-07-08-003-evals-high-taste-benchmark.html">③ 高品味題庫自我驗測</a>
+  </div>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">① 技術重點</button>
+    <button class="tab-btn" onclick="switchTab(1)">② 📺 影片參考</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ 🌏 國際政策</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ 🇺🇸 大廠語錄</button>
+    <button class="tab-btn" onclick="switchTab(4)">⑤ 💡 洞見 × 台灣</button>
+  </div>
+
+  <!-- Tab 1: 技術重點 -->
+  <div class="tab-panel active">
+    <div class="section-title">🧠 四個你上台能講的技術重點</div>
+    <p class="lead">核心訊息一句話：<strong>「模型會擴散，evals 才是護城河。」</strong> 誰有高品味、私有、專家策展、可迴歸測試的題庫，誰才有能力自我驗測、生出高品味 AI。</p>
+
+    <!-- SVG: evals = 新單元測試 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">概念 1：Evals 是 AI 應用的「新單元測試」</text>
+        <g transform="translate(30,56)">
+          <rect width="360" height="170" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="180" y="34" text-anchor="middle" font-size="14.5" font-weight="700" fill="#475569">傳統程式：單元測試</text>
+          <text x="180" y="70" text-anchor="middle" font-size="13" fill="#333">一個輸入 → 一個確定答案</text>
+          <text x="180" y="98" text-anchor="middle" font-size="13" fill="#333"><tspan font-family="monospace">assert f(2)==4</tspan></text>
+          <text x="180" y="134" text-anchor="middle" font-size="12.5" fill="#64748b">比對是否完全相等即可</text>
+        </g>
+        <g transform="translate(450,56)">
+          <rect width="360" height="170" rx="12" fill="#fff5f0" stroke="#e8713a" stroke-width="2.5"/>
+          <text x="180" y="34" text-anchor="middle" font-size="14.5" font-weight="700" fill="#c2571f">LLM 應用：evals</text>
+          <text x="180" y="70" text-anchor="middle" font-size="13" fill="#333">一個 prompt → 上千種合理輸出</text>
+          <text x="180" y="98" text-anchor="middle" font-size="13" fill="#333">非確定性，無法比對「相等」</text>
+          <text x="180" y="134" text-anchor="middle" font-size="12.5" fill="#b45309">需要一套 eval 系統判斷「夠不夠好」</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>傳統程式一個輸入對一個確定答案；LLM 是非確定性的（同一 prompt 可有上千種合理輸出），所以你需要 eval 系統判斷「輸出夠不夠好」，而不是比對是否完全相等。這套能力，就是把領域專業轉成護城河的機制——Garry Tan（YC 執行長）直言「evals 正成為 AI 新創真正的護城河」。</figcaption>
+    </figure>
+
+    <div class="section-title" style="font-size:1.12rem;">概念 2：什麼是「高品味題庫」</div>
+    <div class="quote-box">
+      高品味的評測集不是通用榜單，而是<strong>由領域專家設計、貼近真實任務、能明確區分模型好壞</strong>的題庫。一組好 eval 的判準是「specific to your tasks and mirror the intended use cases（專屬於你的任務、且映射真實使用情境）」——愈貼近實際工作流程，就愈能測出對你有意義的品質差異。
+      <cite>— 業界實戰指南《What We've Learned From A Year of Building with LLMs》（Eugene Yan、Hamel Husain、Charles Frye 等）</cite>
+    </div>
+
+    <div class="section-title" style="font-size:1.12rem;">概念 3：驗測的具體做法</div>
+    <div class="stack-card">
+      <div class="layer"><div class="layer-num">⚖️</div><div class="layer-info"><h5>LLM-as-judge</h5><p>用另一個 LLM 依評分準則替輸出打分，可規模化但非萬靈丹——需先用人工標註對齊、驗證判官本身可信。「爛的 judge 比沒有更糟」。</p></div></div>
+      <div class="layer"><div class="layer-num">🔍</div><div class="layer-info"><h5>人工標註 + 錯誤分析（error analysis）</h5><p>把失敗案例分類、逐類寫成測試，是整套 eval 的地基。這一步最累，但也最不可省。</p></div></div>
+      <div class="layer"><div class="layer-num">📋</div><div class="layer-info"><h5>Rubric（評分準則）</h5><p>避免用 1–5 這種模糊分數（不同標註者對刻度理解不同），改用明確的「通過／不通過」準則。</p></div></div>
+      <div class="layer"><div class="layer-num">🔁</div><div class="layer-info"><h5>A/B + 迴歸測試</h5><p>改 prompt／換模型後重跑題庫，確保沒有「修好一個、弄壞三個」。把 evals 寫進 CI/CD 當測試跑。</p></div></div>
+    </div>
+
+    <!-- SVG: benchmark 污染 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">概念 4：為何要「自我驗測」而非只信公開 benchmark</text>
+        <g transform="translate(30,54)">
+          <rect width="360" height="150" rx="12" fill="#fff5f5" stroke="#e07a5f" stroke-width="1.5"/>
+          <text x="180" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#c0392b">❌ 公開榜單的病</text>
+          <text x="24" y="62" font-size="12.5" fill="#333">• 污染：測試題洩漏進訓練語料</text>
+          <text x="24" y="86" font-size="12.5" fill="#333">• 過擬合：業界拼命刷分</text>
+          <text x="24" y="110" font-size="12.5" fill="#333">• 研究：13B 模型都能被「訓練到」</text>
+          <text x="34" y="130" font-size="12.5" fill="#c0392b">在 MMLU 刷到接近 GPT-4 的假分數</text>
+        </g>
+        <g transform="translate(450,54)">
+          <rect width="360" height="150" rx="12" fill="#f0fdf4" stroke="#4a7c59" stroke-width="2.5"/>
+          <text x="180" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#2d5a3d">✅ 私有自建 eval</text>
+          <text x="24" y="62" font-size="12.5" fill="#333">• 沒公開，不會被污染</text>
+          <text x="24" y="86" font-size="12.5" fill="#333">• 專家策展，貼近自己任務</text>
+          <text x="24" y="110" font-size="12.5" fill="#333">• 乾淨、可信、可迴歸</text>
+          <text x="34" y="130" font-size="12.5" fill="#166534">→ 機關必須自建，才能真正量測</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>公開題一旦公開就會逐漸被污染，Karpathy 直接喊「評測危機」——舊榜單（MMLU）失效、實用榜單（SWE-Bench）又太窄。結論：機關必須自建私有、專家策展的 eval，才能得到乾淨、可信、貼近自己任務的量測。OpenAI 早在 2023 年就把 Evals 框架開源，代表「把 eval 當軟體資產維護」已是主流。</figcaption>
+    </figure>
+  </div>
+
+  <!-- Tab 2: 影片 -->
+  <div class="tab-panel">
+    <div class="section-title">📺 參考影片：evals 的實戰教學</div>
+    <div class="video-note">🎬 <strong>Gary Talks Stuff 目前沒有專講 evals 的影片</strong>（最接近的是 002 那支「Claude 跟 Codex 自動互審」，但屬自我修正而非評測體系）。本主題全數用高可信外部來源：evals 課權威 Hamel Husain、AI Engineer 研討會、OpenAI 官方教學。<strong>所有連結經 oEmbed 驗證。</strong></div>
+    <div class="video-grid">
+      <div class="video-card"><div class="vtop"><span class="chan chan-creator">Peter Yang ft. Hamel Husain</span></div>
+        <h4>AI Evaluations Clearly Explained in 50 Minutes (Real Example)</h4>
+        <p>evals 課權威 Hamel Husain 用真實案例 50 分鐘講透 LLM evals 全流程——<strong>本主題最實戰的一支，建議先看。</strong></p>
+        <a class="watch" href="https://www.youtube.com/watch?v=uiza7wp1KrE" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-official">AI Engineer</span></div>
+        <h4>Evals 101 — Doug Guthrie, Braintrust</h4>
+        <p>研討會的 evals 入門，Braintrust 講者帶你建 eval set 的基本盤。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=bk0TmxoZlUY" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-official">AI Engineer</span></div>
+        <h4>Judge the Judge: Building LLM Evaluators That Actually Work — Mahmoud Mabrouk, Agenta AI</h4>
+        <p>深入 LLM-as-judge：如何校準評審模型、避免「爛 eval 比沒 eval 更糟」。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=X4dEHRzBLmc" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-creator">Kody Simpson</span></div>
+        <h4>OpenAI Evaluations Tutorial: How to Test Your AI Models</h4>
+        <p>手把手示範用 OpenAI Evals 工具測模型，把「evals 當單元測試」落地成程式碼。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=fUv-c57H7qI" target="_blank">▶ 看影片</a></div>
+    </div>
+  </div>
+
+  <!-- Tab 3: 國際政策 -->
+  <div class="tab-panel">
+    <div class="section-title">🌏 六國：把「評測能力」當國家基礎建設</div>
+    <p class="lead">近兩年六國競相成立「AI 安全研究院」，核心工作正是建立<strong>國家級評測與自我驗測能力</strong>。原來「會考試、會出題」本身就是一種國力——其中<strong>英國 Inspect</strong> 與<strong>新加坡 Project Moonshot</strong> 更把工具開源給全世界用。</p>
+    <div class="law-grid">
+      <div class="law-card" style="border-top-color:#bc002d;">
+        <div class="law-icon">🇯🇵</div>
+        <h4>Japan AI Safety Institute（J-AISI）</h4>
+        <div class="law-date">2024 成立於 IPA 之下</div>
+        <p>發布《AI 安全評估觀點指南》（涵蓋 human centricity、safety、fairness，聚焦 LLM 系統），並於 <strong>2025/9 將 AI 安全評測工具以開源（OSS）釋出</strong>，降低業者自我驗測門檻。</p>
+        <div class="src"><a href="https://aisi.go.jp/" target="_blank">aisi.go.jp ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#003478;">
+        <div class="law-icon">🇰🇷</div>
+        <h4>Korea AI Safety Institute（K-AISI）</h4>
+        <div class="law-date">2024/11 設立於 ETRI 之下</div>
+        <p>全球第六個成立國家級 AI 安全院的國家。內設 <strong>AI Safety Evaluation Office（AI 安全評測室）</strong>，研究並推進風險評估方法學，並與 OpenAI 簽署高風險 AI 評測合作。</p>
+        <div class="src"><a href="https://www.aisi.re.kr/eng/contents/22" target="_blank">aisi.re.kr ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#ef3340;">
+        <div class="law-icon">🇸🇬</div>
+        <h4>Project Moonshot（IMDA × AI Verify）</h4>
+        <div class="law-date">2024/5/31 推出 · 開源</div>
+        <p><strong>全球最早的 LLM 評測工具箱之一</strong>，把 benchmarking 與 red-teaming 合而為一、內建 100+ 評測資料集與預建評分器，附 Web UI 與 Python library，讓開發者與稽核團隊自己測。</p>
+        <div class="src"><a href="https://aiverifyfoundation.sg/project-moonshot/" target="_blank">AI Verify · Moonshot ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#003399;">
+        <div class="law-icon">🇪🇺</div>
+        <h4>European AI Office × GPAI Code of Practice</h4>
+        <div class="law-date">2025/7/10 最終版</div>
+        <p>通用型 AI 行為準則「Safety and Security」章，要求具系統性風險的模型做 <strong>state-of-the-art 模型評測</strong>——明列 Q&amp;A sets、task-based evaluations、benchmarks、red-teaming、對抗測試等方法。</p>
+        <div class="src"><a href="https://code-of-practice.ai/" target="_blank">code-of-practice.ai ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#0055a4;">
+        <div class="law-icon">🇫🇷</div>
+        <h4>INESIA 國家 AI 評估與安全研究院</h4>
+        <div class="law-date">2025/1/31 宣布成立</div>
+        <p>不新設法人，而是統合 ANSSI、Inria、LNE（國家計量與測試實驗室）、PEReN 等既有評測力量；設「支援監管」支柱，為監管機關提供尖端技術評測方法與工具。</p>
+        <div class="src"><a href="https://www.economie.gouv.fr/actualites/la-france-se-dote-dun-institut-national-pour-levaluation-et-la-securite-de-lintelligence" target="_blank">economie.gouv.fr ↗</a></div>
+      </div>
+      <div class="law-card" style="border-top-color:#012169;">
+        <div class="law-icon">🇬🇧</div>
+        <h4>AI Security Institute — Inspect 開源評測框架</h4>
+        <div class="law-date">2024/4 以 MIT 授權釋出</div>
+        <p>可組合的 datasets／agents／tools／scorers 積木、200+ 預建評測，支援 agentic 與多模態評測，是全球研究者「自建 eval script、跑自己測試」的基礎設施。<strong>把國家級評測能力開源給全世界。</strong></p>
+        <div class="src"><a href="https://inspect.aisi.org.uk/" target="_blank">inspect.aisi.org.uk ↗</a></div>
+      </div>
+    </div>
+    <div class="insight">
+      <strong class="h">🧭 一句話看懂六國</strong>
+      日 J-AISI、韓 K-AISI、星 Project Moonshot、歐 GPAI Code、法 INESIA、英 Inspect——六國一致的動作證明「<strong>評測能力＝國家級基礎建設</strong>」。而且英國與新加坡都把評測工具開源，台灣機關可以直接拿來當自我驗測的起手式。
+    </div>
+  </div>
+
+  <!-- Tab 4: 大廠語錄 -->
+  <div class="tab-panel">
+    <div class="section-title">🇺🇸 美國大廠：「evals 才是關鍵」的原話</div>
+    <p class="lead">以下引言<strong>全部可查證</strong>。從 YC 到 OpenAI 到 Anthropic，一致指向同一結論：模型會擴散，evals 才是護城河。</p>
+
+    <div class="quote-box">
+      「<strong>Evals are emerging as the real moat for AI startups.</strong>」<br>
+      <span style="color:#6b4226;">（評測正在成為 AI 新創真正的護城河。）</span>
+      <cite>— Garry Tan，Y Combinator 執行長 · X 貼文</cite>
+      <div class="src"><a href="https://x.com/garrytan/status/1892952656940880036" target="_blank">🔗 x.com/garrytan ↗</a></div>
+    </div>
+
+    <div class="quote-box" style="border-left-color:#10a37f;">
+      「<strong>evals are surprisingly often all you need</strong>」<br>
+      <span style="color:#6b4226;">（評測往往出乎意料地，就是你所需要的全部。）意指與其追新模型，把評測做好往往就足以解決問題。已成圈內名言。</span>
+      <cite>— Greg Brockman，OpenAI 共同創辦人暨總裁 · 2023/12/9 X 貼文</cite>
+      <div class="src"><a href="https://x.com/gdb/status/1733553161884127435" target="_blank">🔗 x.com/gdb ↗</a></div>
+    </div>
+
+    <div class="quote-box">
+      「There is an evaluation crisis. I don't really know what metrics to look at right now. MMLU was good and useful for a few years but that's long over. SWE-Bench Verified … I really like … but itself too narrow.」<br>
+      <span style="color:#6b4226;">（有一場評測危機。我現在真的不知道該看哪些指標。MMLU 曾好用幾年但早就過時；SWE-Bench Verified 我很喜歡……但本身又太窄。）</span>
+      <cite>— Andrej Karpathy，前 OpenAI 創始成員、前 Tesla AI 總監 · 2025/3/2 X 貼文</cite>
+      <div class="src"><a href="https://x.com/karpathy/status/1896266683301659068" target="_blank">🔗 x.com/karpathy ↗</a> · <a href="https://www.technologyreview.com/2025/06/24/1119187/fix-ai-evaluation-crisis/" target="_blank">MIT Tech Review 佐證 ↗</a></div>
+    </div>
+
+    <div class="quote-box" style="border-left-color:#d97757;">
+      「These same capabilities that make AI agents useful—autonomy, intelligence, and flexibility—also make them harder to evaluate.」「Good evaluations help teams ship AI agents more confidently. Without them, it's easy to get stuck in reactive loops.」<br>
+      <span style="color:#6b4226;">（讓 AI 代理好用的那些能力——自主、智慧、彈性——同時也讓它們更難評估。好的評測讓團隊更有信心地上線；沒有評測，很容易卡在被動救火的迴圈裡。）</span>
+      <cite>— Anthropic 工程部落格《Demystifying evals for AI agents》· 2026/1/9</cite>
+      <div class="src"><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank">🔗 anthropic.com ↗</a></div>
+    </div>
+
+    <div class="quote-box">
+      失敗的 LLM 產品幾乎都有同一個根因：「<strong>a failure to create robust evaluation systems</strong>」（沒能建立穩健的評測系統）。<br>
+      <span style="color:#6b4226;">佐證業界共識：「rigorous and thoughtful evals are critical—it's no coincidence that technical leaders at OpenAI work on evaluation.」（嚴謹的評測至關重要——OpenAI 的技術領袖都在做評測，絕非巧合。）</span>
+      <cite>— Hamel Husain，獨立 AI 顧問（前 GitHub、Airbnb ML）·《Your AI Product Needs Evals》</cite>
+      <div class="src"><a href="https://hamel.dev/blog/posts/evals/" target="_blank">🔗 hamel.dev ↗</a></div>
+    </div>
+  </div>
+
+  <!-- Tab 5: 洞見 × 台灣 -->
+  <div class="tab-panel">
+    <div class="section-title">💡 洞見與台灣啟示</div>
+
+    <div class="insight">
+      <strong class="h">🎯 一句話收束三部曲</strong>
+      001 證明<strong>技術已到位</strong>（資料不出門地端可跑）、002 證明<strong>方法已轉型</strong>（工程化迴圈取代手寫 prompt）、003 點出<strong>真正門檻</strong>（自我驗測的高品味題庫）。三者串起來就是政府 AI 落地的完整故事——<strong>能地端跑（001）→ 會工程化迴圈（002）→ 有自我驗測力（003）</strong>。
+    </div>
+
+    <div class="quote-box">
+      🐻 <strong>肉乙</strong>：這是三主題裡對卡米爾生意最直接的一個。核心洞見一句話：模型會擴散，evals 才是護城河。Garry Tan、Greg Brockman「evals are surprisingly often all you need」、Karpathy 的「評測危機」都指向同一結論——機關必須自建私有、專家策展的高品味題庫。這正是我們「hermes × gemma 題庫問答」在做的事（20/20 通過那套）。<br><br>
+      🎨 <strong>卡拉</strong>：我看到六國政府居然都在做同一件事——把評測當國家基礎建設：英國 Inspect（MIT 開源）、新加坡 Project Moonshot（benchmark + red-team 合一）、日 J-AISI、韓 K-AISI、法 INESIA、歐 GPAI Code。原來「會考試出題」本身就是一種國力。
+      <cite>— Forever-AI 團隊討論，2026-07-08</cite>
+    </div>
+
+    <div class="stack-card">
+      <h4>🇹🇼 對台灣做政府 AI 的三個實戰啟示</h4>
+      <div class="layer"><div class="layer-num">1️⃣</div><div class="layer-info"><h5>別比誰接的模型新</h5><p>跟政府客戶談 AI，重點不是「我接了最新的 Opus / Gemini」，而是「我幫你建了一份能區分好壞、貼近你任務的題庫」。護城河在題庫，不在模型。</p></div></div>
+      <div class="layer"><div class="layer-num">2️⃣</div><div class="layer-info"><h5>把「自我驗測能力」做成交付物</h5><p>幫機關建立高品味、私有、專家策展、可迴歸測試的題庫，讓他們有能力自己驗——這就是卡米爾差異化的服務。有驗測力，才生得出高品味 AI。</p></div></div>
+      <div class="layer"><div class="layer-num">3️⃣</div><div class="layer-info"><h5>拿英國 Inspect／新加坡 Moonshot 起手</h5><p>兩套國家級評測工具都 MIT 開源，可直接作為機關自我驗測的技術底座，不必從零造輪子。</p></div></div>
+    </div>
+  </div>
+
+  <div class="sources">
+    <h3>📚 原始來源</h3>
+    <a href="https://x.com/garrytan/status/1892952656940880036" target="_blank">Garry Tan · evals are the real moat</a> · <a href="https://arize.com/blog/evals-in-ci-how-to-write-llm-evals-as-tests" target="_blank">Arize · Evals in CI</a><br>
+    <a href="https://applied-llms.org/" target="_blank">What We've Learned From A Year of Building with LLMs（applied-llms.org）</a><br>
+    <a href="https://hamel.dev/blog/posts/llm-judge/" target="_blank">Hamel Husain · LLM-as-Judge 指南</a> · <a href="https://hamel.dev/blog/posts/evals/" target="_blank">Your AI Product Needs Evals</a><br>
+    <a href="https://arxiv.org/html/2406.04244v1" target="_blank">Benchmark 資料污染調查（arXiv）</a> · <a href="https://favtutor.com/articles/llm-overfit-public-benchmarks/" target="_blank">LLM 對公開 benchmark 過擬合</a><br>
+    <a href="https://www.technologyreview.com/2025/06/24/1119187/fix-ai-evaluation-crisis/" target="_blank">MIT Technology Review · AI 評測危機</a> · <a href="https://github.com/openai/evals" target="_blank">OpenAI Evals（開源）</a><br>
+    <a href="https://aisi.go.jp/" target="_blank">日本 J-AISI</a> · <a href="https://www.aisi.re.kr/eng/contents/22" target="_blank">韓國 K-AISI</a> · <a href="https://aiverifyfoundation.sg/project-moonshot/" target="_blank">新加坡 Project Moonshot</a><br>
+    <a href="https://code-of-practice.ai/" target="_blank">歐盟 GPAI Code of Practice</a> · <a href="https://www.inria.fr/fr/creation-institut-evaluation-securite-intelligence-artificielle" target="_blank">法國 INESIA</a> · <a href="https://github.com/UKGovernmentBEIS/inspect_ai" target="_blank">英國 Inspect（GitHub, MIT）</a><br>
+    <a href="https://x.com/gdb/status/1733553161884127435" target="_blank">Greg Brockman · evals 名言</a> · <a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank">Anthropic · Demystifying evals</a> · <a href="https://deepmind.google/research/evals/" target="_blank">Google DeepMind · Evals</a>
+  </div>
+
+  <footer>
+    政府 AI 三部曲 · 003 高品味題庫自我驗測年代 · 2026-07-08<br>
+    技術與應用為主、法規為輔 · 所有影片連結經 oEmbed 驗證、引言回原始出處逐字比對
+  </footer>
+</div>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
