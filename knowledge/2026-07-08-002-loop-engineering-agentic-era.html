@@ -60,6 +60,19 @@
     .watch { display:inline-flex; align-items:center; gap:6px; margin-top:12px; align-self:flex-start; text-decoration:none; background:#1a1a1a; color:#fff; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:700; padding:7px 14px; border-radius:8px; }
     .watch:hover { background:#e8713a; }
     .video-note { background:#fff8ee; border:2px dashed #e0b088; border-radius:10px; padding:14px 18px; font-size:0.9rem; color:#6b4226; line-height:1.7; margin-bottom:18px; }
+    .vyear { font-family:'Inter',sans-serif; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap; }
+    .y26 { background:#dcfce7; color:#166534; }
+    .y25 { background:#fef9c3; color:#854d0e; }
+    .yfound { background:#e2e8f0; color:#475569; }
+    .fresh-box { background:#f0fdf4; border:3px solid #1a1a1a; border-radius:12px; box-shadow:4px 4px 0 #1a1a1a; padding:22px 24px; margin-bottom:24px; }
+    .fresh-box .fresh-h { font-family:'Baloo 2',cursive; font-weight:800; font-size:1.18rem; color:#166534; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .fresh-box .fresh-sub { font-size:0.9rem; color:#3f6212; margin-bottom:16px; line-height:1.65; }
+    .art2026 { list-style:none; margin-top:6px; }
+    .art2026 li { background:white; border-radius:10px; padding:12px 16px; margin-bottom:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); font-size:0.92rem; line-height:1.62; color:#444; }
+    .art2026 .d { display:inline-block; font-family:'Inter',sans-serif; font-size:0.7rem; font-weight:700; color:#166534; background:#dcfce7; padding:1px 8px; border-radius:20px; margin-right:6px; }
+    .art2026 a { color:#c2571f; text-decoration:none; font-weight:700; }
+    .art2026 a:hover { text-decoration:underline; }
+    .art2026 .who { color:#999; font-size:0.85rem; }
     .stack-card { background: white; border-radius: 12px; padding: 24px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 20px; }
     .stack-card h4 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; }
     .stack-card .layer { display: flex; align-items: flex-start; gap: 16px; padding: 13px 0; border-bottom: 1px solid #f0f0f0; }
@@ -177,41 +190,61 @@
   <!-- Tab 2: 影片 -->
   <div class="tab-panel">
     <div class="section-title">📺 參考影片：這是 Gary 頻道的主場</div>
-    <div class="video-note">🎬 <strong>Gary Talks Stuff（@garytalksstuff，頻道主 Gary Chen）</strong> 整個頻道就是「迴圈工程／Claude Code／agent 工作流」的活教材。以下 9 支全是他本人影片，皆經 YouTube RSS／oEmbed 雙重驗證。</div>
+
+    <div class="fresh-box">
+      <div class="fresh-h">🆕 2026 最新補充</div>
+      <div class="fresh-sub">好消息：本頁 <strong>9 支影片全是 Gary 2026 上半年新片</strong>（每張已標日期）。這裡再補上 2026 年的權威文章與政府政策，讓「迴圈工程」的最新進展一次到位。</div>
+      <div class="fresh-h" style="font-size:1.05rem;">📄 2026 最新文章（技術）</div>
+      <ul class="art2026">
+        <li><span class="d">2026-03-24</span><a href="https://www.anthropic.com/engineering/harness-design-long-running-apps" target="_blank">Harness design for long-running application development</a> <span class="who">· Anthropic</span>——多 agent harness（planning/generation/evaluation 分工），解長時任務跨 context window 接力。</li>
+        <li><span class="d">2026-04-08</span><a href="https://www.anthropic.com/engineering/managed-agents" target="_blank">Scaling Managed Agents: Decoupling the brain from the hands</a> <span class="who">· Anthropic</span>——「大腦與雙手分離」：介面穩定、harness 可換，適合企業長跑。</li>
+        <li><span class="d">2026-02-11</span><a href="https://developers.openai.com/blog/skills-shell-tips" target="_blank">Shell + Skills + Compaction: Tips for long-running agents</a> <span class="who">· OpenAI</span>——長時 agent 三大件：shell 工具、可重用 Skills、context compaction。</li>
+        <li><span class="d">2026-03-09</span><a href="https://blog.modelcontextprotocol.io/posts/2026-mcp-roadmap/" target="_blank">The 2026 MCP Roadmap</a> <span class="who">· MCP 官方</span>——MCP 2026 路線圖：傳輸擴展、agent 溝通、治理、企業部署。</li>
+        <li><span class="d">2026-04-23</span><a href="https://cloud.google.com/blog/products/ai-machine-learning/introducing-gemini-enterprise-agent-platform" target="_blank">Introducing Gemini Enterprise Agent Platform</a> <span class="who">· Google Cloud</span>——企業級 agent 平台，build/scale/govern/optimize 一條龍。</li>
+      </ul>
+      <div class="fresh-h" style="font-size:1.05rem;margin-top:14px;">🏛 2026 最新政策（政府導入 agentic）</div>
+      <ul class="art2026">
+        <li><span class="d">2026-01-22</span><a href="https://www.imda.gov.sg/resources/press-releases-factsheets-and-speeches/press-releases/2026/new-model-ai-governance-framework-for-agentic-ai" target="_blank">新加坡：Model AI Governance Framework for Agentic AI</a> <span class="who">· IMDA</span>——全球第一份專門針對 agentic AI 的政府治理框架（達沃斯 WEF 發表）。</li>
+        <li><span class="d">2026-01-23</span><a href="https://digital-strategy.ec.europa.eu/en/library/agentic-ai-leveraging-european-ai-talent-and-regulatory-assets-scale-adoption" target="_blank">歐盟：Agentic AI — Leveraging European talent &amp; regulatory assets</a> <span class="who">· 執委會</span>——盤點歐盟 agentic AI 的人才與法規優勢、怎麼安全大規模落地。</li>
+        <li><span class="d">2026-03-16</span><a href="https://insidegovuk.blog.gov.uk/2026/03/16/5-things-we-learned-testing-gov-uk-chat-an-ai-assistant-for-government/" target="_blank">英國：5 things we learned testing GOV.UK Chat</a> <span class="who">· GDS</span>——政府實測 AI 助理的五個教訓，正往「替你把事辦掉」的 agentic 推進。</li>
+      </ul>
+    </div>
+
+    <div class="video-note">🎬 <strong>Gary Talks Stuff（@garytalksstuff，頻道主 Gary Chen）</strong> 整個頻道就是「迴圈工程／Claude Code／agent 工作流」的活教材。以下 9 支全是他本人影片、<strong>且全部 🟢 2026 上半年</strong>，皆經 YouTube RSS／oEmbed 雙重驗證。</div>
     <div class="video-grid">
-      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-07-01</span></div>
         <h4>Loop Engineering 解析，大神都不寫 prompt 了？</h4>
         <p>直接命中主題核心：解釋「不再手寫 prompt、改工程化 agent loop」的迴圈工程概念。<strong>建議第一支看這支。</strong></p>
         <a class="watch" href="https://www.youtube.com/watch?v=kGYFSDd-ZVY" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-03-28</span></div>
         <h4>OpenAI 內部實驗：100 萬行程式碼，0 行人寫 — Harness Engineering 到底是什麼？</h4>
         <p>專講 harness（外掛骨架）工程，正是迴圈工程的另一個名字，切題度極高。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=ugKW_Dv37Bk" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-06-27</span></div>
         <h4>AI 寫的 code 一堆 bug？讓 Claude 跟 Codex 自動互審</h4>
         <p>示範 self-correction loop：讓兩個模型互審自動修錯，是 agent loop 的具體實作。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=xzrvAERmvRk" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-06-20</span></div>
         <h4>為什麼你該開始做產品給 AI 用了？瑞幸咖啡提供 MCP 只是炒作嗎？</h4>
         <p>談 MCP（tool use / 工具介接）與「為 AI 做產品」的趨勢，對應概念 3 的 MCP 面向。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=41LR-NhwHfI" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-06-07</span></div>
         <h4>Claude 新功能 Dynamic Workflow，一句話開上百個 agent 幫你幹活</h4>
         <p>agentic workflow 實戰：一句話展開上百個子 agent，示範工程化的迴圈編排。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=4fpZhuJuIls" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-05-24</span></div>
         <h4>我的 AI agent 連續跑了 27 個小時，/goal 功能怎麼用？</h4>
         <p>實測讓 agent loop 連跑 27 小時、用 /goal 驅動長時間自主迴圈，很有「迴圈工程」臨場感。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=PpeCur6fEXc" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-04-08</span></div>
         <h4>從 Claude Code 源代碼學習 Agent 框架，CC 為何這麼好用？</h4>
         <p>拆解 Claude Code 原始碼看 agent harness 怎麼設計，直達 harness 主題。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=-cnAz897A_0" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-05-13</span></div>
         <h4>如果你還在靠一個最強 AI 做萬能打雜工，你要學學「多工具工作流」了</h4>
         <p>講 tool use / 多工具工作流的設計思維，呼應「工程化而非單一 prompt」。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=QHHTcYBEIEo" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-06-11</span></div>
         <h4>你不是不會寫 Prompt，是不會定義任務</h4>
         <p>context / task engineering 觀念課：重點從「寫提示」轉向「定義任務與情境」。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=KNP9Mr1rUQY" target="_blank">▶ 看影片</a></div>
@@ -303,6 +336,14 @@
       <span style="color:#6b4226;">（我支持用「context engineering」取代「prompt engineering」……context engineering 是為了下一步，把恰到好處的資訊填進 context window 的精細藝術與科學。）</span>
       <cite>— Andrej Karpathy，前 Tesla AI 總監、OpenAI 創始成員 · 2025/6/25 X 貼文</cite>
       <div class="src"><a href="https://x.com/karpathy/status/1937902205765607626" target="_blank">🔗 x.com/karpathy ↗</a> · <a href="https://www.ycombinator.com/library/MW-andrej-karpathy-software-is-changing-again" target="_blank">Software 3.0 演講 ↗</a></div>
+    </div>
+
+    <div class="quote-box" style="border-left-color:#4285f4;">
+      <span style="display:inline-block;background:#dcfce7;color:#166534;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:20px;margin-bottom:8px;">🆕 2026 最新</span><br>
+      「Welcome to the <strong>agentic Gemini era</strong>.」<br>
+      <span style="color:#6b4226;">（歡迎來到代理型的 Gemini 時代。）Pichai 在 I/O 2026 親自宣告 Google 全面 all-in agent，Gemini 3.5 主打 agentic 與長時任務——正好呼應本頁「迴圈工程」主題的最新一里。</span>
+      <cite>— Sundar Pichai，Google／Alphabet 執行長 · 2026/5/19 Google I/O 2026 主題演講</cite>
+      <div class="src"><a href="https://blog.google/innovation-and-ai/sundar-pichai-io-2026/" target="_blank">🔗 blog.google ↗</a></div>
     </div>
   </div>
 

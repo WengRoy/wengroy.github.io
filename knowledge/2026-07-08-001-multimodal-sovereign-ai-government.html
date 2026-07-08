@@ -90,6 +90,19 @@
     .watch { display:inline-flex; align-items:center; gap:6px; margin-top:12px; align-self:flex-start; text-decoration:none; background:#1a1a1a; color:#fff; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:700; padding:7px 14px; border-radius:8px; }
     .watch:hover { background:#e8713a; }
     .video-note { background:#fff8ee; border:2px dashed #e0b088; border-radius:10px; padding:14px 18px; font-size:0.9rem; color:#6b4226; line-height:1.7; margin-bottom:18px; }
+    .vyear { font-family:'Inter',sans-serif; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap; }
+    .y26 { background:#dcfce7; color:#166534; }
+    .y25 { background:#fef9c3; color:#854d0e; }
+    .yfound { background:#e2e8f0; color:#475569; }
+    .fresh-box { background:#f0fdf4; border:3px solid #1a1a1a; border-radius:12px; box-shadow:4px 4px 0 #1a1a1a; padding:22px 24px; margin-bottom:24px; }
+    .fresh-box .fresh-h { font-family:'Baloo 2',cursive; font-weight:800; font-size:1.18rem; color:#166534; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .fresh-box .fresh-sub { font-size:0.9rem; color:#3f6212; margin-bottom:16px; line-height:1.65; }
+    .art2026 { list-style:none; margin-top:6px; }
+    .art2026 li { background:white; border-radius:10px; padding:12px 16px; margin-bottom:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); font-size:0.92rem; line-height:1.62; color:#444; }
+    .art2026 .d { display:inline-block; font-family:'Inter',sans-serif; font-size:0.7rem; font-weight:700; color:#166534; background:#dcfce7; padding:1px 8px; border-radius:20px; margin-right:6px; }
+    .art2026 a { color:#c2571f; text-decoration:none; font-weight:700; }
+    .art2026 a:hover { text-decoration:underline; }
+    .art2026 .who { color:#999; font-size:0.85rem; }
 
     .stack-card { background: white; border-radius: 12px; padding: 24px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 20px; }
     .stack-card h4 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; }
@@ -223,46 +236,79 @@
   <!-- Tab 2: 影片 -->
   <div class="tab-panel">
     <div class="section-title">📺 參考影片：先看這幾支，就知道怎麼講</div>
-    <div class="video-note">🎬 <strong>Gary Talks Stuff（@garytalksstuff）</strong> 在本主題只有「語音輸入（ASR）」一支切題，其餘用官方頻道（OpenAI／Google／AI Engineer）與地端實測頻道補足。<strong>所有連結都經 YouTube oEmbed／RSS 實抓驗證，非搜尋摘要。</strong></div>
+
+    <div class="fresh-box">
+      <div class="fresh-h">🆕 2026 最新補充</div>
+      <div class="fresh-sub">下方原有清單裡的 GPT-4o／Gemini 官方 demo 是 2023–2024 的<strong>奠基里程碑</strong>（講原理很好）；這裡補上 <strong>2026 年最新、且能地端跑</strong>的實測與發表。</div>
+      <div class="video-grid">
+        <div class="video-card"><div class="vtop"><span class="chan chan-official">NVIDIA Developer</span><span class="vyear y26">2026-04-21</span></div>
+          <h4>Gemma 4 Runs 100% Local on NVIDIA Jetson</h4>
+          <p>官方短片：語音（Parakeet STT）＋視覺＋推理全在 Jetson 邊緣裝置地端跑，一支涵蓋 ASR＋VLM＋on-prem。</p>
+          <a class="watch" href="https://www.youtube.com/shorts/7eawJCUTVLQ" target="_blank">▶ 看影片</a></div>
+        <div class="video-card"><div class="vtop"><span class="chan chan-creator">Fahd Mirza</span><span class="vyear y26">2026-01-27</span></div>
+          <h4>DeepSeek OCR 2: Deep Encoder for Document Understanding — Run Locally</h4>
+          <p>發布當天實測 3B 的 DeepSeek-OCR 2 完全地端把文件轉文字，全機敏場景首選。</p>
+          <a class="watch" href="https://www.youtube.com/watch?v=ZDntsimpS3g" target="_blank">▶ 看影片</a></div>
+        <div class="video-card"><div class="vtop"><span class="chan chan-official">AI Engineer</span><span class="vyear y26">2026-04-27</span></div>
+          <h4>Gemma 4 Deep Dive — Cassidy Hardin, Google DeepMind</h4>
+          <p>DeepMind 研究員親自深講 Gemma 4 架構，官方等級的技術權威來源。</p>
+          <a class="watch" href="https://www.youtube.com/watch?v=_A367W_qvc8" target="_blank">▶ 看影片</a></div>
+        <div class="video-card"><div class="vtop"><span class="chan chan-creator">Andrej Baranovskij</span><span class="vyear y26">2026-03-03</span></div>
+          <h4>Local OCR Comparison: dots.ocr vs DeepSeek-OCR 2（Sparrow + MLX）</h4>
+          <p>用 MLX 在 Mac 地端把 dots.ocr 跟 DeepSeek-OCR 2 對打，準確度 vs 速度取捨很實用。</p>
+          <a class="watch" href="https://www.youtube.com/watch?v=dIfWLgKAHrI" target="_blank">▶ 看影片</a></div>
+      </div>
+      <div class="fresh-h" style="font-size:1.05rem;margin-top:18px;">📄 2026 最新文章</div>
+      <ul class="art2026">
+        <li><span class="d">2026-04-02</span><a href="https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/" target="_blank">Gemma 4: Byte for byte, the most capable open models</a> <span class="who">· Google 官方</span>——最強 open-weight 家族，邊緣版可完全離線、原生影像/音訊/影片多模態。</li>
+        <li><span class="d">2026-06-03</span><a href="https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemma-4-12b/" target="_blank">Introducing Gemma 4 12B：encoder-free 多模態</a> <span class="who">· Google 官方</span>——免獨立 encoder 直吃影像+音訊，16GB RAM 筆電就能地端多模態。</li>
+        <li><span class="d">2026-02-04</span><a href="https://mistral.ai/news/voxtral-transcribe-2/" target="_blank">Voxtral Transcribe 2</a> <span class="who">· Mistral 官方</span>——Apache 2.0 開源、可地端跑的即時 ASR，sub-200ms、13 語言、隱私優先。</li>
+        <li><span class="d">2026-04-28</span><a href="https://blogs.nvidia.com/blog/nemotron-3-nano-omni-multimodal-ai-agents/" target="_blank">NVIDIA Nemotron 3 Nano Omni</a> <span class="who">· NVIDIA 官方</span>——把視覺+音訊+語言塞進單一開源 30B 模型，可地端做文件/語音/影片理解。</li>
+        <li><span class="d">2026-01-28</span><a href="https://technode.com/2026/01/28/deepseek-releases-ocr-2-with-new-visual-encoding-architecture-targeting-more-human-like-machine-vision/" target="_blank">DeepSeek releases OCR 2（DeepEncoder V2）</a> <span class="who">· TechNode</span>——開源 3B，「先看全局再讀」，OmniDocBench 91%。</li>
+        <li><span class="d">2026-07-02</span><a href="https://asiatimes.com/2026/07/japan-rallies-tech-giant-alliance-to-build-sovereign-ai/" target="_blank">Japan rallies tech-giant alliance to build sovereign AI</a> <span class="who">· Asia Times</span>——最新：日本出資 Noetra 聯盟自建主權模型，直指「機密外流+營運中斷」風險。</li>
+      </ul>
+    </div>
+
+    <div class="video-note">🎬 以下為原有清單。<strong>Gary Talks Stuff（@garytalksstuff）</strong> 在本主題只有語音輸入一支切題，其餘用官方頻道與地端實測補足。標籤：🟢 2026、🟡 2025、⚪ 2023–24 奠基里程碑。<strong>所有連結經 oEmbed／RSS 實抓驗證。</strong></div>
     <div class="video-grid">
       <div class="video-card">
-        <div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span></div>
+        <div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">🟢 2026-07-07</span></div>
         <h4>語音輸入 x AI 怎麼用？AI 時代最被低估的工作技能！ft. Typeless</h4>
         <p>講語音輸入（ASR）如何搭 AI 變成日常工作流——本主題「語音辨識」面向唯一命中 Gary 的影片。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=5XeVLt9WejM" target="_blank">▶ 看影片</a>
       </div>
       <div class="video-card">
-        <div class="vtop"><span class="chan chan-official">OpenAI 官方</span></div>
+        <div class="vtop"><span class="chan chan-official">OpenAI 官方</span><span class="vyear yfound">⚪ 2024 奠基</span></div>
         <h4>Live demo of GPT-4o vision capabilities</h4>
-        <p>官方 GPT-4o omni 現場示範，鏡頭即時視覺辨識——「原生多模態 vision」的代表作。</p>
+        <p>官方 GPT-4o omni 現場示範，鏡頭即時視覺辨識——「原生多模態 vision」的代表作。（2024-05-13 GPT-4o 發表當天）</p>
         <a class="watch" href="https://www.youtube.com/watch?v=RI-BxtCx32s" target="_blank">▶ 看影片</a>
       </div>
       <div class="video-card">
-        <div class="vtop"><span class="chan chan-official">OpenAI 官方</span></div>
+        <div class="vtop"><span class="chan chan-official">OpenAI 官方</span><span class="vyear yfound">⚪ 2024 奠基</span></div>
         <h4>Live demo of GPT-4o realtime conversational speech</h4>
-        <p>即時語音對話示範，展示 omni 的語音輸入輸出（ASR＋TTS 端到端）。</p>
+        <p>即時語音對話示範，展示 omni 的語音輸入輸出（ASR＋TTS 端到端）。（2024-05-13）</p>
         <a class="watch" href="https://www.youtube.com/watch?v=1uM8jhcqDP0" target="_blank">▶ 看影片</a>
       </div>
       <div class="video-card">
-        <div class="vtop"><span class="chan chan-official">Google 官方</span></div>
+        <div class="vtop"><span class="chan chan-official">Google 官方</span><span class="vyear yfound">⚪ 2023 奠基</span></div>
         <h4>The capabilities of multimodal AI | Gemini Demo</h4>
-        <p>Gemini 原生多模態示範（文字/影像/聲音/影片一起推理）。註：此片當年被討論「有剪接美化」，但內容真實存在，可當概念示意。</p>
+        <p>Gemini 原生多模態示範（文字/影像/聲音/影片一起推理）。註：此片當年被討論「有剪接美化」，但內容真實存在，可當概念示意。（2023-12-06 最舊）</p>
         <a class="watch" href="https://www.youtube.com/watch?v=UIZAiXYceBI" target="_blank">▶ 看影片</a>
       </div>
       <div class="video-card">
-        <div class="vtop"><span class="chan chan-official">AI Engineer</span></div>
+        <div class="vtop"><span class="chan chan-official">AI Engineer</span><span class="vyear y26">🟢 2026-05-20</span></div>
         <h4>Any-to-Any: Building Native Multimodal Agents — Patrick Löber, Google DeepMind</h4>
         <p>研討會上 Google DeepMind 工程師談如何打造原生多模態 agent，技術深度足。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=GIRpQEfYf3U" target="_blank">▶ 看影片</a>
       </div>
       <div class="video-card">
-        <div class="vtop"><span class="chan chan-creator">Venelin Valkov</span></div>
+        <div class="vtop"><span class="chan chan-creator">Venelin Valkov</span><span class="vyear y26">🟢 2026-03-01</span></div>
         <h4>Qwen Local Test with Ollama | Coding, OCR, Data Extraction, Image Understanding</h4>
         <p>地端用 Ollama 跑 open-weight 的 Qwen，實測 OCR、資料抽取、看圖——正中「地端多模態＋OCR」。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=6y66Wa7bYRA" target="_blank">▶ 看影片</a>
       </div>
       <div class="video-card">
-        <div class="vtop"><span class="chan chan-creator">Digital Spaceport</span></div>
+        <div class="vtop"><span class="chan chan-creator">Digital Spaceport</span><span class="vyear y25">🟡 2025-05-16</span></div>
         <h4>Ollama Local AI Vision: Qwen 2.5 VL and Gemma 3 QAT Test</h4>
         <p>地端同時測 Qwen2.5-VL 與 Gemma 3 視覺模型，open-weight on-prem 推論實戰，貼合「機敏地端」訴求。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=1kchCV0lWBU" target="_blank">▶ 看影片</a>

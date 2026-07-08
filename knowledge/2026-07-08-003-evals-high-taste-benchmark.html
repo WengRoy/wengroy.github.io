@@ -61,6 +61,19 @@
     .watch { display:inline-flex; align-items:center; gap:6px; margin-top:12px; align-self:flex-start; text-decoration:none; background:#1a1a1a; color:#fff; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:700; padding:7px 14px; border-radius:8px; }
     .watch:hover { background:#e8713a; }
     .video-note { background:#fff8ee; border:2px dashed #e0b088; border-radius:10px; padding:14px 18px; font-size:0.9rem; color:#6b4226; line-height:1.7; margin-bottom:18px; }
+    .vyear { font-family:'Inter',sans-serif; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap; }
+    .y26 { background:#dcfce7; color:#166534; }
+    .y25 { background:#fef9c3; color:#854d0e; }
+    .yfound { background:#e2e8f0; color:#475569; }
+    .fresh-box { background:#f0fdf4; border:3px solid #1a1a1a; border-radius:12px; box-shadow:4px 4px 0 #1a1a1a; padding:22px 24px; margin-bottom:24px; }
+    .fresh-box .fresh-h { font-family:'Baloo 2',cursive; font-weight:800; font-size:1.18rem; color:#166534; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .fresh-box .fresh-sub { font-size:0.9rem; color:#3f6212; margin-bottom:16px; line-height:1.65; }
+    .art2026 { list-style:none; margin-top:6px; }
+    .art2026 li { background:white; border-radius:10px; padding:12px 16px; margin-bottom:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); font-size:0.92rem; line-height:1.62; color:#444; }
+    .art2026 .d { display:inline-block; font-family:'Inter',sans-serif; font-size:0.7rem; font-weight:700; color:#166534; background:#dcfce7; padding:1px 8px; border-radius:20px; margin-right:6px; }
+    .art2026 a { color:#c2571f; text-decoration:none; font-weight:700; }
+    .art2026 a:hover { text-decoration:underline; }
+    .art2026 .who { color:#999; font-size:0.85rem; }
     .stack-card { background: white; border-radius: 12px; padding: 24px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 20px; }
     .stack-card h4 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; }
     .stack-card .layer { display: flex; align-items: flex-start; gap: 16px; padding: 13px 0; border-bottom: 1px solid #f0f0f0; }
@@ -169,21 +182,49 @@
   <!-- Tab 2: 影片 -->
   <div class="tab-panel">
     <div class="section-title">📺 參考影片：evals 的實戰教學</div>
-    <div class="video-note">🎬 <strong>Gary Talks Stuff 目前沒有專講 evals 的影片</strong>（最接近的是 002 那支「Claude 跟 Codex 自動互審」，但屬自我修正而非評測體系）。本主題全數用高可信外部來源：evals 課權威 Hamel Husain、AI Engineer 研討會、OpenAI 官方教學。<strong>所有連結經 oEmbed 驗證。</strong></div>
+
+    <div class="fresh-box">
+      <div class="fresh-h">🆕 2026 最新補充</div>
+      <div class="fresh-sub">下方原有清單多為 2025 的經典教學（概念仍適用）。這裡補上 <strong>2026 年最新</strong>的 evals 影片與文章，含 Anthropic 兩篇 2026 官方工程文與抗污染題庫新研究。</div>
+      <div class="video-grid">
+        <div class="video-card"><div class="vtop"><span class="chan chan-creator">Vanishing Gradients</span><span class="vyear y26">2026-04-22</span></div>
+          <h4>Next Level AI Evals for 2026</h4>
+          <p>2026 evals 專題演講，直接把「下一階段評測」講清楚，標題與時間點都最對題。</p>
+          <a class="watch" href="https://www.youtube.com/watch?v=z7_4_ywwRDI" target="_blank">▶ 看影片</a></div>
+        <div class="video-card"><div class="vtop"><span class="chan chan-creator">LiftoffPM</span><span class="vyear y26">2026-02-02</span></div>
+          <h4>How Anthropic Actually Writes AI Evals for Agents</h4>
+          <p>拆解 Anthropic《Demystifying evals》的實作八招（eval harness／tasks／graders），實作範例首選。</p>
+          <a class="watch" href="https://www.youtube.com/watch?v=pDp8Gm64EmY" target="_blank">▶ 看影片</a></div>
+        <div class="video-card"><div class="vtop"><span class="chan chan-official">Braintrust 官方</span><span class="vyear y26">2026-01-22</span></div>
+          <h4>Intro to Braintrust: AI Observability and Evals</h4>
+          <p>eval 基礎設施廠商官方 demo，用客服 chatbot 走完 LLM-as-judge 到監控。</p>
+          <a class="watch" href="https://www.youtube.com/watch?v=qpmMxRwXzEQ" target="_blank">▶ 看影片</a></div>
+      </div>
+      <div class="fresh-h" style="font-size:1.05rem;margin-top:18px;">📄 2026 最新文章</div>
+      <ul class="art2026">
+        <li><span class="d">2026-01-09</span><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank">Demystifying evals for AI agents</a> <span class="who">· Anthropic</span>——agent evals 權威定調：tasks／trials／graders 變成程式化基礎設施。</li>
+        <li><span class="d">2026-01-21</span><a href="https://www.anthropic.com/engineering/AI-resistant-technical-evaluations" target="_blank">Designing AI-resistant technical evaluations</a> <span class="who">· Anthropic</span>——如何設計「不會被模型作弊／抗污染」的技術題庫，直打 benchmark 污染。</li>
+        <li><span class="d">2026-06-29</span><a href="https://hamel.dev/blog/posts/eval-smell/" target="_blank">"It's Hard to Eval" Is a Product Smell</a> <span class="who">· Hamel Husain</span>——最新犀利觀點：說「我產品很難 eval」其實是產品有問題的味道。</li>
+        <li><span class="d">2026-04-29</span><a href="https://huggingface.co/blog/evaleval/eval-costs-bottleneck" target="_blank">AI evals are becoming the new compute bottleneck</a> <span class="who">· EvalEval Coalition</span>——「eval 成本正成為新的算力瓶頸」，講 eval 基礎設施規模化痛點。</li>
+        <li><span class="d">2026-05-19</span><a href="https://arxiv.org/abs/2605.19999" target="_blank">LLM Benchmark Datasets Should Be Contamination-Resistant</a> <span class="who">· arXiv</span>——2026 新研究：題庫本身要「抗污染」設計，呼應概念 4。</li>
+      </ul>
+    </div>
+
+    <div class="video-note">🎬 以下為原有清單。<strong>Gary Talks Stuff 至今沒有專講 evals 的影片</strong>，本區全用高可信外部來源。標籤：🟢 2026、🟡 2025。<strong>所有連結經 oEmbed 驗證。</strong></div>
     <div class="video-grid">
-      <div class="video-card"><div class="vtop"><span class="chan chan-creator">Peter Yang ft. Hamel Husain</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-creator">Peter Yang ft. Hamel Husain</span><span class="vyear y25">🟡 2025-09-28</span></div>
         <h4>AI Evaluations Clearly Explained in 50 Minutes (Real Example)</h4>
-        <p>evals 課權威 Hamel Husain 用真實案例 50 分鐘講透 LLM evals 全流程——<strong>本主題最實戰的一支，建議先看。</strong></p>
+        <p>evals 課權威 Hamel Husain 用真實案例 50 分鐘講透 LLM evals 全流程——<strong>經典必看，觀念不過時。</strong></p>
         <a class="watch" href="https://www.youtube.com/watch?v=uiza7wp1KrE" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-official">AI Engineer</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-official">AI Engineer</span><span class="vyear y25">🟡 2025-06-27</span></div>
         <h4>Evals 101 — Doug Guthrie, Braintrust</h4>
         <p>研討會的 evals 入門，Braintrust 講者帶你建 eval set 的基本盤。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=bk0TmxoZlUY" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-official">AI Engineer</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-official">AI Engineer</span><span class="vyear y26">🟢 2026-04-10</span></div>
         <h4>Judge the Judge: Building LLM Evaluators That Actually Work — Mahmoud Mabrouk, Agenta AI</h4>
-        <p>深入 LLM-as-judge：如何校準評審模型、避免「爛 eval 比沒 eval 更糟」。</p>
+        <p>深入 LLM-as-judge：如何校準評審模型、避免「爛 eval 比沒 eval 更糟」。（既有清單裡唯一 2026）</p>
         <a class="watch" href="https://www.youtube.com/watch?v=X4dEHRzBLmc" target="_blank">▶ 看影片</a></div>
-      <div class="video-card"><div class="vtop"><span class="chan chan-creator">Kody Simpson</span></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-creator">Kody Simpson</span><span class="vyear y25">🟡 2025-09-30</span></div>
         <h4>OpenAI Evaluations Tutorial: How to Test Your AI Models</h4>
         <p>手把手示範用 OpenAI Evals 工具測模型，把「evals 當單元測試」落地成程式碼。</p>
         <a class="watch" href="https://www.youtube.com/watch?v=fUv-c57H7qI" target="_blank">▶ 看影片</a></div>
