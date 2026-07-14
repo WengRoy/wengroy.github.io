@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>資料不出境也能用 AI — 波特人 × 國網中心 RAP 工作坊</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: #fdf6e3; background-image: radial-gradient(circle, #d4b896 1px, transparent 1px); background-size: 18px 18px; color: #1a1a1a; min-height: 100vh; padding: 24px 16px; font-size: 17px; }
+    .page { max-width: 980px; margin: 0 auto; }
+    .back-link { display: inline-block; margin-bottom: 16px; color: #e8713a; text-decoration: none; font-size: 0.85rem; font-weight: 700; }
+    .back-link:hover { text-decoration: underline; }
+    .header { border: 3px solid #1a1a1a; border-radius: 14px; background: #fff8ee; box-shadow: 5px 5px 0 #1a1a1a; padding: 30px 34px; margin-bottom: 20px; }
+    .header-badge { display: inline-block; background: #e8713a; color: white; font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.88rem; padding: 5px 16px; border-radius: 20px; border: 2px solid #1a1a1a; box-shadow: 2px 2px 0 #1a1a1a; margin-bottom: 14px; }
+    .header .kicker { font-family:'Baloo 2',cursive; font-size:0.9rem; color:#6b4226; font-weight:700; margin-bottom:6px; }
+    .header h1 { font-family: 'Baloo 2', cursive; font-size: 2.05rem; font-weight: 800; color: #1a1a1a; line-height: 1.28; margin-bottom: 12px; }
+    .header h1 span { color: #e8713a; }
+    .header p { color: #6b4226; font-size: 1.05rem; line-height: 1.75; }
+    .agenda-nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px; }
+    .agenda-pill { font-family:'Baloo 2',cursive; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:20px; border:2px solid #1a1a1a; color:#6b4226; background:#fff8ee; box-shadow:2px 2px 0 #1a1a1a; }
+    .agenda-pill .t { color:#e8713a; }
+    .tab-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tab-btn { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.96rem; padding: 10px 16px; border: 3px solid #1a1a1a; border-bottom: none; border-radius: 10px 10px 0 0; background: #fff8ee; cursor: pointer; transition: all 0.12s; color: #6b4226; }
+    .tab-btn.active { background: #e8713a; color: white; }
+    .tab-btn:hover:not(.active) { background: #fdf6e3; transform: translateY(-2px); }
+    .tab-panel { display: none; border: 3px solid #1a1a1a; border-radius: 0 8px 8px 8px; padding: 30px 30px 34px; background: #fdf6e3; box-shadow: 5px 5px 0 #1a1a1a; }
+    .tab-panel.active { display: block; }
+    .section-title { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; color: #6b4226; margin: 4px 0 20px; display: flex; align-items: center; gap: 8px; }
+    .lead { font-size: 1.02rem; color:#5a4a38; line-height:1.85; margin-bottom:20px; }
+    .quote-box { border-left: 5px solid #e8713a; background: #fff8ee; padding: 16px 22px; border-radius: 0 8px 8px 0; margin: 20px 0; font-size: 1.02rem; line-height: 1.8; color: #333; }
+    .quote-box cite { display: block; font-style: normal; font-weight: 700; color: #e8713a; font-size: 0.9rem; margin-top: 8px; }
+    .insight { background: #e8713a; color: #fff; border: 3px solid #1a1a1a; border-radius: 10px; padding: 22px 26px; box-shadow: 4px 4px 0 #1a1a1a; margin: 24px 0; font-size: 1.02rem; line-height: 1.85; }
+    .insight strong.h { display: block; font-size: 1.2rem; margin-bottom: 8px; }
+    .svgcard { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 24px; overflow: hidden; }
+    .svgcard figcaption { padding: 14px 22px; font-size: 0.96rem; color: #555; border-top: 1px solid #f0f0f0; line-height: 1.72; }
+    .svgcard figcaption strong { color: #333; }
+    .session-head { display:flex; align-items:center; gap:10px; margin: 26px 0 14px; padding:12px 18px; border-radius:10px; border:3px solid #1a1a1a; box-shadow:3px 3px 0 #1a1a1a; }
+    .session-head .no { font-family:'Baloo 2',cursive; font-weight:800; font-size:1.15rem; }
+    .session-head .nm { font-family:'Baloo 2',cursive; font-weight:800; font-size:1.05rem; color:#1a1a1a; line-height:1.35; }
+    .sh1 { background:#eaf4ff; } .sh1 .no { color:#1e5fa8; }
+    .sh2 { background:#fff2e6; } .sh2 .no { color:#c2571f; }
+    .sh3 { background:#eefaf0; } .sh3 .no { color:#2d7a45; }
+    .video-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:680px){ .video-grid{ grid-template-columns:1fr; } }
+    .video-card { background:white; border-radius:12px; padding:18px 20px; box-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(0,0,0,0.06); display:flex; flex-direction:column; }
+    .video-card .vtop { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+    .chan { font-family:'Inter',sans-serif; font-size:0.74rem; font-weight:700; padding:2px 9px; border-radius:20px; }
+    .chan-gary { background:#fee2e2; color:#b91c1c; }
+    .chan-nchc { background:#dbeafe; color:#1e40af; }
+    .chan-ext { background:#ede9fe; color:#6b21a8; }
+    .video-card h4 { font-family:'Inter','Noto Sans TC',sans-serif; font-size:1rem; font-weight:700; color:#1a1a1a; line-height:1.45; margin-bottom:8px; }
+    .video-card p { font-size:0.9rem; color:#555; line-height:1.65; flex:1; }
+    .watch { display:inline-flex; align-items:center; gap:6px; margin-top:12px; align-self:flex-start; text-decoration:none; background:#1a1a1a; color:#fff; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:700; padding:7px 14px; border-radius:8px; }
+    .watch:hover { background:#e8713a; }
+    .video-note { background:#fff8ee; border:2px dashed #e0b088; border-radius:10px; padding:14px 18px; font-size:0.9rem; color:#6b4226; line-height:1.7; margin-bottom:18px; }
+    .vyear { font-family:'Inter',sans-serif; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap; }
+    .y26 { background:#dcfce7; color:#166534; }
+    .y25 { background:#fef9c3; color:#854d0e; }
+    .vtag { background:#e2e8f0; color:#475569; }
+    .stack-card { background: white; border-radius: 12px; padding: 24px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .stack-card h4 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; }
+    .stack-card .layer { display: flex; align-items: flex-start; gap: 16px; padding: 13px 0; border-bottom: 1px solid #f0f0f0; }
+    .stack-card .layer:last-child { border-bottom: none; }
+    .stack-card .layer-num { font-size: 1.6rem; min-width: 42px; line-height: 1.2; }
+    .stack-card .layer-info h5 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1rem; font-weight: 700; color: #333; margin-bottom: 5px; }
+    .stack-card .layer-info p { font-size: 0.94rem; color: #555; line-height: 1.7; }
+    .stack-card .layer-info code { background:#f4f4f4; padding:1px 7px; border-radius:3px; font-size:0.9rem; }
+    .fresh-box { background:#f0fdf4; border:3px solid #1a1a1a; border-radius:12px; box-shadow:4px 4px 0 #1a1a1a; padding:22px 24px; margin-bottom:24px; }
+    .fresh-box .fresh-h { font-family:'Baloo 2',cursive; font-weight:800; font-size:1.18rem; color:#166534; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .fresh-box .fresh-sub { font-size:0.9rem; color:#3f6212; margin-bottom:14px; line-height:1.65; }
+    .art2026 { list-style:none; margin-top:6px; }
+    .art2026 li { background:white; border-radius:10px; padding:12px 16px; margin-bottom:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); font-size:0.92rem; line-height:1.62; color:#444; }
+    .art2026 a { color:#c2571f; text-decoration:none; font-weight:700; }
+    .art2026 a:hover { text-decoration:underline; }
+    .art2026 .who { color:#999; font-size:0.85rem; }
+    .sources { background: white; border-radius: 12px; padding: 20px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05); margin-top: 26px; font-size: 0.92rem; color: #666; line-height: 2.0; }
+    .sources h3 { font-family: 'Baloo 2', cursive; font-size: 1.05rem; color: #6b4226; margin-bottom: 8px; }
+    .sources a { color: #e8713a; text-decoration: none; }
+    .sources a:hover { text-decoration: underline; }
+    footer { text-align: center; margin-top: 20px; color: #aaa; font-size: 0.85rem; line-height:1.7; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">← 回到知識分享</a>
+
+  <header class="header">
+    <div class="header-badge">🛡️ 主權 AI 實戰工作坊</div>
+    <div class="kicker">卡米爾 · 資安技術長 翁瑞鋒 · 影片參考包</div>
+    <h1>資料不出境也能用 AI —<span> 波特人 × 國網中心 RAP</span></h1>
+    <p>在「資料安全」與「AI 應用需求」同步升溫的年代，怎麼同時顧到<strong>主權、效能、落地</strong>，是政府與企業的共同課題。這一頁把工作坊三大場次要用的<strong>參考影片</strong>整理好——全程用 11 套政府合成題庫、零機敏顧慮動手做。核心一張圖帶回去就能複製：<strong>主權算力（國網 RAP）× 開源模型（Gemma 4 31B）× Agentic 框架（波特人／成長知己）</strong>三層堆疊。</p>
+  </header>
+
+  <div class="agenda-nav">
+    <span class="agenda-pill"><span class="t">13:45</span> 場次一 · 資料不出國起手式</span>
+    <span class="agenda-pill"><span class="t">14:45</span> 場次二 · 審查 + 數據分析</span>
+    <span class="agenda-pill"><span class="t">15:45</span> 場次三 · 成長知己記憶力+100</span>
+  </div>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">① 三層架構</button>
+    <button class="tab-btn" onclick="switchTab(1)">② 📺 影片參考</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ 📊 為何要「聽話」的模型</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ 💡 洞見 × 業界轉化</button>
+  </div>
+
+  <!-- Tab 1: 三層架構 -->
+  <div class="tab-panel active">
+    <div class="section-title">🏛️ 一張架構圖帶回去就能複製</div>
+    <p class="lead">整套工作坊只要記住一件事：<strong>「AI 聰不聰明不是重點，資料有沒有離開你家才是重點。」</strong>把三層堆疊拆開來看，每一層都在確保「資料不出境」。（真操作：全程在國網中心 TAIWAN AI RAP 平台內完成，資料不經過任何外部雲端 API。）</p>
+
+    <!-- SVG: 三層堆疊 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">主權 AI 三層堆疊：資料從頭到尾都留在境內</text>
+        <!-- Layer 3 -->
+        <g transform="translate(150,52)">
+          <rect width="540" height="66" rx="12" fill="#f0fdf4" stroke="#4a7c59" stroke-width="2"/>
+          <text x="24" y="30" font-size="15" font-weight="700" fill="#2d5a3d">🤖 第 3 層 · Agentic AI 框架</text>
+          <text x="24" y="52" font-size="12.5" fill="#4a5568">波特人 Agentic 工作流 ＋「成長知己」記憶——把承辦 SOP 結晶成可傳承技能</text>
+        </g>
+        <!-- Layer 2 -->
+        <g transform="translate(150,132)">
+          <rect width="540" height="66" rx="12" fill="#fff5f0" stroke="#e07a5f" stroke-width="2"/>
+          <text x="24" y="30" font-size="15" font-weight="700" fill="#c0392b">🧩 第 2 層 · 開源模型</text>
+          <text x="24" y="52" font-size="12.5" fill="#4a5568">Gemma 4 31B、TAIDE 等開源權重——模型抱在自己手上，不呼叫外部 API</text>
+        </g>
+        <!-- Layer 1 -->
+        <g transform="translate(150,212)">
+          <rect width="540" height="66" rx="12" fill="#eaf4ff" stroke="#2980b9" stroke-width="2"/>
+          <text x="24" y="30" font-size="15" font-weight="700" fill="#1e5fa8">⚡ 第 1 層 · 主權算力</text>
+          <text x="24" y="52" font-size="12.5" fill="#4a5568">國網中心 TAIWAN AI RAP／TWCC——GPU 機房在境內，資料不落地海外</text>
+        </g>
+        <!-- side bracket -->
+        <path d="M120 60 L108 60 L108 270 L120 270" stroke="#94a3b8" stroke-width="2" fill="none"/>
+        <text x="86" y="168" text-anchor="middle" font-size="12" fill="#64748b" transform="rotate(-90 86 168)">資料不出境</text>
+        <text x="720" y="90" font-size="12" fill="#4a7c59">承辦人風格</text>
+        <text x="720" y="170" font-size="12" fill="#c0392b">會「聽話」</text>
+        <text x="720" y="250" font-size="12" fill="#1e5fa8">機房在台灣</text>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>由下往上疊——先有<strong>境內的機房算力</strong>（RAP），再放上<strong>抱在自己手上的開源模型</strong>（Gemma／TAIDE），最上面才是<strong>會幹活的 Agentic 框架</strong>（波特人）。三層都在境內，資料自然「不出國」。（真操作：模型權重與推論都跑在國網 RAP 的 GPU 上，前端只送任務、不送資料出境。）</figcaption>
+    </figure>
+
+    <div class="section-title" style="font-size:1.12rem;">🥋 三場動手闖關，對應課表三大場次</div>
+    <div class="stack-card">
+      <div class="layer"><div class="layer-num">📄</div><div class="layer-info"><h5>場次一 · 資料不出國，AI 還能多聰明？</h5><p>波特人 × TAIWAN AI RAP 實戰起手式。用一張架構圖建立「主權算力 × 開源模型 × Agentic」的整體觀。（真操作：登入 RAP、掛上 Gemma 4 31B、跑第一個合成題庫任務。）</p></div></div>
+      <div class="layer"><div class="layer-num">🔍</div><div class="layer-info"><h5>場次二 · 把機敏文件丟進來：審查 + 數據分析合成實戰</h5><p>文件審查（表單／證書 OCR）＋ 數萬筆合成資料分析。（真操作：多模態模型讀掃描件抽欄位、再對數萬筆合成資料做統計與異常偵測。）</p></div></div>
+      <div class="layer"><div class="layer-num">🧠</div><div class="layer-info"><h5>場次三 · AI 不再金魚腦：成長知己讓機關記憶力 +100</h5><p>讓 AI「算過不忘」，把承辦人的審查風格與機關 SOP 結晶成可傳承技能。（真操作：把互動歷程寫成結構化技能檔／記憶檔，下次任務自動載入。）</p></div></div>
+    </div>
+
+    <div class="insight">
+      <strong class="h">🛡️ 合成資料保護傘</strong>
+      全程使用 <strong>11 套政府合成題庫</strong>（涵蓋法務、內政、環境、工程會等態樣），學員接觸的都是去機敏後的合成資料，<strong>零機敏顧慮即可動手實作</strong>——這正是「資料不出境」在教學現場最直接的落實。
+    </div>
+  </div>
+
+  <!-- Tab 2: 影片參考 -->
+  <div class="tab-panel">
+    <div class="section-title">📺 三場次對應的參考影片</div>
+    <div class="video-note">🎬 所有影片皆經 <strong>YouTube RSS／oEmbed 雙重驗證</strong>（真實可播、非搜尋摘要）。頻道標籤：<span class="chan chan-nchc">國網中心</span> 官方、<span class="chan chan-gary">Gary Talks Stuff</span> 繁中教學、<span class="chan chan-ext">國際</span> 英文權威。標日期者為 RSS 實抓發布日；標主題者為 oEmbed 驗證但未取用日期。</div>
+
+    <!-- Session 1 -->
+    <div class="session-head sh1"><span class="no">場次一</span><span class="nm">資料不出國，AI 還能多聰明？— 主權算力 × RAP 起手式</span></div>
+    <div class="video-grid">
+      <div class="video-card"><div class="vtop"><span class="chan chan-nchc">國網中心 NCHC</span><span class="vyear y25">2025-11-12</span></div>
+        <h4>【TAIWAN AI RAP】2025 亮點成果精華版｜5 分鐘看 AI 落地五大產業</h4>
+        <p>官方 5 分鐘濃縮，直接就是本工作坊主角 RAP 的最佳開場素材。<strong>建議第一支放這支。</strong></p>
+        <a class="watch" href="https://www.youtube.com/watch?v=2J1mMB9NtM8" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-nchc">國網中心 NCHC</span><span class="vyear y25">2025-11-12</span></div>
+        <h4>【TAIWAN AI RAP】2025 亮點成果完整版｜五大領域 AI 應用全紀錄</h4>
+        <p>完整版，備課時挑段落用；把 RAP 五大領域一次看完。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=y8tcUNCAIGs" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-nchc">國網中心 NCHC</span><span class="vyear y26">2026-01-14</span></div>
+        <h4>國網雲端算力中心啟用典禮紀錄</h4>
+        <p>「主權算力」的實體畫面——境內 GPU 機房落成，第 1 層底座的最佳佐證。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=3-EatO2_b2E" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-nchc">國網中心 NCHC</span><span class="vyear y26">2026-05-25</span></div>
+        <h4>NCHC LLM &amp; Agentic AI Bootcamp, 2026</h4>
+        <p>官方 LLM × Agentic 訓練營，佐證「開源模型 + Agentic」兩層都在國網生態內。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=kB-CKNtiziQ" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-ext">World Gov Summit</span><span class="vyear vtag">🌏 主權 AI 論述</span></div>
+        <h4>Jensen Huang Reveals the Future of AI &amp; Industry</h4>
+        <p>黃仁勳談「每個國家都要擁有自己的主權 AI」，開場拉高度用。（英文）</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=eWQ99Vmtb1w" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-ext">Prompt Engineering</span><span class="vyear vtag">🔧 技術實證</span></div>
+        <h4>Embedding Gemma: On-Device RAG Made Easy</h4>
+        <p>開源 Gemma 在<strong>裝置端</strong>跑 RAG＝「資料留在本地」的技術實證。（英文）</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=420x8bv1la0" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">2026-06-18</span></div>
+        <h4>Claude Fable 5 使用心得，上線 72 小時就被政府緊急停用？</h4>
+        <p>政府 × AI 導入的真實張力，破題「為什麼要地端／合規」。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=L5LLzXrKFIY" target="_blank">▶ 看影片</a></div>
+    </div>
+
+    <!-- Session 2 -->
+    <div class="session-head sh2"><span class="no">場次二</span><span class="nm">把機敏文件丟進來 — 審查（OCR）＋ 數據分析合成實戰</span></div>
+    <div class="video-grid">
+      <div class="video-card"><div class="vtop"><span class="chan chan-nchc">國網中心 NCHC</span><span class="vyear y25">2025-11-12</span></div>
+        <h4>【TAIWAN AI RAP】急診交班不再手忙腳亂！AI 幫醫師省下黃金救援時間</h4>
+        <p>文件／紀錄審查的真實場域 demo，對應「表單審查」闖關。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=g4NVpqfQncM" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-nchc">國網中心 NCHC</span><span class="vyear y25">2025-11-08</span></div>
+        <h4>【TAIWAN AI RAP】AI 智慧製造助手登場！讓產線更快、更準、更智慧</h4>
+        <p>數萬筆數據分析的產業對照案例，對應「數據分析」闖關。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=3BFPj7PWFcw" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-nchc">國網中心 NCHC</span><span class="vyear y25">2025-11-09</span></div>
+        <h4>【TAIWAN AI RAP】養豬也能靠 AI！「豬事問 AI」讓豬舍管理更輕鬆</h4>
+        <p>開源模型 + 領域資料的接地氣範例，說明合成／領域資料怎麼落地。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=WZEkbiOyEys" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-ext">Prompt Engineering</span><span class="vyear vtag">🔧 技術流程</span></div>
+        <h4>Embedding Gemma: On-Device RAG Made Easy</h4>
+        <p>文件切塊 → 嵌入 → 檢索的完整流程，對照「表單／證書 OCR + RAG」實作。（英文）</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=420x8bv1la0" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">2026-06-11</span></div>
+        <h4>你不是不會寫 Prompt，是不會定義任務</h4>
+        <p>教學員怎麼把「文件審查」拆成可交付 AI 的任務定義，實作前的觀念課。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=KNP9Mr1rUQY" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">2026-06-27</span></div>
+        <h4>AI 寫的 code 一堆 bug？讓 Claude 跟 Codex 自動互審</h4>
+        <p>多 agent「互審」概念，直接類比公文／文件的雙重覆核機制。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=xzrvAERmvRk" target="_blank">▶ 看影片</a></div>
+    </div>
+
+    <!-- Session 3 -->
+    <div class="session-head sh3"><span class="no">場次三</span><span class="nm">AI 不再金魚腦 — 成長知己讓機關記憶力 +100</span></div>
+    <div class="video-grid">
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">2026-05-31</span></div>
+        <h4>AI 時代非技術人最該學的設計能力：把 Human SOP 變成 Agentic Workflow</h4>
+        <p><strong>成長知己核心</strong>：把承辦 SOP 結晶成可傳承技能——本場次最切題的一支。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=Yzpx4Xaigms" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">2026-05-24</span></div>
+        <h4>我的 AI agent 連續跑了 27 個小時，/goal 功能怎麼用？</h4>
+        <p>長時記憶 + 自主任務，呼應「算過不忘、記憶力 +100」。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=PpeCur6fEXc" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">2026-06-07</span></div>
+        <h4>Claude 新功能 Dynamic Workflow，一句話開上百個 agent 幫你幹活</h4>
+        <p>把單一機關記憶擴張成 agent 團隊的想像，延伸「傳承」概念。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=4fpZhuJuIls" target="_blank">▶ 看影片</a></div>
+      <div class="video-card"><div class="vtop"><span class="chan chan-gary">Gary Talks Stuff</span><span class="vyear y26">2026-05-21</span></div>
+        <h4>Anthropic 工程師為什麼拋棄 Markdown 改用 HTML 跟 AI 工作？</h4>
+        <p>如何「結構化」機關知識餵給 AI 的實作觀，對應技能檔／記憶檔的寫法。</p>
+        <a class="watch" href="https://www.youtube.com/watch?v=BhHMGRcbPkQ" target="_blank">▶ 看影片</a></div>
+    </div>
+  </div>
+
+  <!-- Tab 3: 為何要聽話的模型 -->
+  <div class="tab-panel">
+    <div class="section-title">📊 為何 GPT-4.7／Gemini 3.1 太聰明，Agentic 反而要「會聽話」的開源模型</div>
+    <p class="lead">這是卡米爾 × AIEC「Agentic AI 模型排行榜」的核心洞見：<strong>「打雜要的是聽話的員工，不是愛自作主張的天才。」</strong>前沿大模型很會臨場發揮，但在需要「照 SOP 一步步走、每步都可預測」的 agentic 任務裡，太多自由發揮反而扣分。（真操作：把同一批合成題庫任務丟給不同模型，比對「有沒有照指定格式輸出、有沒有亂改欄位、可不可重現」。）</p>
+
+    <!-- SVG: before / after -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">兩個維度的「不出境 × 會聽話」對照</text>
+        <!-- Left: cloud frontier -->
+        <g transform="translate(40,52)">
+          <rect width="360" height="210" rx="12" fill="#fdecec" stroke="#b23b3b" stroke-width="2"/>
+          <text x="180" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#b23b3b">❌ 雲端前沿大模型</text>
+          <text x="24" y="72" font-size="13" fill="#7a2e2e">🌐 資料上傳外部 API → 出境</text>
+          <text x="24" y="104" font-size="13" fill="#7a2e2e">🎩 太聰明，愛自作主張改格式</text>
+          <text x="24" y="136" font-size="13" fill="#7a2e2e">🎲 同題兩次答不一樣，難重現</text>
+          <text x="24" y="168" font-size="13" fill="#7a2e2e">💸 按 token 計費，量大即失控</text>
+          <text x="180" y="198" text-anchor="middle" font-size="12" fill="#b23b3b" font-weight="700">聰明 ≠ 適合當「流程員工」</text>
+        </g>
+        <!-- Right: sovereign open -->
+        <g transform="translate(440,52)">
+          <rect width="360" height="210" rx="12" fill="#eafaf0" stroke="#4a7c59" stroke-width="2.5"/>
+          <text x="180" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#2d5a3d">✅ 地端開源模型（RAP × Gemma）</text>
+          <text x="24" y="72" font-size="13" fill="#2d5a3d">🛡️ 資料留在境內機房 → 不出境</text>
+          <text x="24" y="104" font-size="13" fill="#2d5a3d">🎯 照指定格式輸出、乖乖聽話</text>
+          <text x="24" y="136" font-size="13" fill="#2d5a3d">🔁 可微調、可重現、可驗測</text>
+          <text x="24" y="168" font-size="13" fill="#2d5a3d">💰 權重自持，量大成本可控</text>
+          <text x="180" y="198" text-anchor="middle" font-size="12" fill="#2d5a3d" font-weight="700">會聽話 = 好用的「agentic 員工」</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>agentic 任務要的是「每一步都可預測、照 SOP 走」。太聰明的模型愛臨場發揮，反而讓流程不穩、難重現；<strong>會聽話、可微調、可自持</strong>的開源模型（跑在 RAP 上）才是政府與企業真正需要的「流程員工」。（真操作：以「格式遵從率、欄位竄改率、重現率、單位成本」四項打分，就是排行榜的評測骨架。）</figcaption>
+    </figure>
+
+    <div class="fresh-box">
+      <div class="fresh-h">📄 佐證這個論點的權威來源（非影片）</div>
+      <div class="fresh-sub">這塊沒有找到夠切題又可驗證的影片，改附權威文字來源，讓「排行榜」的論述站得住。</div>
+      <ul class="art2026">
+        <li><a href="https://www.langchain.com/blog/open-models-have-crossed-a-threshold" target="_blank">Open Models have crossed a threshold</a> <span class="who">· LangChain</span>——小型／中型開源模型已足以扛下真實 agent pipeline 裡「短程、結構化的 tool use」，且成本遠低於前沿模型。</li>
+        <li><a href="https://arxiv.org/abs/2605.00334" target="_blank">AgentFloor: How Far Up the Tool-Use Ladder Can Small Open-Weight Models Go?</a> <span class="who">· arXiv</span>——實測小型開源權重模型在工具使用任務的能力邊界，說明「哪些任務開源模型已經夠用」。</li>
+      </ul>
+    </div>
+
+    <div class="insight">
+      <strong class="h">🏆 排行榜的一句話</strong>
+      別再問「哪個模型最聰明」，要問「哪個模型最<strong>聽話又可重現</strong>、還能<strong>抱在自己手上</strong>」。這正是卡米爾 × AIEC「Agentic AI 模型排行榜」首次公開要傳達的核心。
+    </div>
+  </div>
+
+  <!-- Tab 4: 洞見 × 業界轉化 -->
+  <div class="tab-panel">
+    <div class="section-title">💡 洞見與業界轉化路徑</div>
+
+    <!-- SVG: gov -> enterprise -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#333">同一套架構，政府練完直接搬去企業</text>
+        <g font-family="Inter,sans-serif">
+          <!-- row 1 -->
+          <rect x="60" y="56" width="300" height="46" rx="10" fill="#eaf4ff" stroke="#2980b9" stroke-width="1.5"/><text x="210" y="84" text-anchor="middle" font-size="13.5" fill="#1e5fa8">政府題庫（合成資料）</text>
+          <text x="392" y="84" text-anchor="middle" font-size="20" fill="#e8713a">→</text>
+          <rect x="480" y="56" width="300" height="46" rx="10" fill="#f0fdf4" stroke="#4a7c59" stroke-width="1.5"/><text x="630" y="84" text-anchor="middle" font-size="13.5" fill="#2d5a3d">企業知識庫</text>
+          <!-- row 2 -->
+          <rect x="60" y="118" width="300" height="46" rx="10" fill="#eaf4ff" stroke="#2980b9" stroke-width="1.5"/><text x="210" y="146" text-anchor="middle" font-size="13.5" fill="#1e5fa8">政府數據分析</text>
+          <text x="392" y="146" text-anchor="middle" font-size="20" fill="#e8713a">→</text>
+          <rect x="480" y="118" width="300" height="46" rx="10" fill="#f0fdf4" stroke="#4a7c59" stroke-width="1.5"/><text x="630" y="146" text-anchor="middle" font-size="13.5" fill="#2d5a3d">企業財報分析</text>
+          <!-- row 3 -->
+          <rect x="60" y="180" width="300" height="46" rx="10" fill="#eaf4ff" stroke="#2980b9" stroke-width="1.5"/><text x="210" y="208" text-anchor="middle" font-size="13.5" fill="#1e5fa8">政府智慧入口</text>
+          <text x="392" y="208" text-anchor="middle" font-size="20" fill="#e8713a">→</text>
+          <rect x="480" y="180" width="300" height="46" rx="10" fill="#f0fdf4" stroke="#4a7c59" stroke-width="1.5"/><text x="630" y="208" text-anchor="middle" font-size="13.5" fill="#2d5a3d">企業客服機器人</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>工作坊練的三件事，換個場景就是企業版：文件審查→企業合約／單據審查、數據分析→財報／營運分析、智慧入口→客服機器人。<strong>「資料不出境」的地端架構學一次，政府與企業通用。</strong></figcaption>
+    </figure>
+
+    <div class="quote-box">
+      🐻 <strong>肉乙</strong>：這套之所以成立，關鍵在「三層都在境內」——算力（RAP）、模型（Gemma／TAIDE）、框架（波特人）一條龍不落地海外。技術上最反直覺的一點是「不要用最聰明的模型」，因為 agentic 要的是可重現、照 SOP 走，不是臨場發揮。<br><br>
+      🎨 <strong>卡拉</strong>：我最喜歡「成長知己」這個名字——AI 不再是金魚腦，而是把承辦人的手感慢慢養成機關的集體記憶。冷冰冰的合規需求，被講成「一起長大的知己」，這就是有溫度的技術。
+      <cite>— Forever-AI 團隊討論，2026-07-14</cite>
+    </div>
+
+    <div class="stack-card">
+      <h4>🎯 給不同角色的一句話帶走</h4>
+      <div class="layer"><div class="layer-num">🏛️</div><div class="layer-info"><h5>決策者</h5><p>先問「資料有沒有出境」，再問「多聰明」。合成資料 + 地端 RAP，讓你零機敏顧慮就能開始試。</p></div></div>
+      <div class="layer"><div class="layer-num">🛠️</div><div class="layer-info"><h5>承辦／技術人</h5><p>把重複的審查 SOP 交給會聽話的開源模型跑迴圈，再用「成長知己」把你的手感存成技能，越用越省力。</p></div></div>
+      <div class="layer"><div class="layer-num">🏢</div><div class="layer-info"><h5>企業</h5><p>政府題庫練成的架構直接平移：知識庫、財報分析、客服機器人——同一張架構圖，換資料就能上。</p></div></div>
+    </div>
+  </div>
+
+  <div class="sources">
+    <h3>📚 影片來源頻道與佐證</h3>
+    <a href="https://www.youtube.com/channel/UCWrzkYUM5cwpZExQ4Et5vSw" target="_blank">國網中心 NCHC 官方頻道</a> · <a href="https://www.youtube.com/@garytalksstuff" target="_blank">Gary Talks Stuff（@garytalksstuff）</a><br>
+    <a href="https://www.digitimes.com.tw/seminar/nchc_2026/" target="_blank">TAIWAN AI RAP 實戰工作坊（活動頁）</a> · <a href="https://www.nchc.org.tw/Page?itemid=6&mid=10" target="_blank">TWCC 臺灣 AI 雲</a><br>
+    <a href="https://www.langchain.com/blog/open-models-have-crossed-a-threshold" target="_blank">LangChain · Open Models have crossed a threshold</a> · <a href="https://arxiv.org/abs/2605.00334" target="_blank">arXiv · AgentFloor（小型開源模型工具使用邊界）</a><br>
+    <a href="https://blogs.nvidia.com/blog/world-governments-summit/" target="_blank">NVIDIA · Every Country Needs Sovereign AI</a>
+  </div>
+
+  <footer>
+    主權 AI 實戰工作坊 · 影片參考包 · 2026-07-14<br>
+    影片全數經 YouTube RSS／oEmbed 雙重驗證真實可播 · 全程使用政府合成題庫，範例皆為去機敏合成資料
+  </footer>
+</div>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
