@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>歐盟 Data Space × 環境部資料湖 — 用 Agent 做動態資料權限治理</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: #fdf6e3; background-image: radial-gradient(circle, #d4b896 1px, transparent 1px); background-size: 18px 18px; color: #1a1a1a; min-height: 100vh; padding: 24px 16px; font-size: 17px; }
+    .page { max-width: 980px; margin: 0 auto; }
+    .back-link { display: inline-block; margin-bottom: 16px; color: #e8713a; text-decoration: none; font-size: 0.85rem; font-weight: 700; }
+    .back-link:hover { text-decoration: underline; }
+    .header { border: 3px solid #1a1a1a; border-radius: 14px; background: #fff8ee; box-shadow: 5px 5px 0 #1a1a1a; padding: 30px 34px; margin-bottom: 20px; }
+    .header-badge { display: inline-block; background: #2d7a45; color: white; font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.88rem; padding: 5px 16px; border-radius: 20px; border: 2px solid #1a1a1a; box-shadow: 2px 2px 0 #1a1a1a; margin-bottom: 14px; }
+    .header .kicker { font-family:'Baloo 2',cursive; font-size:0.9rem; color:#6b4226; font-weight:700; margin-bottom:6px; }
+    .header h1 { font-family: 'Baloo 2', cursive; font-size: 1.95rem; font-weight: 800; color: #1a1a1a; line-height: 1.3; margin-bottom: 12px; }
+    .header h1 span { color: #2d7a45; }
+    .header p { color: #6b4226; font-size: 1.05rem; line-height: 1.75; }
+    .tab-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tab-btn { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.92rem; padding: 10px 15px; border: 3px solid #1a1a1a; border-bottom: none; border-radius: 10px 10px 0 0; background: #fff8ee; cursor: pointer; transition: all 0.12s; color: #6b4226; }
+    .tab-btn.active { background: #2d7a45; color: white; }
+    .tab-btn:hover:not(.active) { background: #fdf6e3; transform: translateY(-2px); }
+    .tab-panel { display: none; border: 3px solid #1a1a1a; border-radius: 0 8px 8px 8px; padding: 30px 30px 34px; background: #fdf6e3; box-shadow: 5px 5px 0 #1a1a1a; }
+    .tab-panel.active { display: block; }
+    .section-title { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; color: #6b4226; margin: 4px 0 18px; display: flex; align-items: center; gap: 8px; line-height:1.35; }
+    .lead { font-size: 1.02rem; color:#5a4a38; line-height:1.85; margin-bottom:20px; }
+    .quote-box { border-left: 5px solid #2d7a45; background: #fff8ee; padding: 16px 22px; border-radius: 0 8px 8px 0; margin: 20px 0; font-size: 1.0rem; line-height: 1.82; color: #333; }
+    .quote-box cite { display: block; font-style: normal; font-weight: 700; color: #2d7a45; font-size: 0.9rem; margin-top: 8px; }
+    .insight { background: #2d7a45; color: #fff; border: 3px solid #1a1a1a; border-radius: 10px; padding: 22px 26px; box-shadow: 4px 4px 0 #1a1a1a; margin: 24px 0; font-size: 1.0rem; line-height: 1.85; }
+    .insight strong.h { display: block; font-size: 1.18rem; margin-bottom: 8px; }
+    .svgcard { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 24px; overflow: hidden; }
+    .svgcard figcaption { padding: 14px 22px; font-size: 0.95rem; color: #555; border-top: 1px solid #f0f0f0; line-height: 1.72; }
+    .svgcard figcaption strong { color: #333; }
+    .stack-card { background: white; border-radius: 12px; padding: 22px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .stack-card h4 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 1.08rem; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; }
+    .stack-card .layer { display: flex; align-items: flex-start; gap: 16px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .stack-card .layer:last-child { border-bottom: none; }
+    .stack-card .layer-num { font-size: 1.5rem; min-width: 40px; line-height: 1.2; }
+    .stack-card .layer-info h5 { font-family: 'Inter','Noto Sans TC',sans-serif; font-size: 0.98rem; font-weight: 700; color: #333; margin-bottom: 4px; }
+    .stack-card .layer-info p { font-size: 0.92rem; color: #555; line-height: 1.7; }
+    .stack-card .layer-info code { background:#f4f4f4; padding:1px 7px; border-radius:3px; font-size:0.88rem; font-family:'Inter',monospace; }
+    .kw { display:inline-block; font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:600; background:#eef6f0; color:#2d5a3d; border:1px solid #bfe0c9; padding:1px 8px; border-radius:5px; margin:1px 2px; }
+    .maptable { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(0,0,0,0.06); margin-bottom:22px; font-size:0.93rem; }
+    .maptable th { background:#1a1a1a; color:#fff; font-family:'Baloo 2',cursive; font-weight:700; text-align:left; padding:12px 16px; font-size:0.95rem; }
+    .maptable td { padding:12px 16px; border-top:1px solid #eee; line-height:1.6; vertical-align:top; }
+    .maptable tr:nth-child(even) td { background:#faf9f6; }
+    .maptable td.roy { color:#6b4226; font-weight:600; width:38%; }
+    .maptable td.eu { color:#333; }
+    .fresh-box { background:#f0fdf4; border:3px solid #1a1a1a; border-radius:12px; box-shadow:4px 4px 0 #1a1a1a; padding:22px 24px; margin-bottom:24px; }
+    .fresh-box .fresh-h { font-family:'Baloo 2',cursive; font-weight:800; font-size:1.18rem; color:#166534; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .fresh-box p { font-size:0.95rem; color:#3f6212; line-height:1.75; }
+    .fresh-box .domains { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+    .fresh-box .domains span { background:white; border:1px solid #bbf7d0; color:#166534; font-size:0.8rem; font-weight:600; padding:3px 10px; border-radius:20px; }
+    .scen-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:680px){ .scen-grid{ grid-template-columns:1fr; } }
+    .scen-card { background:white; border-radius:12px; padding:20px 22px; box-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(0,0,0,0.06); border-top:5px solid #2d7a45; }
+    .scen-card .ic { font-size:1.7rem; margin-bottom:6px; }
+    .scen-card h4 { font-family:'Inter','Noto Sans TC',sans-serif; font-size:1.02rem; font-weight:700; color:#1a1a1a; margin-bottom:8px; line-height:1.4; }
+    .scen-card p { font-size:0.9rem; color:#555; line-height:1.68; }
+    .scen-card .tech { margin-top:10px; font-size:0.82rem; color:#2d5a3d; }
+    .sources { background: white; border-radius: 12px; padding: 20px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05); margin-top: 26px; font-size: 0.9rem; color: #666; line-height: 2.0; }
+    .sources h3 { font-family: 'Baloo 2', cursive; font-size: 1.05rem; color: #6b4226; margin-bottom: 8px; }
+    .sources a { color: #2d7a45; text-decoration: none; }
+    .sources a:hover { text-decoration: underline; }
+    footer { text-align: center; margin-top: 20px; color: #aaa; font-size: 0.85rem; line-height:1.7; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">← 回到知識分享</a>
+
+  <header class="header">
+    <div class="header-badge">🌱 資料治理研究</div>
+    <div class="kicker">歐盟 Data Space × 環境部資料湖 · 資安技術長 翁瑞鋒</div>
+    <h1>用 Agent 打造<span>動態資料權限治理</span><br>——歐盟 Data Space 怎麼搬進環境部資料湖</h1>
+    <p>一句話講完這份研究：<strong>「資料留在各自家裡，需要時才透過受控管道借出去，借出去之後你還管得到它怎麼被用、誰用了、什麼時候用。」</strong>本頁從歐盟 Data Space 的<strong>資料治理策略</strong>，一路拆到<strong>底層技術關鍵字</strong>，再對應到環境部資料湖的<strong>應用情境</strong>——特別回答你的構想：用 agent 給一個可驗證身分、權限比照公務員、依防災／特殊時期動態調權、每次存取都留痕可稽核。</p>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">① 🏛️ 治理策略</button>
+    <button class="tab-btn" onclick="switchTab(1)">② 🔧 技術關鍵字</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ 🤖 Agent 動態權限</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ 🌱 環境部應用情境</button>
+    <button class="tab-btn" onclick="switchTab(4)">⑤ 💡 洞見 × 落地</button>
+  </div>
+
+  <!-- Tab 1: 治理策略 -->
+  <div class="tab-panel active">
+    <div class="section-title">🏛️ Data Space 的資料治理，核心就四個字：資料主權</div>
+    <p class="lead">歐盟 Data Space 跟傳統「把大家的資料集中倒進一個大水庫」完全相反。它的骨幹是<strong>資料主權（Data Sovereignty）</strong>——你把資料分享出去，但<strong>你對它怎麼被用，仍然保有完整控制權</strong>。（真操作：採聯邦式架構 federated architecture，資料留在原持有者端，只透過 connector 依約定交換；政策跟著資料走，不是資料交出去就失控。）</p>
+
+    <!-- SVG: 集中式 vs 聯邦式 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">兩種資料共享哲學：集中水庫 vs 聯邦主權</text>
+        <!-- left: centralized -->
+        <g transform="translate(30,50)">
+          <rect width="370" height="230" rx="12" fill="#fdecec" stroke="#b23b3b" stroke-width="2"/>
+          <text x="185" y="30" text-anchor="middle" font-size="14.5" font-weight="700" fill="#b23b3b">❌ 集中式：資料全倒進一個湖</text>
+          <circle cx="70" cy="90" r="20" fill="#f5c0c0"/><text x="70" y="95" text-anchor="middle" font-size="12" fill="#7a2e2e">機關A</text>
+          <circle cx="185" cy="80" r="20" fill="#f5c0c0"/><text x="185" y="85" text-anchor="middle" font-size="12" fill="#7a2e2e">企業</text>
+          <circle cx="300" cy="90" r="20" fill="#f5c0c0"/><text x="300" y="95" text-anchor="middle" font-size="12" fill="#7a2e2e">機關B</text>
+          <path d="M70 112 L165 155 M185 102 L185 152 M300 112 L205 155" stroke="#c98b8b" stroke-width="2"/>
+          <ellipse cx="185" cy="180" rx="120" ry="34" fill="#d98686" stroke="#b23b3b" stroke-width="1.5"/>
+          <text x="185" y="185" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">一個大水庫</text>
+          <text x="185" y="222" text-anchor="middle" font-size="11.5" fill="#b23b3b">交出去就失控 · 誰都能撈 · 難稽核</text>
+        </g>
+        <!-- right: federated -->
+        <g transform="translate(440,50)">
+          <rect width="370" height="230" rx="12" fill="#eafaf0" stroke="#2d7a45" stroke-width="2.5"/>
+          <text x="185" y="30" text-anchor="middle" font-size="14.5" font-weight="700" fill="#2d5a3d">✅ 聯邦式：資料留在各自家裡</text>
+          <g font-size="12" fill="#2d5a3d">
+            <rect x="26" y="58" width="90" height="48" rx="8" fill="#fff" stroke="#4a7c59"/><text x="71" y="80" text-anchor="middle">機關A🔒</text><text x="71" y="97" text-anchor="middle" font-size="10">留自家</text>
+            <rect x="140" y="58" width="90" height="48" rx="8" fill="#fff" stroke="#4a7c59"/><text x="185" y="80" text-anchor="middle">企業🔒</text><text x="185" y="97" text-anchor="middle" font-size="10">留自家</text>
+            <rect x="254" y="58" width="90" height="48" rx="8" fill="#fff" stroke="#4a7c59"/><text x="299" y="80" text-anchor="middle">機關B🔒</text><text x="299" y="97" text-anchor="middle" font-size="10">留自家</text>
+          </g>
+          <text x="185" y="132" text-anchor="middle" font-size="18" fill="#4a7c59">↕ connector ↕</text>
+          <rect x="60" y="146" width="250" height="40" rx="8" fill="#4a7c59"/><text x="185" y="171" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">受控管道 + 使用政策 + 留痕</text>
+          <text x="185" y="212" text-anchor="middle" font-size="11.5" fill="#2d5a3d">分享後仍握有控制權 · 借出可管 · 全程可稽核</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>環境部資料湖不必變成「誰都能撈的大水庫」。聯邦式讓水利、氣象、環境監測各自資料留在源頭，透過 connector 依政策交換——<strong>借得出去、也收得回控制權</strong>。（真操作：每個資料持有者跑一個 connector，交換時附上 ODRL 使用政策，交易寫進 Clearing House。）</figcaption>
+    </figure>
+
+    <div class="section-title" style="font-size:1.1rem;">📐 四個治理策略支柱</div>
+    <div class="stack-card">
+      <div class="layer"><div class="layer-num">👑</div><div class="layer-info"><h5>1. 資料主權 Data Sovereignty</h5><p>分享者對資料保有完整控制權——這是整個 Data Space 的第一原則。（真操作：用「使用控制」把規則綁在資料上，而非只在門口檢查一次。）</p></div></div>
+      <div class="layer"><div class="layer-num">🕸️</div><div class="layer-info"><h5>2. 聯邦式、去中心 Federated</h5><p>資料留在原持有者端，不強制集中；透過安全介面與共同治理機制被存取。（真操作：connector-to-connector 交換，中央只提供目錄與信任服務。）</p></div></div>
+      <div class="layer"><div class="layer-num">🎛️</div><div class="layer-info"><h5>3. 使用控制 &gt; 存取控制 Usage Control</h5><p>存取控制管「能不能進門」；使用控制管「進門後能做什麼、不能做什麼」——用 ODRL 政策把「只能統計不能匯出」「30 天後失效」寫進資料。</p></div></div>
+      <div class="layer"><div class="layer-num">🤝</div><div class="layer-info"><h5>4. 信任框架 Trust Framework</h5><p>誰能進這個資料空間、身分怎麼驗、憑證誰發——由信任框架與身分服務把關。（真操作：Gaia-X Trust Framework + 可驗證憑證 VC。）</p></div></div>
+    </div>
+
+    <div class="section-title" style="font-size:1.1rem;">⚖️ 上層還有法規治理層</div>
+    <div class="stack-card">
+      <div class="layer"><div class="layer-num">🇪🇺</div><div class="layer-info"><h5>歐洲資料策略 · 9 大共同資料空間</h5><p>四支柱（治理框架／基礎建設投資／人才技能／共同資料空間），在製造、移動、健康、能源等 9 領域推共同資料空間。</p></div></div>
+      <div class="layer"><div class="layer-num">📜</div><div class="layer-info"><h5>資料治理法 DGA（Data Governance Act）</h5><p>建立「資料中介者」（中立第三方，須結構性利益迴避）、「資料利他」（公益目的自願分享）、以及<strong>公部門受保護資料的再利用機制</strong>——後者對政府開放環境資料特別關鍵。</p></div></div>
+      <div class="layer"><div class="layer-num">🔁</div><div class="layer-info"><h5>資料法 Data Act</h5><p>規範資料存取、可攜與雲端轉換的權利義務，補齊「資料怎麼流動」的法律底盤。</p></div></div>
+    </div>
+
+    <div class="fresh-box">
+      <div class="fresh-h">🌍 直接對應環境部：綠色政綱資料空間（Green Deal Data Space, GDDS）</div>
+      <p>歐盟 9 大共同資料空間裡，<strong>GDDS 就是「環境版」</strong>。<strong>GREAT</strong> 專案負責打地基（成立基金會、畫落地藍圖），<strong>SAGE</strong> 專案接手實作——目標 <strong>2028 年</strong>建成可運作、聯邦式、安全、互通的綠色資料空間，由 IDC 領軍、<strong>12 國 40 個夥伴</strong>。它的招牌能力正是環境部要的：把<strong>機敏／受限資料</strong>安全地與<strong>開放／公共資料</strong>結合，遵守 FAIR 原則、語意互通。</p>
+      <div class="domains"><span>🦋 生物多樣性</span><span>🌡️ 氣候調適</span><span>♻️ 循環經濟</span><span>🏭 零污染</span><span>🌲 森林服務</span><span>🚊 智慧移動</span><span>✅ 環境法遵</span></div>
+    </div>
+  </div>
+
+  <!-- Tab 2: 技術關鍵字 -->
+  <div class="tab-panel">
+    <div class="section-title">🔧 底層技術關鍵字：一張架構圖 + 一份詞彙表</div>
+    <p class="lead">白話：這一整套技術，就是在做一件事——<strong>「讓兩個素不相識的機關，也能安全地交換資料、而且規則跟著資料走」</strong>。（真操作：核心元件都圍繞 <strong>IDS 參考架構模型 IDS-RAM</strong> 與 <strong>Gaia-X 信任框架</strong>，用 <strong>Eclipse Dataspace Components（EDC）</strong> 這套事實標準 connector 落地。）</p>
+
+    <!-- SVG: IDS-RAM 元件圖 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">IDS 參考架構：資料怎麼安全流動的元件地圖</text>
+        <!-- provider & consumer connectors -->
+        <rect x="40" y="120" width="150" height="90" rx="10" fill="#eaf4ff" stroke="#2980b9" stroke-width="2"/>
+        <text x="115" y="150" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1e5fa8">資料提供者</text>
+        <text x="115" y="172" text-anchor="middle" font-size="12" fill="#4a5568">Connector</text>
+        <text x="115" y="192" text-anchor="middle" font-size="11" fill="#94a3b8">🔌 資料留這端</text>
+        <rect x="650" y="120" width="150" height="90" rx="10" fill="#f0fdf4" stroke="#2d7a45" stroke-width="2"/>
+        <text x="725" y="150" text-anchor="middle" font-size="13.5" font-weight="700" fill="#2d5a3d">資料使用者</text>
+        <text x="725" y="172" text-anchor="middle" font-size="12" fill="#4a5568">Connector</text>
+        <text x="725" y="192" text-anchor="middle" font-size="11" fill="#94a3b8">🤖 agent 在這端</text>
+        <!-- arrow between -->
+        <path d="M190 165 L648 165" stroke="#e8713a" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#a2)"/>
+        <text x="420" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#c2571f">Dataspace Protocol（DSP）+ ODRL 政策</text>
+        <defs><marker id="a2" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="#e8713a"/></marker></defs>
+        <!-- top services -->
+        <rect x="250" y="40" width="150" height="52" rx="9" fill="#fff8ee" stroke="#e0b088" stroke-width="1.5"/>
+        <text x="325" y="62" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6b4226">📇 Broker／目錄</text>
+        <text x="325" y="80" text-anchor="middle" font-size="10.5" fill="#94773f">找得到有哪些資料</text>
+        <rect x="440" y="40" width="150" height="52" rx="9" fill="#fff8ee" stroke="#e0b088" stroke-width="1.5"/>
+        <text x="515" y="62" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6b4226">🪪 Identity Provider</text>
+        <text x="515" y="80" text-anchor="middle" font-size="10.5" fill="#94773f">CA · DAPS · ParIS</text>
+        <path d="M325 92 L200 118 M515 92 L640 118" stroke="#d9c2a0" stroke-width="1.5"/>
+        <!-- bottom clearing house -->
+        <rect x="300" y="250" width="240" height="62" rx="10" fill="#1a1a1a"/>
+        <text x="420" y="278" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">🧾 Clearing House</text>
+        <text x="420" y="298" text-anchor="middle" font-size="11" fill="#cbd5e1">每筆交易留痕 → 可稽核</text>
+        <path d="M300 220 L390 248 M540 220 L450 248" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <text x="150" y="240" font-size="11" fill="#94a3b8">存取／使用全程被記錄 ↓</text>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>資料提供者與使用者各跑一個 <strong>Connector</strong>，透過 <strong>Broker</strong> 找資料、透過 <strong>Identity Provider</strong> 驗身分、交換走 <strong>Dataspace Protocol（DSP）</strong>並帶 <strong>ODRL</strong> 使用政策，每筆交易寫進 <strong>Clearing House</strong> 留痕。（真操作：EDC 這套開源元件把「查詢／交換／政策執行／監控／稽核」都內建好了。）</figcaption>
+    </figure>
+
+    <div class="stack-card">
+      <h4>🗂️ 技術詞彙表（上台可直接念）</h4>
+      <div class="layer"><div class="layer-num">🏛️</div><div class="layer-info"><h5>IDS-RAM（International Data Spaces 參考架構模型）</h5><p>定義角色與元件的藍圖：資料提供者／使用者、Connector、Broker、Clearing House、Identity Provider、App Store、Vocabulary Provider。</p><p style="margin-top:6px;"><span class="kw">Connector</span><span class="kw">Broker</span><span class="kw">Clearing House</span><span class="kw">Data Sovereignty</span></p></div></div>
+      <div class="layer"><div class="layer-num">☁️</div><div class="layer-info"><h5>Gaia-X</h5><p>歐洲聯邦式雲基礎設施 + 信任框架，要求可攜性、透明度、主權；用 self-description 描述每個參與者。</p><p style="margin-top:6px;"><span class="kw">Trust Framework</span><span class="kw">Self-Description</span><span class="kw">Federation Services</span></p></div></div>
+      <div class="layer"><div class="layer-num">🧩</div><div class="layer-info"><h5>EDC（Eclipse Dataspace Components）</h5><p>事實標準的開源 connector 框架，實作 <code>Dataspace Protocol</code>，內建政策引擎、監控與稽核；FIWARE Data Space Connector 為另一選擇。</p><p style="margin-top:6px;"><span class="kw">EDC</span><span class="kw">DSP 1.0（2025/7 定案）</span><span class="kw">PAP／PDP／PEP</span></p></div></div>
+      <div class="layer"><div class="layer-num">📝</div><div class="layer-info"><h5>ODRL（Open Digital Rights Language）</h5><p>使用控制政策語言。用 permission／prohibition／obligation 三種規則，加上 <strong>temporal（時間）、spatial（地點）、purpose（目的）</strong> 等約束條件——這正是「動態調權」的表達工具。</p><p style="margin-top:6px;"><span class="kw">Permission/Prohibition/Obligation</span><span class="kw">Constraint</span><span class="kw">State of the World</span></p></div></div>
+      <div class="layer"><div class="layer-num">🪪</div><div class="layer-info"><h5>可驗證憑證 VC + 去中心識別碼 DID</h5><p>參與者／agent 的可驗證身分。政策引擎在驗證後產生 <code>ParticipantAgent</code>，帶著所有已驗證的憑證聲明（claims）進行判斷。</p><p style="margin-top:6px;"><span class="kw">Verifiable Credentials</span><span class="kw">DID</span><span class="kw">ParticipantAgent</span></p></div></div>
+      <div class="layer"><div class="layer-num">⚡</div><div class="layer-info"><h5>DAPS（動態屬性提供服務）</h5><p>Identity Provider 的一環，發放<strong>短效 token、帶最新屬性</strong>——讓權限能隨時間／狀態動態更新，不必重發憑證。</p><p style="margin-top:6px;"><span class="kw">Dynamic Attribute</span><span class="kw">短效 Token</span><span class="kw">ABAC</span></p></div></div>
+    </div>
+  </div>
+
+  <!-- Tab 3: Agent 動態權限 -->
+  <div class="tab-panel">
+    <div class="section-title">🤖 你的構想，在 Data Space 裡完全成立</div>
+    <p class="lead">你講的「agent 設一個 id、權限比照公務員、防災時期動態調權、存取可稽核」——這不是天馬行空，而是 Data Space 的<strong>使用控制 + 屬性式存取控制（ABAC）+ 稽核</strong>本來就在做的事。差別只在：把「使用者」換成「agent 這個非人類身分（NHI）」。（真操作：agent 拿一張 VC 當身分證，政策引擎讀它的職務屬性 + 當下情境，動態判准。）</p>
+
+    <!-- SVG: agent 決策流 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="26" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">一次資料存取，政策引擎怎麼動態判准</text>
+        <!-- agent -->
+        <rect x="30" y="130" width="140" height="72" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/>
+        <text x="100" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#4338ca">🤖 Agent</text>
+        <text x="100" y="178" text-anchor="middle" font-size="10.5" fill="#6b7280">帶 VC 身分證</text>
+        <text x="100" y="193" text-anchor="middle" font-size="10.5" fill="#6b7280">職務=承辦人</text>
+        <!-- arrow to PDP -->
+        <path d="M170 166 L292 166" stroke="#94a3b8" stroke-width="2" marker-end="url(#a3)"/>
+        <text x="230" y="156" text-anchor="middle" font-size="10.5" fill="#64748b">請求存取</text>
+        <!-- PDP -->
+        <rect x="295" y="70" width="250" height="200" rx="12" fill="#fff8ee" stroke="#e8713a" stroke-width="2.5"/>
+        <text x="420" y="96" text-anchor="middle" font-size="13.5" font-weight="700" fill="#c2571f">⚖️ PDP 政策決策點</text>
+        <rect x="315" y="112" width="210" height="40" rx="7" fill="#fff" stroke="#e0b088"/>
+        <text x="420" y="130" text-anchor="middle" font-size="11.5" fill="#333">① 讀 VC 職務／授權屬性</text>
+        <text x="420" y="145" text-anchor="middle" font-size="10" fill="#94773f">＝比照公務員權限（ABAC）</text>
+        <rect x="315" y="158" width="210" height="40" rx="7" fill="#fff" stroke="#e0b088"/>
+        <text x="420" y="176" text-anchor="middle" font-size="11.5" fill="#333">② 讀 ODRL 使用政策</text>
+        <text x="420" y="191" text-anchor="middle" font-size="10" fill="#94773f">目的／時間／地點約束</text>
+        <rect x="315" y="204" width="210" height="46" rx="7" fill="#fef2f2" stroke="#f0a0a0"/>
+        <text x="420" y="223" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b23b3b">③ 讀「當下情境」SotW</text>
+        <text x="420" y="239" text-anchor="middle" font-size="10" fill="#b23b3b">現在是不是防災時期？</text>
+        <!-- arrow to PEP -->
+        <path d="M545 166 L648 166" stroke="#94a3b8" stroke-width="2" marker-end="url(#a3)"/>
+        <text x="596" y="156" text-anchor="middle" font-size="10.5" fill="#64748b">准／駁</text>
+        <!-- PEP + data -->
+        <rect x="650" y="110" width="160" height="52" rx="9" fill="#f0fdf4" stroke="#2d7a45" stroke-width="2"/>
+        <text x="730" y="132" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2d5a3d">🛡️ PEP 執行點</text>
+        <text x="730" y="150" text-anchor="middle" font-size="10.5" fill="#4a7c59">放行受控資料</text>
+        <rect x="650" y="176" width="160" height="46" rx="9" fill="#1a1a1a"/>
+        <text x="730" y="197" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">🧾 Clearing House</text>
+        <text x="730" y="213" text-anchor="middle" font-size="10" fill="#cbd5e1">寫入稽核日誌</text>
+        <path d="M730 162 L730 174" stroke="#9ca3af" stroke-width="1.5"/>
+        <defs><marker id="a3" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="#94a3b8"/></marker></defs>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>agent 帶著 VC 身分證來要資料，<strong>政策決策點（PDP）</strong>同時看三件事——①它的職務屬性（＝比照公務員權限）②綁在資料上的 ODRL 政策 ③<strong>當下情境「State of the World」</strong>（現在是不是防災期）——動態判准，<strong>執行點（PEP）</strong>放行，<strong>Clearing House</strong> 把這筆存取寫進稽核日誌。（真操作：SotW 就是那個「防災旗標」，翻成 true 時同一顆 agent 就自動升權。）</figcaption>
+    </figure>
+
+    <!-- SVG: 平時 vs 防災 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="26" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">同一顆 agent id，權限隨情境自動切換</text>
+        <g transform="translate(40,46)">
+          <rect width="360" height="140" rx="12" fill="#f4f7fb" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="180" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#475569">🌤️ 平時（SotW = 一般）</text>
+          <text x="24" y="62" font-size="12.5" fill="#334155">✔ 讀「去識別化」統計資料</text>
+          <text x="24" y="88" font-size="12.5" fill="#334155">✔ 彙整報表、趨勢分析</text>
+          <text x="24" y="114" font-size="12.5" fill="#b23b3b">✗ 原始場址／個案資料 → 拒絕</text>
+        </g>
+        <text x="420" y="122" text-anchor="middle" font-size="22" fill="#e8713a">→</text>
+        <g transform="translate(440,46)">
+          <rect width="360" height="140" rx="12" fill="#fff1f0" stroke="#e07a5f" stroke-width="2.5"/>
+          <text x="180" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#c0392b">🌀 防災時期（SotW = 緊急）</text>
+          <text x="24" y="62" font-size="12.5" fill="#7a2e2e">✔ 同一顆 agent，政策自動放寬</text>
+          <text x="24" y="88" font-size="12.5" fill="#7a2e2e">✔ 可讀原始感測／場址資料</text>
+          <text x="24" y="114" font-size="12.5" fill="#166534">＋ 每筆存取加倍留痕、事後自動回收</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>不用重發身分證、不用改程式碼——只要「當下情境」旗標從一般翻成緊急，綁在資料上的 ODRL 政策就讓同一顆 agent 升權；緊急結束，權限自動縮回、全程留痕。這就是<strong>政策式存取控制（PBAC）+ 動態屬性（DAPS）</strong>的威力。</figcaption>
+    </figure>
+
+    <div class="section-title" style="font-size:1.1rem;">🔗 你的構想 → Data Space 技術對照</div>
+    <table class="maptable">
+      <thead><tr><th>你的構想</th><th>Data Space 對應技術</th></tr></thead>
+      <tbody>
+        <tr><td class="roy">用 agent 做資料權限管理</td><td class="eu">Connector + 政策引擎（PDP／PEP）+ ODRL 使用控制——規則跟著資料走，不是門口檢查一次就放生</td></tr>
+        <tr><td class="roy">agent 設一個 id</td><td class="eu">可驗證憑證 VC + 去中心識別碼 DID；agent 本身視為「非人類身分 NHI」，走 Agentic IAM 生命週期</td></tr>
+        <tr><td class="roy">法規權限比照公務員</td><td class="eu">VC 的 claims 帶職務／授權等級屬性 → 屬性式存取控制 ABAC（Gaia-X Lab 正在做的 ODRL ABAC Profile 就是用 VC claims 判權）</td></tr>
+        <tr><td class="roy">防災／特殊時期動態調權</td><td class="eu">ODRL 的 temporal／purpose 約束 + 「State of the World」情境注入 + DAPS 短效動態屬性 → 政策式存取控制 PBAC</td></tr>
+        <tr><td class="roy">存取都有記錄、可稽核</td><td class="eu">IDS Clearing House（交易留痕、可出報表）+ Audit Logging Service（設定變更、錯誤、資料存取、政策執行全記錄）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <strong class="h">🧭 一句話收斂</strong>
+      給 agent 一張「會過期、帶職務屬性」的數位身分證，把權限規則寫成跟著資料走的 ODRL 政策，再讓政策引擎讀「當下是不是特殊時期」動態判准——最後每一筆都進 Clearing House。<strong>身分、政策、情境、留痕，四件事湊齊，就是你要的動態治理。</strong>
+    </div>
+
+    <div class="fresh-box">
+      <div class="fresh-h">🆕 2026 最新：AI Agent 身分治理已是顯學</div>
+      <p>把「使用者」換成「agent」不是概念實驗——2026 年 <strong>NIST 已出概念文件</strong>探討 AI agent 的身分與授權控制、<strong>雲端安全聯盟 CSA</strong> 提出 Agentic AI IAM 新框架。業界共識的 agent 身分四階段：<strong>①派發（政策綁定的唯一身分）②授權與範圍界定（最小權限、任務限定、有時效）③執行期監控 ④自動註銷</strong>——跟 Data Space 的使用控制完全同源。（注意：AI 工作負載的認證頻率可達人類的 148 倍，靜態權限根本擋不住，非動態不可。）</p>
+    </div>
+  </div>
+
+  <!-- Tab 4: 環境部應用情境 -->
+  <div class="tab-panel">
+    <div class="section-title">🌱 環境部資料湖：六個可以直接套的情境</div>
+    <p class="lead">把上面那套搬進環境部資料湖，最有價值的落點如下。每個情境都標了對應的技術積木，方便你在 RFP／POC 直接點名。</p>
+
+    <div class="scen-grid">
+      <div class="scen-card">
+        <div class="ic">🌀</div>
+        <h4>防災時期跨機關即時調閱</h4>
+        <p>颱風、地震、重大污染事件時，應變 agent 依「當下情境」自動升權，即時讀水文、空品、場址原始資料給應變中心；緊急結束權限自動縮回。</p>
+        <p class="tech">🔧 ODRL temporal 約束 · State of the World · Clearing House 留痕</p>
+      </div>
+      <div class="scen-card">
+        <div class="ic">📊</div>
+        <h4>環境輿情 × 開放資料混合分析</h4>
+        <p>把內部機敏監測資料與公開輿情、開放資料結合分析，但用使用控制確保機敏部分「只出結論、不出原始資料」，不外流。</p>
+        <p class="tech">🔧 Usage Control · 機敏/開放分層 · GDDS FAIR 原則</p>
+      </div>
+      <div class="scen-card">
+        <div class="ic">🏭</div>
+        <h4>企業排放申報／環境法遵</h4>
+        <p>企業把排放數據透過自己的 connector 送進資料湖，保有資料主權；環境部只在授權範圍與目的內使用，杜絕「交出去就被拿去別的用途」。</p>
+        <p class="tech">🔧 Connector · ODRL purpose 約束 · Data Sovereignty</p>
+      </div>
+      <div class="scen-card">
+        <div class="ic">🔗</div>
+        <h4>跨部會資料交換</h4>
+        <p>環境部 ↔ 農業部 ↔ 內政部消防署 ↔ 氣象署，connector-to-connector 交換，各自資料留在家，用共同信任框架驗身分。</p>
+        <p class="tech">🔧 Federated 架構 · Gaia-X Trust Framework · DSP</p>
+      </div>
+      <div class="scen-card">
+        <div class="ic">🧾</div>
+        <h4>稽核與問責（AI 存取全留痕）</h4>
+        <p>每一次 AI／agent 存取資料湖，都寫進 Clearing House——滿足個資法、資安稽核與「誰在什麼時候用了什麼」的問責要求。</p>
+        <p class="tech">🔧 Clearing House · Audit Logging · 不可否認性</p>
+      </div>
+      <div class="scen-card">
+        <div class="ic">📂</div>
+        <h4>公部門環境資料再利用</h4>
+        <p>依資料治理法 DGA 的公部門資料再利用機制，讓學研、企業在受控條件下使用環境資料，兼顧開放價值與機敏保護。</p>
+        <p class="tech">🔧 DGA 公部門再利用 · 資料中介者 · 資料利他</p>
+      </div>
+    </div>
+
+    <div class="insight">
+      <strong class="h">🎯 一張架構圖帶進 RFP</strong>
+      環境部資料湖不用一步到位。先挑「防災跨機關調閱 + AI 存取稽核」兩個最痛的點做 POC——因為它們同時展示了<strong>動態調權</strong>與<strong>可稽核</strong>兩大賣點，也最容易讓長官一眼看懂價值。
+    </div>
+  </div>
+
+  <!-- Tab 5: 洞見 × 落地 -->
+  <div class="tab-panel">
+    <div class="section-title">💡 團隊洞見與落地路徑</div>
+
+    <!-- SVG: roadmap -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">環境部資料湖導入 Data Space 的四步路徑</text>
+        <line x1="90" y1="90" x2="770" y2="90" stroke="#e2e8f0" stroke-width="3"/>
+        <g font-family="Inter,sans-serif" font-size="12" text-anchor="middle">
+          <circle cx="130" cy="90" r="8" fill="#2d7a45"/><text x="130" y="72" fill="#2d5a3d" font-weight="700">STEP 1</text><text x="130" y="118" fill="#64748b">單一 connector</text><text x="130" y="134" fill="#94a3b8">內部資料湖試接</text>
+          <circle cx="360" cy="90" r="8" fill="#4a7c59"/><text x="360" y="72" fill="#2d5a3d" font-weight="700">STEP 2</text><text x="360" y="118" fill="#64748b">agent + 動態權限</text><text x="360" y="134" fill="#94a3b8">防災調閱 POC</text>
+          <circle cx="590" cy="90" r="8" fill="#e8713a"/><text x="590" y="72" fill="#c2571f" font-weight="700">STEP 3</text><text x="590" y="118" fill="#64748b">跨部會聯邦</text><text x="590" y="134" fill="#94a3b8">connector 互連</text>
+          <circle cx="770" cy="90" r="8" fill="#1a1a1a"/><text x="740" y="72" fill="#1a1a1a" font-weight="700">STEP 4</text><text x="740" y="118" fill="#64748b">對接國際</text><text x="740" y="134" fill="#94a3b8">相容 GDDS/DSP</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>從「自家資料湖接一個 connector」起步，第二步就把 agent 動態權限 + 稽核做成防災 POC，第三步擴到跨部會聯邦，最後讓標準相容歐盟 GDDS／DSP，未來要跟國際環境資料對接也不必打掉重練。</figcaption>
+    </figure>
+
+    <div class="quote-box">
+      🐻 <strong>肉乙</strong>：這題最漂亮的地方是「不用重造輪子」——歐盟已經把「資料主權 + 使用控制 + 稽核」標準化成 EDC／DSP／ODRL，台灣直接採相容規格就好。技術上最反直覺、也最關鍵的一點：<strong>權限不是「進門檢查一次」，而是「規則綁在資料上一路跟著跑」</strong>。防災動態調權之所以能成立，就是因為政策引擎每次都重新讀「當下情境」。<br><br>
+      🎨 <strong>卡拉</strong>：我很喜歡「State of the World」這個詞——世界的當下狀態。平時、防災時、特殊時期，資料湖就像會看天氣的守門人，該鬆手時鬆手、該收緊時收緊，而且每個動作都寫在日記本上。冷冰冰的權限控制，被講成「一個懂得看情況的管家」，這就有溫度了。
+      <cite>— Forever-AI 團隊討論，2026-07-16</cite>
+    </div>
+
+    <div class="stack-card">
+      <h4>🎯 給不同角色的一句話帶走</h4>
+      <div class="layer"><div class="layer-num">🏛️</div><div class="layer-info"><h5>決策者</h5><p>資料湖不必變「誰都能撈的大水庫」。用 Data Space 標準，開放與機敏可以並存，防災時放得開、平時收得緊，每筆都可稽核。</p></div></div>
+      <div class="layer"><div class="layer-num">🛠️</div><div class="layer-info"><h5>技術／架構師</h5><p>採 EDC connector + DSP + ODRL 落地，別自己刻協定。agent 用 VC 當身分、DAPS 發動態屬性，PDP/PEP 判權，Clearing House 稽核。</p></div></div>
+      <div class="layer"><div class="layer-num">⚖️</div><div class="layer-info"><h5>法遵／資安</h5><p>「權限比照公務員」用 VC claims 表達，對應現行職務授權；動態調權與全程留痕，正好回應個資法與稽核要求。參考 DGA 公部門資料再利用機制。</p></div></div>
+    </div>
+  </div>
+
+  <div class="sources">
+    <h3>📚 原始來源</h3>
+    <a href="https://digital-strategy.ec.europa.eu/en/policies/strategy-data" target="_blank">歐洲資料策略（European strategy for data）</a> · <a href="https://digital-strategy.ec.europa.eu/en/policies/data-governance-act" target="_blank">資料治理法 DGA</a><br>
+    <a href="https://green-deal-dataspace.eu/" target="_blank">Green Deal Data Space</a> · <a href="https://www.greendealdata.eu/" target="_blank">SAGE — The Green Deal Data Space（2028 落地）</a> · <a href="https://ad4gd.eu/what-is-the-green-deal-data-space/" target="_blank">What is the Green Deal Data Space?（AD4GD）</a><br>
+    <a href="https://docs.internationaldataspaces.org/ids-knowledgebase/ids-ram-4/" target="_blank">IDS-RAM 4 參考架構</a> · <a href="https://docs.internationaldataspaces.org/ids-knowledgebase/ids-ram-4/perspectives-of-the-reference-architecture-model/4_perspectives/4_1_security_perspective/4_1_6_usage_control" target="_blank">IDS Usage Control</a><br>
+    <a href="https://projects.eclipse.org/projects/technology.edc" target="_blank">Eclipse Dataspace Components（EDC）</a> · <a href="https://github.com/eclipse-edc" target="_blank">eclipse-edc GitHub</a> · <a href="https://internationaldataspaces.org/idsa-data-space-connector-report/" target="_blank">IDSA Data Space Connector Report（DSP 1.0, 2025/7）</a><br>
+    <a href="https://w3c.github.io/odrl/landscape/" target="_blank">ODRL Landscape（W3C）</a> · <a href="https://arxiv.org/pdf/2309.11289" target="_blank">Policy Patterns for Usage Control in Data Spaces</a> · <a href="https://internationaldataspaces.org/wp-content/uploads/dlm_uploads/IDSA-White-Paper-Specification-IDS-Clearing-House-.pdf" target="_blank">IDS Clearing House 白皮書</a><br>
+    <a href="https://cloudsecurityalliance.org/artifacts/agentic-ai-identity-and-access-management-a-new-approach" target="_blank">CSA · Agentic AI IAM</a> · <a href="https://www.biometricupdate.com/202603/nist-concept-paper-explores-identity-and-authorization-controls-for-ai-agents" target="_blank">NIST · AI Agent 身分授權概念文件</a>
+  </div>
+
+  <footer>
+    資料治理研究 · 歐盟 Data Space × 環境部資料湖 · 2026-07-16<br>
+    卡米爾 資安技術長 翁瑞鋒 · 資料來源皆為歐盟官方／IDSA／W3C／Eclipse 等一手文件並附連結
+  </footer>
+</div>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
