@@ -83,7 +83,8 @@
     <button class="tab-btn" onclick="switchTab(1)">② 🔧 技術關鍵字</button>
     <button class="tab-btn" onclick="switchTab(2)">③ 🤖 Agent 動態權限</button>
     <button class="tab-btn" onclick="switchTab(3)">④ 🌱 環境部應用情境</button>
-    <button class="tab-btn" onclick="switchTab(4)">⑤ 💡 洞見 × 落地</button>
+    <button class="tab-btn" onclick="switchTab(4)">⑤ 🏗️ 資料湖實戰架構</button>
+    <button class="tab-btn" onclick="switchTab(5)">⑥ 💡 洞見 × 落地</button>
   </div>
 
   <!-- Tab 1: 治理策略 -->
@@ -338,7 +339,119 @@
     </div>
   </div>
 
-  <!-- Tab 5: 洞見 × 落地 -->
+  <!-- Tab 5: 資料湖實戰架構 -->
+  <div class="tab-panel">
+    <div class="section-title">🏗️ 環境部資料湖：從「資料交換平臺」升級成 Data Space</div>
+    <p class="lead">白話講現況：環境部的資料<strong>散落在各機關</strong>，就算你有權限，各系統也串不起來、調一份檔案跑超慢。所以做法是「盡量請各機關把資料先匯集上來資料湖」——但上來的資料要<strong>分級管控</strong>：有些一般環境部身份就能取，有些含個資／機敏、要很高等級權限才給。（真操作：資料湖的前身是一個「資料交換平臺」，本來靠 API 人工上傳／下載；現在要換成 connector + ODRL 政策的 Data Space 架構，讓權限控管長在資料湖本身。）</p>
+
+    <div class="stack-card">
+      <h4>😖 環境部資料湖的三個現況痛點</h4>
+      <div class="layer"><div class="layer-num">🧩</div><div class="layer-info"><h5>資料散落各機關</h5><p>每個機關一套系統，跨系統要資料像跨部會走公文，實務上兜不起來。</p></div></div>
+      <div class="layer"><div class="layer-num">🐌</div><div class="layer-info"><h5>串接慢、有權限也取不到</h5><p>缺統一介面、格式各異，就算「名義上」有權限，實際上調不動、跑很慢。</p></div></div>
+      <div class="layer"><div class="layer-num">🔐</div><div class="layer-info"><h5>機敏與一般混雜</h5><p>個資／法規機敏資料與可開放資料混在一起，難一刀切，需要分級控管。</p></div></div>
+    </div>
+
+    <!-- SVG A: 主資料流架構圖 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 860 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="430" y="26" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">環境部資料湖資料流架構：擷取 → 分級 → 判准 → 使用</text>
+        <!-- Col1 原系統 -->
+        <rect x="20" y="88" width="140" height="180" rx="10" fill="#eaf4ff" stroke="#2980b9" stroke-width="1.5"/>
+        <text x="90" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#1e5fa8">① 各機關原系統</text>
+        <text x="36" y="142" font-size="11.5" fill="#334155">💧 水利／河川</text>
+        <text x="36" y="168" font-size="11.5" fill="#334155">🌤️ 氣象／空品</text>
+        <text x="36" y="194" font-size="11.5" fill="#334155">🏢 地方環保局</text>
+        <text x="36" y="220" font-size="11.5" fill="#334155">📡 監測站感測</text>
+        <text x="36" y="248" font-size="10" fill="#94a3b8">格式各異 · 難串接</text>
+        <!-- sync arrows -->
+        <path d="M160 150 L192 150" stroke="#e8713a" stroke-width="2" marker-end="url(#arro)"/>
+        <path d="M192 190 L160 190" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+        <text x="176" y="142" text-anchor="middle" font-size="9" fill="#c2571f">定期擷取</text>
+        <text x="176" y="206" text-anchor="middle" font-size="9" fill="#94a3b8">回寫同步</text>
+        <!-- Col2 擷取層 -->
+        <rect x="192" y="126" width="120" height="86" rx="10" fill="#fff8ee" stroke="#e0b088" stroke-width="1.5"/>
+        <text x="252" y="152" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6b4226">② 擷取層</text>
+        <text x="252" y="172" text-anchor="middle" font-size="11" fill="#94773f">Connector</text>
+        <text x="252" y="190" text-anchor="middle" font-size="10" fill="#94773f">CDC／ETL 快取</text>
+        <!-- arrow to lake -->
+        <path d="M312 165 L348 150" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="332" y="146" text-anchor="middle" font-size="9" fill="#64748b">匯集</text>
+        <!-- Col3 資料湖 -->
+        <rect x="350" y="58" width="332" height="304" rx="12" fill="#f7fbf8" stroke="#2d7a45" stroke-width="2.5"/>
+        <text x="516" y="82" text-anchor="middle" font-size="13" font-weight="700" fill="#2d5a3d">③ 環境部資料湖（快取匯集層）</text>
+        <!-- 分級儲存 -->
+        <rect x="366" y="96" width="300" height="106" rx="8" fill="#fff" stroke="#cbd5e1"/>
+        <text x="382" y="116" font-size="11.5" font-weight="700" fill="#475569">🗂️ 分級儲存</text>
+        <rect x="382" y="124" width="268" height="21" rx="4" fill="#fde2e2"/><text x="392" y="139" font-size="10.5" fill="#b23b3b">L3 機敏／個資 · 需高等級權限</text>
+        <rect x="382" y="149" width="268" height="21" rx="4" fill="#fef3c7"/><text x="392" y="164" font-size="10.5" fill="#92610e">L2 受限 · 特定職務可取</text>
+        <rect x="382" y="174" width="268" height="21" rx="4" fill="#dcfce7"/><text x="392" y="189" font-size="10.5" fill="#166534">L1 一般 · 環境部身份可取</text>
+        <!-- 政策引擎 -->
+        <rect x="366" y="214" width="300" height="72" rx="8" fill="#fff8ee" stroke="#e0b088"/>
+        <text x="516" y="236" text-anchor="middle" font-size="12" font-weight="700" fill="#c2571f">⚖️ 政策引擎 PDP／PEP + ODRL</text>
+        <text x="516" y="256" text-anchor="middle" font-size="10.5" fill="#94773f">檢核：職務權限等級（VC）+ 資料有效期</text>
+        <text x="516" y="274" text-anchor="middle" font-size="10.5" fill="#94773f">＋ 當下情境（防災旗標）</text>
+        <!-- Clearing House -->
+        <rect x="366" y="298" width="300" height="50" rx="8" fill="#1a1a1a"/>
+        <text x="516" y="320" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">🧾 Clearing House</text>
+        <text x="516" y="337" text-anchor="middle" font-size="10" fill="#cbd5e1">存取全留痕 · 可稽核</text>
+        <!-- arrow lake -> col4 -->
+        <path d="M682 200 L716 200" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="699" y="192" text-anchor="middle" font-size="9" fill="#64748b">判准放行</text>
+        <!-- Col4 使用端 -->
+        <rect x="718" y="152" width="128" height="106" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="782" y="178" text-anchor="middle" font-size="12" font-weight="700" fill="#4338ca">④ 使用者／Agent</text>
+        <text x="782" y="200" text-anchor="middle" font-size="10.5" fill="#6b7280">帶 VC 身分證</text>
+        <text x="782" y="218" text-anchor="middle" font-size="10.5" fill="#6b7280">依權限＋有效期</text>
+        <text x="782" y="236" text-anchor="middle" font-size="10.5" fill="#6b7280">下載受控資料</text>
+        <defs>
+          <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="#94a3b8"/></marker>
+          <marker id="arro" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="#e8713a"/></marker>
+        </defs>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>各機關資料由「擷取層 connector」<strong>定期同步</strong>匯集進資料湖當<strong>快取</strong>（原系統仍是真正的資料源頭）；一進來就分成 <strong>L1／L2／L3 三級</strong>。使用者或 agent 要調資料，<strong>政策引擎（PDP/PEP）</strong>依「職務權限等級（VC）＋資料有效期＋當下情境」判准，通過才放行，每筆都進 <strong>Clearing House</strong> 留痕。（真操作：擷取用 CDC／ETL 定期跑，有效期用 ODRL temporal 約束，過期自動失效或重新擷取。）</figcaption>
+    </figure>
+
+    <div class="stack-card">
+      <h4>🔧 兩個關鍵設計：分級 + 擷取快取</h4>
+      <div class="layer"><div class="layer-num">🏷️</div><div class="layer-info"><h5>三級資料 → 對應 VC 職務屬性（ABAC）</h5><p><strong>L1 一般</strong>：環境部身份即可取；<strong>L2 受限</strong>：特定職務／單位；<strong>L3 機敏／個資</strong>：高等級權限。等級寫進 ODRL 政策，agent／使用者的職務屬性由 VC 帶入，政策引擎自動比對。</p></div></div>
+      <div class="layer"><div class="layer-num">🔄</div><div class="layer-info"><h5>資料湖＝快取匯集層，不取代原系統</h5><p>原系統仍是「真實來源（system of record）」，資料湖用擷取 connector <strong>定期 CDC／ETL 同步</strong>把資料拉進來當快取，加速跨機關取用；必要時再回寫。</p></div></div>
+      <div class="layer"><div class="layer-num">⏳</div><div class="layer-info"><h5>每份資料帶「有效期」</h5><p>用 ODRL 的 temporal 約束標記有效期，到期自動失效、重新擷取，避免快取變成「過期的黑資料」——這也正好接回原本交換平臺「權限＋有效期」的設計。</p></div></div>
+    </div>
+
+    <!-- SVG B: before / after 資料交換平臺 -->
+    <figure class="svgcard">
+      <svg viewBox="0 0 840 244" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="420" y="26" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">資料交換平臺的世代升級：API → Data Space</text>
+        <g transform="translate(30,44)">
+          <rect width="360" height="180" rx="12" fill="#fdecec" stroke="#b23b3b" stroke-width="2"/>
+          <text x="180" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="#b23b3b">❌ 舊：API 資料交換平臺</text>
+          <text x="22" y="58" font-size="11.5" fill="#7a2e2e">📤 一端人工／寫程式 API 上傳</text>
+          <text x="22" y="84" font-size="11.5" fill="#7a2e2e">🗄️ 平臺暫存（帶權限＋有效期）</text>
+          <text x="22" y="110" font-size="11.5" fill="#7a2e2e">📥 另一端 API 下載</text>
+          <text x="22" y="140" font-size="11.5" fill="#b23b3b">✗ 靠人工 · 規則寫死 · 稽核拼 log</text>
+          <text x="22" y="164" font-size="11.5" fill="#b23b3b">✗ 難動態調權 · 難跨機關擴充</text>
+        </g>
+        <text x="420" y="142" text-anchor="middle" font-size="22" fill="#2d7a45">→</text>
+        <g transform="translate(450,44)">
+          <rect width="360" height="180" rx="12" fill="#eafaf0" stroke="#2d7a45" stroke-width="2.5"/>
+          <text x="180" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="#2d5a3d">✅ 新：Data Space 架構</text>
+          <text x="22" y="58" font-size="11.5" fill="#2d5a3d">🔌 提供端 connector 自動上架</text>
+          <text x="22" y="84" font-size="11.5" fill="#2d5a3d">📝 ODRL 政策：權限＋有效期跟著資料走</text>
+          <text x="22" y="110" font-size="11.5" fill="#2d5a3d">🤖 使用端 agent 帶 VC 依權限取用</text>
+          <text x="22" y="140" font-size="11.5" fill="#166534">✓ 動態調權 · 自動化 · 跨機關聯邦</text>
+          <text x="22" y="164" font-size="11.5" fill="#166534">✓ 每筆進 Clearing House 自動稽核</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼講：</strong>舊平臺靠人工／寫程式用 API 一端上傳、一端下載，權限與有效期是寫死的、稽核要自己拼 log。換成 Data Space 後：提供端用 <strong>connector 自動上架</strong>、權限與有效期用 <strong>ODRL 政策綁在資料上跟著跑</strong>、使用端 <strong>agent 帶 VC 依權限取用</strong>，每筆自動進 Clearing House——同一套邏輯還能無痛擴充到<strong>跨機關聯邦</strong>。</figcaption>
+    </figure>
+
+    <div class="insight">
+      <strong class="h">🏗️ 一句話收斂這頁</strong>
+      把「資料交換平臺」的三個舊觀念——上傳、權限、有效期——分別換成 Data Space 的三個新積木：<strong>connector 自動上架、ODRL 政策綁權限、temporal 約束管有效期</strong>；再加上分級儲存（對應 VC 職務等級）與 Clearing House 稽核，權限控管就長在資料湖本身，而不是散在各機關的人工流程裡。
+    </div>
+  </div>
+
+  <!-- Tab 6: 洞見 × 落地 -->
   <div class="tab-panel">
     <div class="section-title">💡 技術白話評論與落地路徑</div>
 
