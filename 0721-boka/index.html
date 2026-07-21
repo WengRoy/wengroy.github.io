@@ -106,13 +106,13 @@
     <div class="header-badge">🛡️ 資安應變工具箱 · 內部使用</div>
     <div class="kicker">Windows 主機 · 弱點掃描 × 入侵偵測 · 一鍵複製指令</div>
     <h1>Windows <span>弱點掃描與入侵偵測</span> 工具箱</h1>
-    <p>疑似遭入侵的 Windows 主機該怎麼查？這頁把<strong>要下載的鑑識工具</strong>、<strong>一塊一塊可直接複製貼上的 bat／PowerShell 指令</strong>、<strong>遠端掃描做法</strong>與<strong>判讀速查表</strong>都整理好了。每塊指令都有 <code>📋 複製</code> 鈕，貼到主機的命令提示字元就能跑。指令刻意拆小、一行註解一行指令，方便你改參數。</p>
+    <p>疑似遭入侵的 Windows 主機該怎麼查？<strong>快速診斷完全用系統內建指令、免安裝任何軟體</strong>——直接看 ③④ 分頁，逐塊複製貼到命令提示字元就能跑。想再做完整弱掃或深入鑑識時，② 分頁才有進階工具可選裝。每塊指令都有 <code>📋 複製</code> 鈕，刻意拆小、一行註解一行指令，方便你改參數。</p>
     <p class="meta">最後更新：2026-07-21　·　適用：Windows 10 / 11 / Server　·　指令中的 <span class="placeholder">192.168.1.50</span> 等為範例，請自行替換</p>
   </header>
 
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab(0)">① 🛡️ 安全總則</button>
-    <button class="tab-btn" onclick="switchTab(1)">② 📥 下載清單</button>
+    <button class="tab-btn" onclick="switchTab(1)">② 📥 進階工具（選裝）</button>
     <button class="tab-btn" onclick="switchTab(2)">③ 🔍 系統盤點·弱掃</button>
     <button class="tab-btn" onclick="switchTab(3)">④ 🕵️ 入侵偵測·鑑識</button>
     <button class="tab-btn" onclick="switchTab(4)">⑤ 🌐 遠端掃描</button>
@@ -144,13 +144,14 @@
 │  · Nmap / Nessus 遠端掃  │  遠端  │    Autoruns/Nmap/Defender│
 │  · 收檔案回來判讀        │◀─輸出──│  · 憑證絕不進這台 ✗       │
 └────────────────────────┘        └────────────────────────┘</pre>
-    <p class="lead" style="margin-top:14px;">下面各分頁：<strong>②</strong> 先把工具抓齊 → <strong>③④</strong> 在可疑機本機跑指令、把輸出帶回乾淨機 → <strong>⑤</strong> 從乾淨機遠端補掃 → <strong>⑥</strong> 照處置流程收尾、對照判讀表看哪裡有鬼。</p>
+    <p class="lead" style="margin-top:14px;"><strong>免安裝快速診斷</strong>：直接跳 <strong>③④</strong> 分頁，用系統內建指令逐塊複製執行、把輸出帶回乾淨機即可。需要更完整的弱掃或深入鑑識時，再看 <strong>②</strong> 裝進階工具、<strong>⑤</strong> 從乾淨機遠端補掃；<strong>⑥</strong> 是處置流程與判讀速查表。</p>
   </div>
 
   <!-- ═══ Tab 2：下載清單 ═══ -->
   <div class="tab-panel">
-    <div class="section-title">📥 入侵偵測 / 鑑識工具下載清單</div>
-    <p class="lead">先在<strong>乾淨機</strong>下載、掃過毒、再用隨身碟帶到可疑機（或直接在乾淨機遠端用）。以下皆為官方來源，標 <span style="background:#2d7a45;color:#fff;padding:1px 7px;border-radius:10px;font-size:0.72rem;">免費</span> 者可直接使用。</p>
+    <div class="section-title">📥 進階工具下載（選裝，快速診斷不需要）</div>
+    <div class="warn-inline" style="border-left-color:#2d7a45;background:#f0fdf4;color:#14532d;">⚡ <b>想快速看有沒有中鏢，這頁可以直接跳過</b>——③④ 分頁全是 Windows 內建指令、免安裝。下面這些工具是要做「<b>完整弱點掃描</b>」或「<b>深入鑑識分析</b>」時才需要。</div>
+    <p class="lead">安裝前先在<strong>乾淨機</strong>下載、掃過毒，再用隨身碟帶到可疑機（或直接在乾淨機遠端用）。以下皆為官方來源，標 <span style="background:#2d7a45;color:#fff;padding:1px 7px;border-radius:10px;font-size:0.72rem;">免費</span> 者可直接使用。</p>
 
     <div class="dl-cat">🧰 基本鑑識工具（必備）</div>
     <div class="dl"><div class="ic">🧰</div><div class="info"><h4>Sysinternals Suite <span class="free">免費</span></h4><p>微軟官方鑑識神器包。重點：<code>Autoruns</code>（看所有開機自啟／持久化）、<code>Process Explorer</code>（看程序真面目）、<code>TCPView</code>（看即時連線）、<code>Sigcheck</code>（驗數位簽章）、<code>Autorunsc</code>（命令列版）。</p><a href="https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite">learn.microsoft.com/sysinternals/downloads/sysinternals-suite</a></div></div>
@@ -176,13 +177,13 @@
     <div class="dl-cat">🌐 封包分析</div>
     <div class="dl"><div class="ic">🦈</div><div class="info"><h4>Wireshark <span class="free">免費</span></h4><p>抓封包看這台在跟誰講話、有沒有外傳到可疑 IP。搭配隔離網段觀察最有效。</p><a href="https://www.wireshark.org/download.html">wireshark.org/download.html</a></div></div>
 
-    <div class="tip-inline">💡 <b>沒時間全下載？</b>最小組合就三個：<strong>Sysinternals Suite</strong>（本機看自啟／程序／連線）＋ <strong>Nmap</strong>（遠端掃服務）＋ <strong>Windows Defender</strong>（內建，直接全盤掃）。這三個就能覆蓋八成的初步偵測。</div>
+    <div class="tip-inline">💡 <b>只想快速看有沒有中鏢？</b>完全不用裝東西：<strong>③④ 分頁的內建指令</strong> ＋ <strong>Windows Defender 全盤掃</strong>（系統內建）就能覆蓋八成初步偵測。要做完整弱掃或事件日誌深掃時，再回來裝 Nmap／Nessus／Chainsaw。</div>
   </div>
 
   <!-- ═══ Tab 3：系統盤點 · 弱掃 ═══ -->
   <div class="tab-panel">
     <div class="section-title">🔍 系統盤點 &amp; 弱點面（本機執行）</div>
-    <p class="lead">在可疑機開「<strong>命令提示字元（以系統管理員身分執行）</strong>」，逐塊複製貼上。目的是摸清這台的底細、缺哪些修補、開了哪些門。<strong>建議把輸出存檔帶回乾淨機分析</strong>——每塊最後都可加 <code>&gt; 檔名.txt</code> 導出。</p>
+    <p class="lead">以下<strong>全部是 Windows 內建指令、免安裝任何軟體</strong>。在可疑機開「<strong>命令提示字元（以系統管理員身分執行）</strong>」，逐塊複製貼上，摸清這台的底細、缺哪些修補、開了哪些門。<strong>建議把輸出存檔帶回乾淨機分析</strong>——每塊最後都可加 <code>&gt; 檔名.txt</code> 導出。</p>
 
     <div class="cmd">
       <div class="cmd-head"><span class="cmd-title">🖥️ 系統資訊與修補程式全貌</span><span class="shell-badge sh-cmd">CMD</span></div>
@@ -240,22 +241,22 @@ route print</pre>
     <div class="section-title sub">🗂️ 一鍵把系統盤點結果全導出到桌面</div>
     <div class="cmd">
       <div class="cmd-head"><span class="cmd-title">📤 全部輸出成一份 txt（帶回乾淨機看）</span><span class="shell-badge sh-cmd">CMD</span></div>
-      <pre class="code">REM 依序把各項結果寫進桌面 recon.txt（第一行用 &gt; 建檔，其餘用 &gt;&gt; 附加）
-systeminfo &gt; "%USERPROFILE%\Desktop\recon.txt"
-netstat -ano &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
-sc query type=service state=all &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
-net share &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
-ipconfig /all &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
-arp -a &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
-route print &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"</pre>
-      <div class="cmd-note">🔎 <b>用途：</b>跑完桌面會有 <code>recon.txt</code>，用隨身碟帶回乾淨機，或貼給 AI 幫你判讀，避免在可疑機上久留。</div>
+      <pre class="code">REM 依序把各項結果寫進目前資料夾的 recon.txt（第一行用 &gt; 建檔，其餘用 &gt;&gt; 附加）
+systeminfo &gt; recon.txt
+netstat -ano &gt;&gt; recon.txt
+sc query type=service state=all &gt;&gt; recon.txt
+net share &gt;&gt; recon.txt
+ipconfig /all &gt;&gt; recon.txt
+arp -a &gt;&gt; recon.txt
+route print &gt;&gt; recon.txt</pre>
+      <div class="cmd-note">🔎 <b>用途：</b>跑完會在你<b>目前命令列所在的資料夾</b>（通常是 <code>C:\Users\你的帳號</code>）產生 <code>recon.txt</code>，用隨身碟帶回乾淨機，或貼給 AI 幫你判讀，避免在可疑機上久留。想確認位置可先打 <code>cd</code> 看目前路徑。</div>
     </div>
   </div>
 
   <!-- ═══ Tab 4：入侵偵測 · 鑑識 ═══ -->
   <div class="tab-panel">
     <div class="section-title">🕵️ 入侵偵測 / 鑑識（找有沒有被種後門）</div>
-    <p class="lead">弱掃是「找門有沒有鎖」，這頁是「找小偷是不是已經在屋裡」。一樣用<strong>系統管理員命令提示字元</strong>，逐塊複製。重點放在<strong>帳號、持久化（自啟／排程）、可疑程序、登入紀錄</strong>。</p>
+    <p class="lead">弱掃是「找門有沒有鎖」，這頁是「找小偷是不是已經在屋裡」。一樣<strong>免安裝、全用系統內建指令</strong>，在<strong>系統管理員命令提示字元</strong>逐塊複製。重點放在<strong>帳號、持久化（自啟／排程）、可疑程序、登入紀錄</strong>。</p>
 
     <div class="section-title sub">👤 帳號與權限</div>
     <div class="cmd">
@@ -324,9 +325,9 @@ ipconfig /displaydns</pre>
     <div class="section-title sub">📜 事件日誌：登入與異常</div>
     <div class="cmd">
       <div class="cmd-head"><span class="cmd-title">匯出「安全性」事件日誌</span><span class="shell-badge sh-cmd">CMD</span></div>
-      <pre class="code">REM 把安全性事件日誌匯出成 evtx（帶回乾淨機用 Chainsaw/Hayabusa 分析）
-wevtutil epl Security "%USERPROFILE%\Desktop\Security.evtx"</pre>
-      <div class="cmd-note">🔎 <b>用途：</b>桌面會產生 <code>Security.evtx</code>，帶回乾淨機用下載清單的 Chainsaw／Hayabusa 套 Sigma 規則掃威脅，比在本機肉眼看快得多。</div>
+      <pre class="code">REM 把安全性事件日誌匯出成 evtx 到目前資料夾（帶回乾淨機用 Chainsaw/Hayabusa 分析）
+wevtutil epl Security Security.evtx</pre>
+      <div class="cmd-note">🔎 <b>用途：</b>會在目前資料夾產生 <code>Security.evtx</code>，帶回乾淨機用進階工具 Chainsaw／Hayabusa 套 Sigma 規則掃威脅，比在本機肉眼看快得多。（這步是進階分析，只匯出檔案本身不用裝軟體。）</div>
     </div>
     <div class="cmd">
       <div class="cmd-head"><span class="cmd-title">查登入成功 / 失敗 / 新建帳號事件</span><span class="shell-badge sh-cmd">CMD</span></div>
