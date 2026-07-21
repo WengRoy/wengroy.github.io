@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Windows 弱點掃描與入侵偵測 工具箱</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: #fdf6e3; background-image: radial-gradient(circle, #d4b896 1px, transparent 1px); background-size: 18px 18px; color: #1a1a1a; min-height: 100vh; padding: 24px 16px; font-size: 16px; }
+    .page { max-width: 1000px; margin: 0 auto; }
+
+    /* ── 外框：漫畫暖色 ── */
+    .header { border: 3px solid #1a1a1a; border-radius: 14px; background: #fff8ee; box-shadow: 5px 5px 0 #1a1a1a; padding: 28px 32px; margin-bottom: 18px; }
+    .header-badge { display: inline-block; background: #c0392b; color: white; font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.85rem; padding: 5px 16px; border-radius: 20px; border: 2px solid #1a1a1a; box-shadow: 2px 2px 0 #1a1a1a; margin-bottom: 12px; }
+    .header .kicker { font-family:'Baloo 2',cursive; font-size:0.9rem; color:#6b4226; font-weight:700; margin-bottom:6px; }
+    .header h1 { font-family: 'Baloo 2', cursive; font-size: 1.9rem; font-weight: 800; color: #1a1a1a; line-height: 1.3; margin-bottom: 12px; }
+    .header h1 span { color: #e8713a; }
+    .header p { color: #6b4226; font-size: 1rem; line-height: 1.75; }
+    .header .meta { margin-top:12px; font-size:0.82rem; color:#a06a3a; }
+
+    .tab-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tab-btn { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.9rem; padding: 10px 14px; border: 3px solid #1a1a1a; border-bottom: none; border-radius: 10px 10px 0 0; background: #fff8ee; cursor: pointer; transition: all 0.12s; color: #6b4226; }
+    .tab-btn.active { background: #e8713a; color: white; }
+    .tab-btn:hover:not(.active) { background: #fdf6e3; transform: translateY(-2px); }
+    .tab-panel { display: none; border: 3px solid #1a1a1a; border-radius: 0 8px 8px 8px; padding: 28px 28px 34px; background: #fdf6e3; box-shadow: 5px 5px 0 #1a1a1a; }
+    .tab-panel.active { display: block; }
+
+    .section-title { font-family: 'Baloo 2', cursive; font-size: 1.28rem; font-weight: 800; color: #6b4226; margin: 6px 0 16px; display: flex; align-items: center; gap: 8px; line-height:1.35; }
+    .section-title.sub { font-size:1.05rem; margin-top:26px; padding-top:18px; border-top:2px dashed #d4b896; }
+    .lead { font-size: 1rem; color:#5a4a38; line-height:1.85; margin-bottom:20px; }
+
+    .insight { background: #6b4226; color: #fff; border: 3px solid #1a1a1a; border-radius: 10px; padding: 20px 24px; box-shadow: 4px 4px 0 #1a1a1a; margin: 20px 0; font-size: 0.98rem; line-height: 1.85; }
+    .insight strong.h { display: block; font-size: 1.12rem; margin-bottom: 8px; font-family:'Baloo 2',cursive; }
+    .danger { background: #c0392b; }
+    .safe { background: #2d7a45; }
+
+    /* ── 原則卡 ── */
+    .rule-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:18px 0; }
+    @media (max-width:700px){ .rule-grid{ grid-template-columns:1fr; } }
+    .rule-card { background:#fff; border:2px solid #1a1a1a; border-radius:10px; padding:16px 18px; box-shadow:3px 3px 0 #1a1a1a; }
+    .rule-card .n { font-family:'Baloo 2',cursive; font-weight:800; color:#e8713a; font-size:1.5rem; line-height:1; }
+    .rule-card h4 { font-size:1rem; font-weight:700; color:#1a1a1a; margin:6px 0 6px; }
+    .rule-card p { font-size:0.88rem; color:#5a4a38; line-height:1.7; }
+
+    /* ── 指令碼塊 ── */
+    .cmd { background:#fff; border:2px solid #1a1a1a; border-radius:10px; box-shadow:3px 3px 0 #1a1a1a; margin-bottom:18px; overflow:hidden; }
+    .cmd-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; background:#fff8ee; border-bottom:2px solid #1a1a1a; }
+    .cmd-title { font-weight:700; font-size:0.95rem; color:#1a1a1a; display:flex; align-items:center; gap:8px; }
+    .shell-badge { font-family:'JetBrains Mono',monospace; font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:5px; border:1.5px solid #1a1a1a; }
+    .sh-cmd { background:#dbeafe; color:#1e40af; }
+    .sh-ps { background:#ede9fe; color:#6d28d9; }
+    .sh-bash { background:#dcfce7; color:#166534; }
+    .copy-btn { font-family:'Baloo 2',cursive; font-weight:700; font-size:0.82rem; padding:6px 14px; border:2px solid #1a1a1a; border-radius:7px; background:#e8713a; color:#fff; cursor:pointer; box-shadow:2px 2px 0 #1a1a1a; transition:all 0.1s; white-space:nowrap; }
+    .copy-btn:hover { transform:translateY(-1px); box-shadow:3px 3px 0 #1a1a1a; }
+    .copy-btn:active { transform:translate(2px,2px); box-shadow:0 0 0 #1a1a1a; }
+    .copy-btn.copied { background:#2d7a45; }
+    pre.code { font-family:'JetBrains Mono',monospace; font-size:0.86rem; line-height:1.65; background:#1e1e2e; color:#e4e4e7; padding:14px 16px; overflow-x:auto; white-space:pre; tab-size:2; }
+    pre.code .rem { color:#7f9f8f; }
+    .cmd-note { padding:11px 15px; font-size:0.86rem; color:#5a4a38; line-height:1.7; background:#fffdf8; }
+    .cmd-note b { color:#c0392b; }
+
+    /* ── 下載清單 ── */
+    .dl-cat { font-family:'Baloo 2',cursive; font-weight:800; font-size:1.05rem; color:#e8713a; margin:22px 0 10px; }
+    .dl { display:flex; gap:12px; align-items:flex-start; background:#fff; border:2px solid #1a1a1a; border-radius:9px; padding:13px 16px; margin-bottom:10px; box-shadow:2px 2px 0 #1a1a1a; }
+    .dl .ic { font-size:1.4rem; line-height:1.2; }
+    .dl .info { flex:1; }
+    .dl .info h4 { font-size:0.98rem; font-weight:700; margin-bottom:3px; }
+    .dl .info h4 .free { font-size:0.7rem; background:#2d7a45; color:#fff; padding:1px 7px; border-radius:10px; margin-left:6px; vertical-align:middle; }
+    .dl .info p { font-size:0.85rem; color:#5a4a38; line-height:1.6; }
+    .dl a { display:inline-block; margin-top:5px; font-size:0.8rem; font-family:'JetBrains Mono',monospace; color:#1e40af; word-break:break-all; text-decoration:none; }
+    .dl a:hover { text-decoration:underline; }
+    .dl a::before { content:"🔗 "; }
+
+    /* ── 判讀表 ── */
+    .rtable { width:100%; border-collapse:collapse; background:#fff; border:2px solid #1a1a1a; border-radius:10px; overflow:hidden; box-shadow:3px 3px 0 #1a1a1a; font-size:0.87rem; margin-bottom:20px; }
+    .rtable th { background:#1a1a1a; color:#fff; font-family:'Baloo 2',cursive; text-align:left; padding:11px 14px; }
+    .rtable td { padding:11px 14px; border-top:1px solid #eee; line-height:1.6; vertical-align:top; }
+    .rtable tr:nth-child(even) td { background:#faf9f6; }
+    .rtable code { font-family:'JetBrains Mono',monospace; font-size:0.82rem; background:#f4f4f4; padding:1px 6px; border-radius:4px; }
+    .rtable .ok { color:#2d7a45; font-weight:700; }
+    .rtable .bad { color:#c0392b; font-weight:700; }
+
+    /* ── 流程步驟 ── */
+    .flow { counter-reset:step; }
+    .flow .step { position:relative; background:#fff; border:2px solid #1a1a1a; border-radius:10px; padding:16px 18px 16px 56px; margin-bottom:12px; box-shadow:3px 3px 0 #1a1a1a; }
+    .flow .step::before { counter-increment:step; content:counter(step); position:absolute; left:14px; top:14px; width:30px; height:30px; background:#e8713a; color:#fff; border:2px solid #1a1a1a; border-radius:50%; font-family:'Baloo 2',cursive; font-weight:800; display:flex; align-items:center; justify-content:center; }
+    .flow .step h4 { font-size:1rem; font-weight:700; margin-bottom:5px; }
+    .flow .step p { font-size:0.88rem; color:#5a4a38; line-height:1.7; }
+    .flow .step.crit { border-color:#c0392b; }
+    .flow .step.crit::before { background:#c0392b; }
+
+    .warn-inline { background:#fef2f2; border-left:4px solid #c0392b; padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0; font-size:0.9rem; color:#7f1d1d; line-height:1.75; }
+    .tip-inline { background:#f0fdf4; border-left:4px solid #2d7a45; padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0; font-size:0.9rem; color:#14532d; line-height:1.75; }
+
+    footer { text-align: center; margin-top: 20px; color: #a06a3a; font-size: 0.82rem; line-height:1.7; }
+    .placeholder { color:#e8713a; font-weight:700; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-badge">🛡️ 資安應變工具箱 · 內部使用</div>
+    <div class="kicker">Windows 主機 · 弱點掃描 × 入侵偵測 · 一鍵複製指令</div>
+    <h1>Windows <span>弱點掃描與入侵偵測</span> 工具箱</h1>
+    <p>疑似遭入侵的 Windows 主機該怎麼查？這頁把<strong>要下載的鑑識工具</strong>、<strong>一塊一塊可直接複製貼上的 bat／PowerShell 指令</strong>、<strong>遠端掃描做法</strong>與<strong>判讀速查表</strong>都整理好了。每塊指令都有 <code>📋 複製</code> 鈕，貼到主機的命令提示字元就能跑。指令刻意拆小、一行註解一行指令，方便你改參數。</p>
+    <p class="meta">最後更新：2026-07-21　·　適用：Windows 10 / 11 / Server　·　指令中的 <span class="placeholder">192.168.1.50</span> 等為範例，請自行替換</p>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">① 🛡️ 安全總則</button>
+    <button class="tab-btn" onclick="switchTab(1)">② 📥 下載清單</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ 🔍 系統盤點·弱掃</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ 🕵️ 入侵偵測·鑑識</button>
+    <button class="tab-btn" onclick="switchTab(4)">⑤ 🌐 遠端掃描</button>
+    <button class="tab-btn" onclick="switchTab(5)">⑥ 🧭 處置·判讀表</button>
+  </div>
+
+  <!-- ═══ Tab 1：安全總則 ═══ -->
+  <div class="tab-panel active">
+    <div class="section-title">🛡️ 動手之前，先記住這五條鐵律</div>
+    <p class="lead">對「<strong>疑似已被入侵</strong>」的機器，錯誤的操作順序會讓災情擴大。下面五條決定你會不會把自己的帳號也一起賠進去。</p>
+
+    <div class="rule-grid">
+      <div class="rule-card"><div class="n">1</div><h4>可疑機器 = 敵營</h4><p>假設它已被植入側錄／後門。你在上面打的任何帳密、存下的任何 token，都可能被偷走。</p></div>
+      <div class="rule-card"><div class="n">2</div><h4>憑證不落地</h4><p>你的 Claude、GCP、網域管理員密碼，<strong>絕不登入這台可疑機器</strong>。操作端要用另一台乾淨機。</p></div>
+      <div class="rule-card"><div class="n">3</div><h4>鑑識前先保全</h4><p>要深入取證前，先<strong>斷網隔離</strong>、再做<strong>磁碟快照／記憶體映像</strong>，別直接動現場。</p></div>
+      <div class="rule-card"><div class="n">4</div><h4>熱點 ≠ 隔離</h4><p>給可疑機任何對外網路，惡意程式就能回連 C2、外傳資料。真隔離＝完全斷網。</p></div>
+      <div class="rule-card"><div class="n">5</div><h4>確認被入侵 → 重灌</h4><p>後門很難保證清乾淨。在上面跑指令主要是<strong>取證</strong>、釐清災情，不是把它救回來繼續用。</p></div>
+    </div>
+
+    <div class="insight danger">
+      <strong class="h">⚠️ 最常見的致命錯誤</strong>
+      在可疑主機上「登入你自己的雲端帳號來裝工具幫忙查」——這是把整串信任憑證端進敵營。正確做法是：<strong>乾淨機當指揮官、可疑機只跑不需登入的獨立工具</strong>，把輸出檔帶回乾淨機分析。
+    </div>
+
+    <div class="section-title sub">🧭 建議的作戰隊形</div>
+    <pre class="code" style="border-radius:10px;border:2px solid #1a1a1a;box-shadow:3px 3px 0 #1a1a1a;">┌────────────────────────┐        ┌────────────────────────┐
+│  乾淨機（操作端）        │        │  可疑 Windows（敵營）     │
+│  · 你信任的帳號都在這     │──掃描──▶│  · 只跑獨立工具：         │
+│  · Nmap / Nessus 遠端掃  │  遠端  │    Autoruns/Nmap/Defender│
+│  · 收檔案回來判讀        │◀─輸出──│  · 憑證絕不進這台 ✗       │
+└────────────────────────┘        └────────────────────────┘</pre>
+    <p class="lead" style="margin-top:14px;">下面各分頁：<strong>②</strong> 先把工具抓齊 → <strong>③④</strong> 在可疑機本機跑指令、把輸出帶回乾淨機 → <strong>⑤</strong> 從乾淨機遠端補掃 → <strong>⑥</strong> 照處置流程收尾、對照判讀表看哪裡有鬼。</p>
+  </div>
+
+  <!-- ═══ Tab 2：下載清單 ═══ -->
+  <div class="tab-panel">
+    <div class="section-title">📥 入侵偵測 / 鑑識工具下載清單</div>
+    <p class="lead">先在<strong>乾淨機</strong>下載、掃過毒、再用隨身碟帶到可疑機（或直接在乾淨機遠端用）。以下皆為官方來源，標 <span style="background:#2d7a45;color:#fff;padding:1px 7px;border-radius:10px;font-size:0.72rem;">免費</span> 者可直接使用。</p>
+
+    <div class="dl-cat">🧰 基本鑑識工具（必備）</div>
+    <div class="dl"><div class="ic">🧰</div><div class="info"><h4>Sysinternals Suite <span class="free">免費</span></h4><p>微軟官方鑑識神器包。重點：<code>Autoruns</code>（看所有開機自啟／持久化）、<code>Process Explorer</code>（看程序真面目）、<code>TCPView</code>（看即時連線）、<code>Sigcheck</code>（驗數位簽章）、<code>Autorunsc</code>（命令列版）。</p><a href="https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite">learn.microsoft.com/sysinternals/downloads/sysinternals-suite</a></div></div>
+
+    <div class="dl-cat">🔎 弱點掃描器</div>
+    <div class="dl"><div class="ic">🗺️</div><div class="info"><h4>Nmap <span class="free">免費</span></h4><p>連接埠與服務探測、內建 NSE 漏洞腳本。遠端掃這台開了哪些服務、有沒有 SMB 弱點的第一工具。</p><a href="https://nmap.org/download.html">nmap.org/download.html</a></div></div>
+    <div class="dl"><div class="ic">🛡️</div><div class="info"><h4>Nessus Essentials <span class="free">免費 16 IP</span></h4><p>業界標準弱點掃描器，個人版免費最多 16 個 IP。支援<strong>認證掃描</strong>（填管理員帳密登入比對修補程式），準確度遠勝非認證掃描。</p><a href="https://www.tenable.com/products/nessus/nessus-essentials">tenable.com/products/nessus/nessus-essentials</a></div></div>
+    <div class="dl"><div class="ic">🟢</div><div class="info"><h4>OpenVAS / Greenbone <span class="free">免費/開源</span></h4><p>完全開源的弱點掃描平台（跑在 Linux）。想避開商用授權限制時的替代方案。</p><a href="https://greenbone.github.io/docs/">greenbone.github.io/docs</a></div></div>
+
+    <div class="dl-cat">🦠 IOC / 威脅獵捕（找後門本體）</div>
+    <div class="dl"><div class="ic">🦠</div><div class="info"><h4>LOKI <span class="free">免費</span></h4><p>用 YARA 規則 + 已知 IOC 掃描落地的惡意檔案／後門。開源、單機可跑。</p><a href="https://github.com/Neo23x0/Loki">github.com/Neo23x0/Loki</a></div></div>
+    <div class="dl"><div class="ic">⚡</div><div class="info"><h4>THOR Lite <span class="free">免費</span></h4><p>Nextron 出品的輕量 APT／後門掃描器，內建大量偵測特徵，比 LOKI 更全面。</p><a href="https://www.nextron-systems.com/thor-lite/">nextron-systems.com/thor-lite</a></div></div>
+
+    <div class="dl-cat">📜 Windows 事件日誌分析（查登入 / 橫向移動）</div>
+    <div class="dl"><div class="ic">🪚</div><div class="info"><h4>Chainsaw <span class="free">免費</span></h4><p>快速套 Sigma 規則掃 Windows 事件日誌（evtx），一眼抓出可疑登入、提權、持久化。</p><a href="https://github.com/WithSecureLabs/chainsaw">github.com/WithSecureLabs/chainsaw</a></div></div>
+    <div class="dl"><div class="ic">🦅</div><div class="info"><h4>Hayabusa <span class="free">免費</span></h4><p>日本 Yamato Security 出的高速事件日誌分析器，產出時間軸與威脅評分。</p><a href="https://github.com/Yamato-Security/hayabusa">github.com/Yamato-Security/hayabusa</a></div></div>
+
+    <div class="dl-cat">🧬 DFIR / 深度取證（進階）</div>
+    <div class="dl"><div class="ic">📦</div><div class="info"><h4>KAPE <span class="free">免費</span></h4><p>Kroll 出的鑑識證物採集器，一鍵蒐集 prefetch、登錄檔、日誌等關鍵證物，帶回乾淨機慢慢分析。</p><a href="https://www.kroll.com/kape">kroll.com/kape</a></div></div>
+    <div class="dl"><div class="ic">🧠</div><div class="info"><h4>WinPmem <span class="free">免費</span></h4><p>製作實體記憶體（RAM）映像，抓出只存在記憶體、沒落地的惡意程式。</p><a href="https://github.com/Velocidex/WinPmem">github.com/Velocidex/WinPmem</a></div></div>
+    <div class="dl"><div class="ic">🦖</div><div class="info"><h4>Velociraptor <span class="free">免費/開源</span></h4><p>開源端點鑑識與威脅獵捕平台，可大規模跨主機採證與獵捕。</p><a href="https://github.com/Velocidex/velociraptor">github.com/Velocidex/velociraptor</a></div></div>
+
+    <div class="dl-cat">🌐 封包分析</div>
+    <div class="dl"><div class="ic">🦈</div><div class="info"><h4>Wireshark <span class="free">免費</span></h4><p>抓封包看這台在跟誰講話、有沒有外傳到可疑 IP。搭配隔離網段觀察最有效。</p><a href="https://www.wireshark.org/download.html">wireshark.org/download.html</a></div></div>
+
+    <div class="tip-inline">💡 <b>沒時間全下載？</b>最小組合就三個：<strong>Sysinternals Suite</strong>（本機看自啟／程序／連線）＋ <strong>Nmap</strong>（遠端掃服務）＋ <strong>Windows Defender</strong>（內建，直接全盤掃）。這三個就能覆蓋八成的初步偵測。</div>
+  </div>
+
+  <!-- ═══ Tab 3：系統盤點 · 弱掃 ═══ -->
+  <div class="tab-panel">
+    <div class="section-title">🔍 系統盤點 &amp; 弱點面（本機執行）</div>
+    <p class="lead">在可疑機開「<strong>命令提示字元（以系統管理員身分執行）</strong>」，逐塊複製貼上。目的是摸清這台的底細、缺哪些修補、開了哪些門。<strong>建議把輸出存檔帶回乾淨機分析</strong>——每塊最後都可加 <code>&gt; 檔名.txt</code> 導出。</p>
+
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">🖥️ 系統資訊與修補程式全貌</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 一次看系統版本、開機時間、已裝的修補程式（找缺哪些更新）
+systeminfo</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>「Hotfix(s)」清單有多舊？作業系統版本是否已過期停止支援？這決定弱點面大小。</div>
+    </div>
+
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">🩹 只列修補程式編號與安裝日期</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 精簡列出已安裝的 KB 修補程式與安裝日期
+wmic qfe get HotFixID,InstalledOn</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>最後一筆安裝日期若在好幾個月前 → 長期沒更新，高風險。（新版 Windows 若無 wmic，改用第④分頁的 PowerShell <code>Get-HotFix</code>。）</div>
+    </div>
+
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">🔌 所有網路連線與監聽埠（含 PID）</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 列出所有連線／監聽的連接埠與對應程式 PID
+netstat -ano</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>有沒有連到<b>陌生外部 IP</b>（ESTABLISHED）？有沒有不該開的監聽埠（LISTENING）？記下可疑的 PID 去第④頁對照程序。</div>
+    </div>
+
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">🧱 防火牆三種設定檔狀態</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 顯示網域／私人／公用三種防火牆設定檔是否開啟
+netsh advfirewall show allprofiles</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>State 是否為 ON？被關掉的防火牆常是攻擊者手筆。</div>
+    </div>
+
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">🧷 列出所有服務狀態</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 列出所有服務與狀態（找被停用的防護服務／可疑新服務）
+sc query type=service state=all</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>防毒／Defender／Windows Update 服務被停？出現名稱怪異的新服務？服務是常見的持久化手法。</div>
+    </div>
+
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">📂 開放的共用資料夾</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 列出這台開出去的網路共用（找被打開的分享）
+net share</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>除了預設的 <code>ADMIN$ C$ IPC$</code>，有沒有多出你不認得的共用？那可能是外洩／橫向移動管道。</div>
+    </div>
+
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">🌐 網路設定 / ARP / 路由</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 網路設定（IP、DNS、閘道）
+ipconfig /all
+REM ARP 快取：內網有哪些機器跟它講過話
+arp -a
+REM 路由表：找有沒有被塞奇怪的靜態路由
+route print</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>DNS 被改成陌生位址？路由表多出奇怪條目？ARP 表有沒有你不認得的內網機器（找橫向移動目標）。</div>
+    </div>
+
+    <div class="section-title sub">🗂️ 一鍵把系統盤點結果全導出到桌面</div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">📤 全部輸出成一份 txt（帶回乾淨機看）</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 依序把各項結果寫進桌面 recon.txt（第一行用 &gt; 建檔，其餘用 &gt;&gt; 附加）
+systeminfo &gt; "%USERPROFILE%\Desktop\recon.txt"
+netstat -ano &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
+sc query type=service state=all &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
+net share &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
+ipconfig /all &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
+arp -a &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"
+route print &gt;&gt; "%USERPROFILE%\Desktop\recon.txt"</pre>
+      <div class="cmd-note">🔎 <b>用途：</b>跑完桌面會有 <code>recon.txt</code>，用隨身碟帶回乾淨機，或貼給 AI 幫你判讀，避免在可疑機上久留。</div>
+    </div>
+  </div>
+
+  <!-- ═══ Tab 4：入侵偵測 · 鑑識 ═══ -->
+  <div class="tab-panel">
+    <div class="section-title">🕵️ 入侵偵測 / 鑑識（找有沒有被種後門）</div>
+    <p class="lead">弱掃是「找門有沒有鎖」，這頁是「找小偷是不是已經在屋裡」。一樣用<strong>系統管理員命令提示字元</strong>，逐塊複製。重點放在<strong>帳號、持久化（自啟／排程）、可疑程序、登入紀錄</strong>。</p>
+
+    <div class="section-title sub">👤 帳號與權限</div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">列出本機所有帳號</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 列出本機所有使用者帳號（找有沒有被偷加的帳號）
+net user</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>出現你不認得的帳號（尤其像亂碼、或偽裝成 <code>admin</code>/<code>support</code>/<code>sql</code>）→ 高度可疑。新增一個看似正常的帳號長期潛伏，是最經典的後門手法。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">列出系統管理員群組成員</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 列出本機 Administrators 群組成員（找被偷偷提權的帳號）
+net localgroup administrators</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>管理員名單裡有沒有多出帳號？一般使用者被加進管理員 = 提權跡象。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">目前登入 / RDP 工作階段</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 目前登入中的使用者工作階段
+query user
+REM 遠端桌面(RDP)工作階段
+query session</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>有沒有<b>你以外的人</b>正透過 RDP 連著？攻擊者常留著遠端桌面。</div>
+    </div>
+
+    <div class="section-title sub">🔁 持久化：開機自啟與排程</div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">登錄檔開機自動執行項</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 機器層級開機自啟項
+reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Run"
+REM 使用者層級開機自啟項
+reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Run"</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>指向 <code>Temp</code>、<code>AppData</code>、<code>ProgramData</code> 或亂碼路徑的自啟項 → 很可能是後門。這是最常見的持久化位置。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">詳列所有排程工作</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 詳列所有排程工作（找被塞的後門排程）
+schtasks /query /fo LIST /v</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>「作者」不是微軟／你、動作是跑 <code>powershell -enc</code>、<code>cmd /c</code>、下載執行的排程 → 高度可疑。攻擊者愛用排程做定時回連。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">wmic 列出開機啟動項</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 列出開機啟動項的名稱與執行路徑
+wmic startup get Caption,Command</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>路徑落在使用者資料夾／暫存區的啟動項要特別留意。（最完整的自啟稽核請用下載清單的 <code>Autoruns</code>。）</div>
+    </div>
+
+    <div class="section-title sub">🧟 可疑程序與網路連線</div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">程序清單 + 對應服務</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 列出所有執行中程序與其掛載的服務
+tasklist /svc</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>把第③頁 netstat 記下的可疑 PID 拿來對照，看是哪支程式在連外。<code>svchost.exe</code> 出現在怪路徑、或 PID 對不上服務 = 偽裝跡象。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">只看「已建立」的對外連線</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 只列出已建立的連線，快速抓連外行為
+netstat -ano | findstr ESTABLISHED</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>連到你不認得的公網 IP（非公司、非常見雲服務）→ 可能是 C2 回連。把 IP 拿去 VirusTotal／AbuseIPDB 查信譽。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">DNS 解析快取</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 顯示 DNS 快取（看這台最近解析過哪些網域）
+ipconfig /displaydns</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>解析過的可疑網域（動態 DNS、亂碼網域、known-bad）留下連外痕跡。</div>
+    </div>
+
+    <div class="section-title sub">📜 事件日誌：登入與異常</div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">匯出「安全性」事件日誌</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 把安全性事件日誌匯出成 evtx（帶回乾淨機用 Chainsaw/Hayabusa 分析）
+wevtutil epl Security "%USERPROFILE%\Desktop\Security.evtx"</pre>
+      <div class="cmd-note">🔎 <b>用途：</b>桌面會產生 <code>Security.evtx</code>，帶回乾淨機用下載清單的 Chainsaw／Hayabusa 套 Sigma 規則掃威脅，比在本機肉眼看快得多。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">查登入成功 / 失敗 / 新建帳號事件</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 最近 20 筆登入成功（EventID 4624）
+wevtutil qe Security /q:"*[System[(EventID=4624)]]" /c:20 /rd:true /f:text
+REM 最近 20 筆登入失敗（EventID 4625，暴力破解跡象）
+wevtutil qe Security /q:"*[System[(EventID=4625)]]" /c:20 /rd:true /f:text
+REM 最近 20 筆新建使用者帳號（EventID 4720）
+wevtutil qe Security /q:"*[System[(EventID=4720)]]" /c:20 /rd:true /f:text</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>大量 <code>4625</code>（登入失敗）＝有人在猜密碼；<code>4720</code>（新建帳號）不是你做的＝有人建了帳號；<code>4624</code> 裡出現陌生來源 IP／帳號＝已被登入。</div>
+    </div>
+
+    <div class="section-title sub">🦠 用內建 Defender 直接全盤掃</div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">更新定義檔並執行完整掃描</span><span class="shell-badge sh-cmd">CMD</span></div>
+      <pre class="code">REM 先更新 Defender 病毒定義檔
+"%ProgramFiles%\Windows Defender\MpCmdRun.exe" -SignatureUpdate
+REM 執行完整掃描（ScanType 2 = 全盤）
+"%ProgramFiles%\Windows Defender\MpCmdRun.exe" -Scan -ScanType 2</pre>
+      <div class="cmd-note">🔎 <b>用途：</b>不用裝任何東西，用系統內建 Defender 就能全盤掃一次。免費、方便，作為第一道快篩。</div>
+    </div>
+
+    <div class="section-title sub">⚡ PowerShell 加值指令（開 PowerShell 系統管理員執行）</div>
+    <div class="warn-inline">⚠️ 下面這幾塊是 <b>PowerShell</b> 語法（註解用 <code>#</code>），要在「Windows PowerShell（系統管理員）」視窗跑，<b>不是</b>命令提示字元。</div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">Defender 狀態 / 完整掃描</span><span class="shell-badge sh-ps">PowerShell</span></div>
+      <pre class="code"># 顯示 Defender 即時防護狀態與最後掃描時間
+Get-MpComputerStatus
+# 執行 Defender 完整掃描
+Start-MpScan -ScanType FullScan</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b><code>RealTimeProtectionEnabled</code> 若為 False → 即時防護被關，是入侵常見動作。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">修補程式（比 wmic 準）</span><span class="shell-badge sh-ps">PowerShell</span></div>
+      <pre class="code"># 列出已安裝修補程式，依安裝日期新到舊排序
+Get-HotFix | Sort-Object InstalledOn -Descending</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>最新一筆更新的日期，判斷這台多久沒打補丁。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">PowerShell 歷史命令（攻擊者愛用 PS）</span><span class="shell-badge sh-ps">PowerShell</span></div>
+      <pre class="code"># 讀取目前使用者的 PowerShell 命令歷史
+Get-Content (Get-PSReadlineOption).HistorySavePath</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>出現 <code>IEX</code>、<code>DownloadString</code>、<code>-EncodedCommand</code>、base64 字串 → 典型攻擊指令，代表這台被拿來下載執行惡意程式。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">找最近 7 天被修改的可執行檔</span><span class="shell-badge sh-ps">PowerShell</span></div>
+      <pre class="code"># 找 C 槽最近 7 天內被寫入的執行檔（可疑落地檔）
+Get-ChildItem C:\ -Include *.exe,*.dll,*.ps1,*.bat -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-7) } | Select-Object FullName,LastWriteTime</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>落在 <code>Temp</code>／<code>AppData</code>／<code>ProgramData</code>／使用者下載區的近期新檔，是後門常見落地點。對照建立時間跟入侵時間軸。</div>
+    </div>
+  </div>
+
+  <!-- ═══ Tab 5：遠端掃描 ═══ -->
+  <div class="tab-panel">
+    <div class="section-title">🌐 從乾淨機遠端掃描這台</div>
+    <p class="lead">當可疑機接在同一個網段（同一台 router / Wi-Fi），你可以從<strong>乾淨機（Mac / Linux / 另一台 Windows）</strong>對它的內網 IP 掃描。指令中的 <span class="placeholder">192.168.1.50</span> 請換成目標主機實際 IP。</p>
+
+    <div class="warn-inline">⚠️ 遠端掃描代表可疑機還連著網路。若你要做的是<b>鑑識取證</b>，請先隔離；遠端掃描適合用在「初步盤點」或「已放到隔離網段」的情況。</div>
+
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">找目標的 IP（先確認掃誰）</span><span class="shell-badge sh-bash">Terminal</span></div>
+      <pre class="code"># 掃整個網段找出存活主機（把網段換成你的，如 192.168.1.0/24）
+nmap -sn 192.168.1.0/24</pre>
+      <div class="cmd-note">🔎 <b>用途：</b>不確定那台 Windows 的 IP 時，先用這條列出網段內所有活著的主機與主機名。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">服務版本與作業系統指紋</span><span class="shell-badge sh-bash">Terminal</span></div>
+      <pre class="code"># 探測目標開了哪些服務、版本、作業系統（需 root/管理員）
+nmap -sV -O 192.168.1.50</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>開放的服務版本是否老舊、有沒有不該對外的服務（RDP 3389、SMB 445）。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">內建漏洞腳本快篩</span><span class="shell-badge sh-bash">Terminal</span></div>
+      <pre class="code"># 用 NSE 內建 vuln 腳本快速篩已知漏洞
+nmap --script vuln 192.168.1.50</pre>
+      <div class="cmd-note">🔎 <b>用途：</b>快速抓出常見 CVE。這是「快篩」不是「完整掃」，完整請用 Nessus。</div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-head"><span class="cmd-title">專掃 Windows SMB 弱點</span><span class="shell-badge sh-bash">Terminal</span></div>
+      <pre class="code"># 專門檢查 SMB 服務的已知漏洞（如永恆之藍等）
+nmap --script smb-vuln* -p 445 192.168.1.50</pre>
+      <div class="cmd-note">🔎 <b>看什麼：</b>SMB（445）是 Windows 橫向移動最愛的入口，這條專門查它有沒有已知的高危漏洞。</div>
+    </div>
+
+    <div class="section-title sub">🛡️ Nessus 認證掃描（最準，建議收尾用）</div>
+    <div class="insight safe">
+      <strong class="h">為什麼要「認證掃描」？</strong>
+      <b>非認證掃描</b>只從外面看得到的埠猜漏洞，會漏很多；<b>認證掃描</b>用一組管理員帳密登入進去，逐一比對修補程式版本，準確度高得多。你人在機器旁、有管理員權限，強烈建議走認證掃描。
+    </div>
+    <div class="tip-inline">🧭 <b>Nessus 認證掃描設定重點（GUI 操作）：</b><br>
+      1. 乾淨機安裝 Nessus Essentials → 新增 <code>Basic Network Scan</code><br>
+      2. Targets 填目標內網 IP（如 <span class="placeholder">192.168.1.50</span>）<br>
+      3. <code>Credentials → Windows</code> 填一組<strong>本機管理員帳密</strong><br>
+      4. 目標端需開：<code>File and Printer Sharing</code>（SMB 445）、<code>Remote Registry</code> 服務、允許掃描來源通過防火牆<br>
+      5. 跑完看報告依 Critical → High → Medium 排序修補
+    </div>
+  </div>
+
+  <!-- ═══ Tab 6：處置 · 判讀 ═══ -->
+  <div class="tab-panel">
+    <div class="section-title">🧭 建議處置流程（一條龍）</div>
+    <div class="flow">
+      <div class="step crit"><h4>止血：切斷源頭</h4><p>若源頭是外洩的雲端金鑰（如被盜的 service account key），先停用／刪除該金鑰、輪換憑證，並關掉雲端連回內網的 VPN／防火牆規則，切斷跳板路徑。</p></div>
+      <div class="step crit"><h4>隔離可疑 Windows</h4><p>拔網路線／關 Wi-Fi，讓它離線。避免攻擊者繼續橫向移動或看到你在動他。</p></div>
+      <div class="step"><h4>保全證據</h4><p>深入取證前先做磁碟快照／WinPmem 記憶體映像。動了現場就回不去。</p></div>
+      <div class="step"><h4>本機鑑識</h4><p>照第③④分頁跑：帳號、自啟、排程、程序、連線、事件日誌、Defender 全盤掃。輸出檔帶回乾淨機。</p></div>
+      <div class="step"><h4>弱點掃描補洞</h4><p>第⑤分頁 Nessus 認證掃描，把該打的補丁、該關的服務、該改的弱密碼處理掉。</p></div>
+      <div class="step"><h4>全面輪換憑證</h4><p>內網相關帳密、VPN、雲端使用者、管理員密碼全部換掉。假設它們都可能已外洩。</p></div>
+      <div class="step crit"><h4>重建乾淨主機</h4><p>確認被入侵的機器，標準處置是重灌（wipe &amp; reinstall）。很難 100% 保證後門清乾淨，別冒險留用。</p></div>
+    </div>
+
+    <div class="section-title sub">🔎 判讀速查表：什麼算正常、什麼有鬼</div>
+    <table class="rtable">
+      <thead><tr><th>檢查項</th><th>正常長這樣</th><th>有鬼的跡象</th></tr></thead>
+      <tbody>
+        <tr><td>本機帳號 <code>net user</code></td><td class="ok">只有你認得的帳號</td><td class="bad">多出亂碼／偽裝名（admin、support、sql…）帳號</td></tr>
+        <tr><td>管理員群組</td><td class="ok">只有應有的管理員</td><td class="bad">一般帳號被加進 Administrators</td></tr>
+        <tr><td>對外連線 <code>netstat</code></td><td class="ok">連到已知雲端／公司服務</td><td class="bad">連陌生公網 IP、非常見埠、持續回連</td></tr>
+        <tr><td>開機自啟 / 排程</td><td class="ok">微軟與已知軟體</td><td class="bad">指向 Temp/AppData、跑 <code>powershell -enc</code> 的項目</td></tr>
+        <tr><td>防火牆 / Defender</td><td class="ok">開啟、即時防護 On</td><td class="bad">被關閉、服務被停用</td></tr>
+        <tr><td>登入事件</td><td class="ok">你本人的登入紀錄</td><td class="bad">大量 4625 失敗、陌生 IP 的 4624、你沒做的 4720</td></tr>
+        <tr><td>PowerShell 歷史</td><td class="ok">空的或你的正常指令</td><td class="bad">IEX / DownloadString / EncodedCommand / base64</td></tr>
+        <tr><td>近期落地檔</td><td class="ok">你安裝的軟體</td><td class="bad">Temp/AppData 下近期新增的 exe/dll/ps1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <strong class="h">🧠 一句話心法</strong>
+      弱點掃描回答「哪些門沒鎖」，入侵偵測回答「小偷是不是已經在屋裡」。<strong>已確認被入侵時，後者比前者急</strong>——先隔離、先取證、先換憑證，最後重灌，才是完整的收尾。
+    </div>
+  </div>
+
+  <footer>
+    🛡️ Windows 弱點掃描與入侵偵測工具箱　·　內部資安應變參考　·　2026-07-21<br>
+    本頁指令為通用工具，實際處置請依現場狀況與法遵要求調整。
+  </footer>
+</div>
+
+<script>
+  function switchTab(i){
+    document.querySelectorAll('.tab-btn').forEach((b,idx)=>b.classList.toggle('active', idx===i));
+    document.querySelectorAll('.tab-panel').forEach((p,idx)=>p.classList.toggle('active', idx===i));
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // 複製指令
+  function copyCmd(btn){
+    const pre = btn.closest('.cmd').querySelector('pre.code');
+    const text = pre.innerText;
+    const done = ()=>{ btn.classList.add('copied'); const o=btn.dataset.o||btn.innerHTML; btn.dataset.o=o; btn.innerHTML='✓ 已複製'; setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML=o; },1500); };
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).then(done).catch(()=>fallback(text,done));
+    } else { fallback(text,done); }
+  }
+  function fallback(text,done){
+    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){ alert('複製失敗，請手動選取'); }
+    document.body.removeChild(ta);
+  }
+
+  // 幫每個碼塊補上複製鈕、並把註解行標色
+  document.querySelectorAll('.cmd').forEach(cmd=>{
+    const head = cmd.querySelector('.cmd-head');
+    if(head && !head.querySelector('.copy-btn')){
+      const btn=document.createElement('button'); btn.className='copy-btn'; btn.textContent='📋 複製'; btn.onclick=function(){copyCmd(this);};
+      head.appendChild(btn);
+    }
+    const pre = cmd.querySelector('pre.code');
+    if(pre){
+      pre.innerHTML = pre.innerHTML.split('\n').map(line=>{
+        const t=line.replace(/<[^>]*>/g,'').trimStart();
+        if(t.startsWith('REM ')||t.startsWith('#')||t.startsWith('::')) return '<span class="rem">'+line+'</span>';
+        return line;
+      }).join('\n');
+    }
+  });
+</script>
+</body>
+</html>
