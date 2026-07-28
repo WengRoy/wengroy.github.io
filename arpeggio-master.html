@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>順階和絃內音 Solo 大師 Arpeggio Ladder — 單弦順階爬梯 × 和絃內音指板地圖 — Roy's Lab</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --comic-black: #1a1a1a;
+            --warm-cream: #fff8eb;
+            --warm-orange: #e8713a;
+            --warm-brown: #6b4226;
+            --warm-gold: #d4a853;
+            --warm-red: #c0392b;
+            --warm-blue: #2e86ab;
+            --warm-green: #27ae60;
+            --warm-purple: #8e44ad;
+            --surface: #fdf6e3;
+            --border: 3px solid var(--comic-black);
+            --border-thin: 2px solid var(--comic-black);
+            --shadow: 4px 4px 0px var(--comic-black);
+            --shadow-lg: 6px 6px 0px var(--comic-black);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Baloo 2', sans-serif;
+            background: var(--warm-cream);
+            color: var(--comic-black);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 10px 10px;
+            pointer-events: none;
+        }
+
+        .app { max-width: 100%; width: 100%; margin: 0; padding: 12px 16px; position: relative; z-index: 1; }
+
+        /* HEADER */
+        .header {
+            display: flex; align-items: center; gap: 16px;
+            background: white; border: var(--border); border-radius: 16px;
+            padding: 14px 20px; box-shadow: var(--shadow-lg); margin-bottom: 14px;
+            position: relative; overflow: hidden;
+        }
+        .header-img { width: 64px; height: 64px; border-radius: 50%; border: var(--border); object-fit: cover; flex-shrink: 0; }
+        .header-text h1 { font-family: 'Baloo 2', cursive; font-size: 1.6rem; font-weight: 800; color: var(--warm-brown); line-height: 1.1; }
+        .header-text h1 span { color: var(--warm-orange); }
+        .header-text p { font-size: 0.8rem; color: #999; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+        .header-text p i { width: 14px; height: 14px; }
+        .sfx { position: absolute; font-family: 'Baloo 2', cursive; font-weight: 800; opacity: 0.06; pointer-events: none; }
+        .sfx-1 { top: -6px; right: 16px; font-size: 3rem; transform: rotate(8deg); color: var(--warm-blue); }
+
+        /* PANEL */
+        .panel {
+            background: white; border: var(--border); border-radius: 14px;
+            padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow);
+        }
+        .panel.hero { border-color: var(--warm-orange); box-shadow: 5px 5px 0 var(--warm-orange); }
+        .panel-title {
+            font-family: 'Baloo 2', cursive; font-size: 1rem; font-weight: 700;
+            color: var(--warm-brown); margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+            padding-bottom: 8px; border-bottom: 2px dashed #ddd;
+        }
+        .panel-title i { color: var(--warm-orange); }
+        .panel-title .hint-tail { margin-left: auto; font-family: 'Noto Sans TC', sans-serif; font-size: 0.72rem; font-weight: 500; color: #bbb; }
+
+        /* SELECTOR BUTTONS */
+        .sel-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+        .sel-label { font-size: 0.72rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+        .sel-label i { width: 13px; height: 13px; }
+
+        .sel-btn {
+            padding: 6px 12px; border: var(--border-thin); border-radius: 8px;
+            background: var(--surface); color: #888; font-family: 'Noto Sans TC', sans-serif;
+            font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.12s; text-align: center;
+        }
+        .sel-btn:hover { border-color: var(--warm-orange); color: var(--comic-black); }
+        .sel-btn.active { border-color: var(--warm-orange); background: var(--warm-orange); color: white; box-shadow: 2px 2px 0 var(--comic-black); }
+
+        /* 調性資訊 */
+        .key-info {
+            display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+            padding: 10px 14px; background: #fef9ef; border: 2px solid #eee;
+            border-radius: 10px; margin-top: 10px;
+        }
+        .key-name { font-family: 'Baloo 2', cursive; font-size: 1.4rem; font-weight: 800; color: var(--warm-brown); }
+        .key-notes { font-size: 0.9rem; font-weight: 600; color: var(--warm-blue); letter-spacing: 1.5px; }
+        .key-formula { font-size: 0.75rem; color: #aaa; }
+
+        /* 模式切換 */
+        .mode-toggle {
+            display: flex; gap: 4px; background: #f5efe3;
+            border: var(--border-thin); border-radius: 20px; padding: 3px;
+        }
+        .mode-toggle button {
+            padding: 5px 14px; border: none; border-radius: 16px;
+            font-family: 'Noto Sans TC', sans-serif; font-size: 0.78rem;
+            font-weight: 600; cursor: pointer; transition: all 0.12s;
+            background: transparent; color: #999; white-space: nowrap;
+        }
+        .mode-toggle button.active { background: var(--warm-brown); color: white; }
+        .mode-toggle button:hover:not(.active) { color: var(--comic-black); }
+        .mode-toggle.hot button.active { background: var(--warm-orange); }
+
+        .toggle-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+        .toggle-group .sel-label { margin-bottom: 0; }
+
+        /* SLIDER */
+        .slider-wrap { display: flex; align-items: center; gap: 8px; }
+        .slider-wrap input[type=range] {
+            -webkit-appearance: none; appearance: none;
+            width: 180px; height: 6px; border-radius: 3px;
+            background: #efe4d0; border: 1.5px solid #d8cbb4; outline: none;
+        }
+        .slider-wrap input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--warm-orange); border: 2px solid var(--comic-black);
+            cursor: pointer; box-shadow: 1px 1px 0 var(--comic-black);
+        }
+        .slider-wrap input[type=range]::-moz-range-thumb {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--warm-orange); border: 2px solid var(--comic-black); cursor: pointer;
+        }
+        .slider-val { font-family: 'Baloo 2', cursive; font-weight: 800; font-size: 0.95rem;
+            color: var(--warm-brown); min-width: 52px; }
+
+        /* 爬梯序列 */
+        .ladder-track {
+            display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap;
+            padding: 12px; background: #fef9ef; border: 2px dashed #e5d9c2;
+            border-radius: 10px; margin-top: 4px;
+        }
+        .step-chip {
+            position: relative; min-width: 84px; flex: 0 0 auto;
+            border: 2px solid #e2d6bf; border-radius: 10px; background: white;
+            padding: 6px 8px 7px; cursor: pointer; transition: all 0.12s;
+            display: flex; flex-direction: column; align-items: center; gap: 1px;
+        }
+        .step-chip:hover { transform: translateY(-2px); }
+        .step-chip.now { box-shadow: 0 0 0 3px rgba(232,113,58,0.25), 3px 3px 0 var(--comic-black); transform: translateY(-3px); }
+        .step-no {
+            position: absolute; top: -9px; left: -7px;
+            width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Baloo 2', cursive; font-size: 0.7rem; font-weight: 800;
+            color: white; border: 2px solid var(--comic-black);
+        }
+        .step-roman { font-family: 'Baloo 2', cursive; font-size: 0.72rem; font-weight: 700; }
+        .step-name { font-family: 'Baloo 2', cursive; font-size: 1.02rem; font-weight: 800; color: var(--warm-brown); line-height: 1.1; }
+        .step-pos { font-size: 0.64rem; color: #b3a68f; letter-spacing: 0.3px; }
+        .step-tones { font-size: 0.63rem; color: #a89880; }
+
+        /* ACTIONS */
+        .actions-row { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+        .action-btn {
+            padding: 8px 20px; border: var(--border-thin); border-radius: 20px;
+            font-family: 'Baloo 2', cursive; font-size: 0.9rem; font-weight: 700;
+            cursor: pointer; transition: all 0.12s; display: flex; align-items: center; gap: 6px;
+        }
+        .action-btn i { width: 16px; height: 16px; }
+        .action-btn:active { transform: scale(0.96); }
+        .btn-play { background: var(--warm-orange); color: white; border-color: var(--comic-black); box-shadow: 2px 2px 0 var(--comic-black); }
+        .btn-play:hover { background: #d0642e; }
+        .btn-stop { background: var(--warm-red); color: white; border-color: var(--comic-black); box-shadow: 2px 2px 0 var(--comic-black); }
+        .btn-listen { background: var(--warm-green); color: white; border-color: var(--comic-black); box-shadow: 2px 2px 0 var(--comic-black); }
+        .btn-listen:hover { background: #219a52; }
+        .btn-arp { background: var(--warm-purple); color: white; border-color: var(--comic-black); box-shadow: 2px 2px 0 var(--comic-black); }
+        .btn-arp:hover { background: #763b91; }
+        .btn-clear { background: var(--surface); color: #888; border-color: #ccc; }
+        .btn-clear:hover { border-color: var(--warm-red); color: var(--warm-red); }
+
+        /* FRETBOARD */
+        .fretboard-wrap { overflow-x: auto; padding: 8px 0; }
+        #fretboardSvg { width: 100%; height: auto; display: block; min-width: 1080px; }
+        #fretboardSvg .hit { cursor: pointer; }
+        #fretboardSvg .hit:hover { opacity: 0.75; }
+        #fretboardSvg .locked { cursor: default; }
+
+        /* LEGEND */
+        .legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: #999; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        /* 已選和絃卡 */
+        .sel-chords { display: flex; flex-wrap: wrap; gap: 10px; min-height: 64px;
+            padding: 12px; background: #fef9ef; border: 2px dashed #ddd; border-radius: 10px; }
+        .sel-chords:empty::before {
+            content: '在指板上點一個音當根音，或用上面的爬梯把整條順階鋪上來 🎯';
+            color: #ccc; font-size: 0.85rem; width: 100%; text-align: center; padding: 12px 0;
+        }
+        .chord-card { min-width: 160px; background: white; border: var(--border-thin); border-radius: 10px;
+            box-shadow: 2px 2px 0 var(--comic-black); overflow: hidden; }
+        .chord-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            padding: 5px 9px; color: white; font-family: 'Baloo 2', cursive; font-size: 0.92rem; font-weight: 800; }
+        .chord-card-head .rm { width: 19px; height: 19px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.45); background: transparent;
+            color: rgba(255,255,255,0.85); font-size: 0.66rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; }
+        .chord-card-head .rm:hover { background: rgba(0,0,0,0.25); }
+        .chord-card-body { padding: 7px 9px; display: flex; flex-direction: column; gap: 3px; }
+        .cc-line { font-size: 0.74rem; color: #999; display: flex; gap: 6px; align-items: baseline; }
+        .cc-line b { color: var(--warm-brown); font-size: 0.84rem; letter-spacing: 0.5px; }
+        .cc-actions { display: flex; gap: 6px; margin-top: 3px; }
+        .cc-btn { flex: 1; padding: 3px 6px; border: 1.5px solid #ddd; border-radius: 6px;
+            background: var(--surface); font-size: 0.68rem; font-weight: 600; color: #888; cursor: pointer; }
+        .cc-btn:hover { border-color: var(--warm-orange); color: var(--warm-orange); }
+
+        /* 順階小抄 */
+        .diatonic-row { display: flex; gap: 6px; flex-wrap: wrap; }
+        .dia-chip { min-width: 76px; padding: 6px 9px; border: var(--border-thin); border-radius: 10px;
+            background: var(--surface); cursor: pointer; transition: all 0.12s;
+            display: flex; flex-direction: column; align-items: center; gap: 1px; }
+        .dia-chip:hover { transform: translateY(-2px); }
+        .dia-roman { font-family: 'Baloo 2', cursive; font-size: 0.74rem; font-weight: 700; color: #aaa; }
+        .dia-name { font-family: 'Baloo 2', cursive; font-size: 0.98rem; font-weight: 800; color: var(--warm-brown); line-height: 1.1; }
+        .dia-tones { font-size: 0.63rem; color: #b3a68f; letter-spacing: 0.3px; }
+
+        /* 心法 */
+        .tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+        .tip { background: #fef9ef; border: 2px solid #f0e6d2; border-radius: 10px;
+            padding: 12px 14px; display: flex; flex-direction: column; gap: 5px; }
+        .tip-h { font-family: 'Baloo 2', cursive; font-size: 0.96rem; font-weight: 800; color: var(--warm-brown);
+            display: flex; align-items: center; gap: 6px; }
+        .tip-h i { width: 16px; height: 16px; color: var(--warm-orange); }
+        .tip-b { font-size: 0.82rem; color: #7a6a58; line-height: 1.72; }
+        .tip-b code { background: #fff3dd; border: 1px solid #f0dfc0; border-radius: 4px;
+            padding: 0 4px; font-size: 0.78rem; color: var(--warm-brown); }
+
+        .footer { text-align: center; padding: 14px; font-size: 0.72rem; color: #bbb; }
+        .footer a { color: var(--warm-orange); text-decoration: none; }
+
+        @media (max-width: 640px) {
+            .app { padding: 10px; }
+            .header { flex-direction: column; text-align: center; }
+            .header-img { width: 52px; height: 52px; }
+            .header-text h1 { font-size: 1.25rem; }
+            .sfx { display: none; }
+            .slider-wrap input[type=range] { width: 130px; }
+        }
+        @media (prefers-reduced-motion: reduce) { * { transition-duration: 0s !important; } }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <div class="header">
+        <span class="sfx sfx-1">LADDER!</span>
+        <img src="botroy-guitar.jpg" alt="波特人羅伊" class="header-img">
+        <div class="header-text">
+            <h1><span>順階和絃內音</span> Solo 大師</h1>
+            <p><i data-lucide="trending-up"></i> Arpeggio Ladder — 單弦順階爬梯 × 和絃內音指板地圖</p>
+        </div>
+    </div>
+
+    <!-- 1. 調性 -->
+    <div class="panel">
+        <div class="panel-title">
+            <i data-lucide="key-round"></i> 調性設定
+            <span class="hint-tail">先決定「這首歌在哪個調」，順階和絃才算得出來</span>
+        </div>
+
+        <div class="sel-label"><i data-lucide="circle-dot"></i> 主音 Key</div>
+        <div class="sel-row" id="keyRow"></div>
+
+        <div class="sel-label" style="margin-top:8px;"><i data-lucide="waves"></i> 調式 Mode</div>
+        <div class="sel-row" id="modeRow"></div>
+
+        <div class="toggle-group" style="margin-top:12px;">
+            <span class="sel-label"><i data-lucide="layers"></i> 和絃內音數</span>
+            <div class="mode-toggle" id="sizeToggle">
+                <button class="active" onclick="setChordSize(3)">三和絃 R·3·5</button>
+                <button onclick="setChordSize(4)">七和絃 R·3·5·7</button>
+            </div>
+        </div>
+
+        <div class="key-info">
+            <span class="key-name" id="keyName">C Ionian</span>
+            <span class="key-notes" id="keyNotes">C D E F G A B</span>
+            <span class="key-formula" id="keyFormula">1-2-3-4-5-6-7</span>
+        </div>
+
+        <div class="sel-label" style="margin-top:14px;"><i data-lucide="table-2"></i> 順階和絃小抄（點一下丟上指板）</div>
+        <div class="diatonic-row" id="diatonicRow"></div>
+    </div>
+
+    <!-- 2. 順階爬梯（主打） -->
+    <div class="panel hero">
+        <div class="panel-title">
+            <i data-lucide="trending-up"></i> 順階爬梯 Diatonic Ladder
+            <span class="hint-tail">在同一條弦上，沿著調性一級一級爬上去／掉下來</span>
+        </div>
+
+        <div class="toggle-group">
+            <span class="sel-label"><i data-lucide="git-commit-horizontal"></i> 爬梯弦</span>
+            <div class="mode-toggle hot" id="ladderStringToggle">
+                <button class="active" onclick="setLadderString(2)">3 弦 G</button>
+                <button onclick="setLadderString(3)">4 弦 D</button>
+                <button onclick="setLadderString(1)">2 弦 B</button>
+                <button onclick="setLadderString(4)">5 弦 A</button>
+            </div>
+
+            <span class="sel-label" style="margin-left:6px;"><i data-lucide="arrow-up-down"></i> 方向</span>
+            <div class="mode-toggle hot" id="dirToggle">
+                <button class="active" onclick="setDir('up')">↑ 上行 C→D→E</button>
+                <button onclick="setDir('down')">↓ 下行 B→A→G</button>
+            </div>
+        </div>
+
+        <div class="toggle-group">
+            <span class="sel-label"><i data-lucide="move-horizontal"></i> 起始格</span>
+            <div class="slider-wrap">
+                <input type="range" id="startFret" min="0" max="16" value="0" oninput="setStart(this.value)">
+                <span class="slider-val" id="startFretVal">第 0 格</span>
+            </div>
+            <button class="sel-btn" onclick="alignTonic()" title="把起點對到這條弦上的調主音，從 I 級開始爬">⤒ 對齊主音</button>
+
+            <span class="sel-label" style="margin-left:6px;"><i data-lucide="ruler"></i> 級數</span>
+            <div class="mode-toggle" id="lenToggle">
+                <button onclick="setLen(7)">7 級</button>
+                <button class="active" onclick="setLen(8)">8 級（含高八度）</button>
+                <button onclick="setLen(11)">11 級</button>
+                <button onclick="setLen(15)">15 級（兩個八度）</button>
+            </div>
+        </div>
+
+        <div class="ladder-track" id="ladderTrack"></div>
+
+        <div class="toggle-group" style="margin-top:14px; justify-content:center;">
+            <span class="sel-label"><i data-lucide="music-4"></i> 彈法</span>
+            <div class="mode-toggle" id="patternToggle">
+                <button class="active" onclick="setPattern('up')">琶音上行 R·3·5·7</button>
+                <button onclick="setPattern('updown')">上下行 R·3·5·3</button>
+                <button onclick="setPattern('chord')">整個和絃</button>
+            </div>
+
+            <span class="sel-label" style="margin-left:6px;"><i data-lucide="gauge"></i> 速度</span>
+            <div class="slider-wrap">
+                <input type="range" id="bpm" min="40" max="180" step="2" value="76" oninput="setBpm(this.value)">
+                <span class="slider-val" id="bpmVal">76 BPM</span>
+            </div>
+
+            <div class="mode-toggle" id="loopToggle">
+                <button class="active" onclick="setLoop(false)">單次</button>
+                <button onclick="setLoop(true)">循環</button>
+            </div>
+        </div>
+
+        <div class="actions-row" style="margin-top:8px;">
+            <button class="action-btn btn-play" onclick="playLadder()"><i data-lucide="play"></i> 逐級跑爬梯</button>
+            <button class="action-btn btn-stop" onclick="stopAll()"><i data-lucide="square"></i> 停止</button>
+            <button class="action-btn btn-arp" onclick="spreadLadder()"><i data-lucide="layout-grid"></i> 整條鋪上指板</button>
+            <button class="action-btn btn-clear" onclick="clearSelections()"><i data-lucide="eraser"></i> 清空指板</button>
+        </div>
+    </div>
+
+    <!-- 3. 指板 -->
+    <div class="panel">
+        <div class="panel-title">
+            <i data-lucide="align-horizontal-space-between"></i> 指板地圖
+            <span class="hint-tail">爬梯弦上的號碼徽章＝一級一級的根音落點</span>
+        </div>
+
+        <div class="toggle-group">
+            <span class="sel-label"><i data-lucide="tag"></i> 標籤</span>
+            <div class="mode-toggle" id="labelToggle">
+                <button class="active" onclick="setLabelMode('chord')">和絃級數 R·3·5·7</button>
+                <button onclick="setLabelMode('note')">音名 A·C·E</button>
+                <button onclick="setLabelMode('scale')">調內級數 1~7</button>
+            </div>
+
+            <span class="sel-label" style="margin-left:6px;"><i data-lucide="focus"></i> 單弦聚焦</span>
+            <div class="mode-toggle" id="focusToggle">
+                <button class="active" onclick="setFocus(true)">開（其他弦變淡）</button>
+                <button onclick="setFocus(false)">關</button>
+            </div>
+
+            <span class="sel-label" style="margin-left:6px;"><i data-lucide="scan"></i> 把位框</span>
+            <div class="mode-toggle" id="boxToggle">
+                <button onclick="setShowBox(true)">顯示</button>
+                <button class="active" onclick="setShowBox(false)">隱藏</button>
+            </div>
+
+            <span class="sel-label" style="margin-left:6px;"><i data-lucide="volume-2"></i> 點擊試聽</span>
+            <div class="mode-toggle" id="autoPlayToggle">
+                <button class="active" onclick="setAutoPlay(true)">開</button>
+                <button onclick="setAutoPlay(false)">關</button>
+            </div>
+        </div>
+
+        <div class="legend" id="legend"></div>
+
+        <div class="fretboard-wrap">
+            <svg id="fretboardSvg"></svg>
+        </div>
+
+        <div class="actions-row">
+            <button class="action-btn btn-arp" onclick="playAllArp()"><i data-lucide="arrow-up-down"></i> 依序琶音</button>
+            <button class="action-btn btn-listen" onclick="playAllChords()"><i data-lucide="volume-2"></i> 依序刷和絃</button>
+            <button class="action-btn btn-stop" onclick="stopAll()"><i data-lucide="square"></i> 停止</button>
+        </div>
+    </div>
+
+    <!-- 4. 已選和絃 -->
+    <div class="panel">
+        <div class="panel-title">
+            <i data-lucide="list-music"></i> 指板上的和絃
+            <span class="hint-tail">同一顆音同時屬於多個和絃時，指板會畫成分色扇形</span>
+        </div>
+        <div class="sel-chords" id="selChords"></div>
+    </div>
+
+    <!-- 5. 心法 -->
+    <div class="panel">
+        <div class="panel-title"><i data-lucide="lightbulb"></i> 單弦順階爬梯心法</div>
+        <div class="tips-grid">
+            <div class="tip">
+                <div class="tip-h"><i data-lucide="trending-up"></i> 什麼是順階爬梯</div>
+                <div class="tip-b">在 C 大調裡，把音階每個音都當根音堆出和絃：<code>C → Dm → Em → F → G → Am → Bdim</code>。順著往上叫上行、倒回來叫下行。這是一切 solo 樂句的骨架 — 你聽到的「一路爬上去」的華麗句子，大多就是順階琶音接龍。</div>
+            </div>
+            <div class="tip">
+                <div class="tip-h"><i data-lucide="git-commit-horizontal"></i> 為什麼在單弦上練</div>
+                <div class="tip-b">同一條弦上爬，耳朵聽到的是<strong>純粹的音程距離</strong>，手也被迫學會水平移動而不是靠死背指型。3 弦（G）在中音域最好聽、4 弦（D）是 <code>A 型／C 型</code> 把位的根音弦 — 兩條走熟，整片指板就串起來了。</div>
+            </div>
+            <div class="tip">
+                <div class="tip-h"><i data-lucide="ruler"></i> 相鄰兩級差幾格</div>
+                <div class="tip-b">同一條弦上，順階相鄰兩級不是 2 格就是 1 格：大調的 <code>3→4</code>（E→F）和 <code>7→1</code>（B→C）是 1 格半音，其餘都是 2 格。記住這個「2-2-1-2-2-2-1」的走法，換調只要平移起始格。</div>
+            </div>
+            <div class="tip">
+                <div class="tip-h"><i data-lucide="target"></i> 每一級彈什麼</div>
+                <div class="tip-b">爬到第 n 級時，彈的是<strong>那一級的和絃內音</strong>，不是音階。例如爬到 Em，手上跑的是 <code>E-G-B</code>（加七和絃就是 E-G-B-D）。指板上同色的圈就是你這一拍可以停的音。</div>
+            </div>
+            <div class="tip">
+                <div class="tip-h"><i data-lucide="repeat"></i> 練習流程</div>
+                <div class="tip-b">① 3 弦、上行、8 級、60 BPM 跟著跑一輪 → ② 換下行 → ③ 換 4 弦重跑 → ④ 加到 90 BPM → ⑤ 切「七和絃」再全部重來。最後把「起始格」往上推，同一條弦在高把位再跑一次。</div>
+            </div>
+            <div class="tip">
+                <div class="tip-h"><i data-lucide="palette"></i> 顏色怎麼看</div>
+                <div class="tip-b">七個級數各有固定顏色（<strong style="color:#c0392b">I 紅</strong>、<strong style="color:#e8713a">ii 橘</strong>、<strong style="color:#d4a853">iii 金</strong>、<strong style="color:#27ae60">IV 綠</strong>、<strong style="color:#2e86ab">V 藍</strong>、<strong style="color:#8e44ad">vi 紫</strong>、<strong style="color:#16a085">vii 青</strong>），換調也不變 — 久了看到顏色就知道級數。淡米色小圈＝同調但不在當下和絃裡的經過音。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer"><a href="index.html">Roy's Lab</a> — 波特人羅伊的實驗室 · Arpeggio Ladder</div>
+</div>
+
+<script>
+// ============ 音樂理論常數 ============
+const NOTES_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTES_FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+const STRINGS = [
+    { name: 'E', midi: 64 }, // 0 → 1 弦 高 E (E4)
+    { name: 'B', midi: 59 }, // 1 → 2 弦
+    { name: 'G', midi: 55 }, // 2 → 3 弦
+    { name: 'D', midi: 50 }, // 3 → 4 弦
+    { name: 'A', midi: 45 }, // 4 → 5 弦
+    { name: 'E', midi: 40 }, // 5 → 6 弦 低 E (E2)
+];
+const STRING_LABELS = ['1e', '2B', '3G', '4D', '5A', '6E'];
+const FRETS = 22;
+
+// 七聲調式（只有七聲音階能堆疊順階和絃）
+const MODES = [
+    { name: 'Ionian 大調',   intervals: [0,2,4,5,7,9,11], formula: '1-2-3-4-5-6-7',      ionianOffset: 0  },
+    { name: 'Dorian',       intervals: [0,2,3,5,7,9,10], formula: '1-2-♭3-4-5-6-♭7',    ionianOffset: 2  },
+    { name: 'Phrygian',     intervals: [0,1,3,5,7,8,10], formula: '1-♭2-♭3-4-5-♭6-♭7',  ionianOffset: 4  },
+    { name: 'Lydian',       intervals: [0,2,4,6,7,9,11], formula: '1-2-3-♯4-5-6-7',     ionianOffset: 5  },
+    { name: 'Mixolydian',   intervals: [0,2,4,5,7,9,10], formula: '1-2-3-4-5-6-♭7',     ionianOffset: 7  },
+    { name: 'Aeolian 小調',  intervals: [0,2,3,5,7,8,10], formula: '1-2-♭3-4-5-♭6-♭7',   ionianOffset: 9  },
+    { name: 'Locrian',      intervals: [0,1,3,5,6,8,10], formula: '1-♭2-♭3-4-♭5-♭6-♭7',  ionianOffset: 11 },
+    { name: '和聲小調',      intervals: [0,2,3,5,7,8,11], formula: '1-2-♭3-4-5-♭6-7',    ionianOffset: 9  },
+    { name: '旋律小調',      intervals: [0,2,3,5,7,9,11], formula: '1-2-♭3-4-5-6-7',     ionianOffset: 9  },
+];
+
+// 用降記號拼寫的大調主音（F / B♭ / E♭ / A♭ / D♭ / G♭）
+const FLAT_IONIAN_ROOTS = new Set([5, 10, 3, 8, 1, 6]);
+
+// 和絃品質查表
+const QUALITY = {
+    '0,4,7':     { suffix: '',       zh: '大三和絃',   roman: 'up'   },
+    '0,3,7':     { suffix: 'm',      zh: '小三和絃',   roman: 'low'  },
+    '0,3,6':     { suffix: 'dim',    zh: '減三和絃',   roman: 'dim'  },
+    '0,4,8':     { suffix: 'aug',    zh: '增三和絃',   roman: 'aug'  },
+    '0,2,7':     { suffix: 'sus2',   zh: '掛留二',     roman: 'up'   },
+    '0,5,7':     { suffix: 'sus4',   zh: '掛留四',     roman: 'up'   },
+    '0,4,7,11':  { suffix: 'maj7',   zh: '大七和絃',   roman: 'up'   },
+    '0,4,7,10':  { suffix: '7',      zh: '屬七和絃',   roman: 'up'   },
+    '0,3,7,10':  { suffix: 'm7',     zh: '小七和絃',   roman: 'low'  },
+    '0,3,6,10':  { suffix: 'm7♭5',   zh: '半減七',     roman: 'half' },
+    '0,3,6,9':   { suffix: 'dim7',   zh: '減七和絃',   roman: 'dim'  },
+    '0,3,7,11':  { suffix: 'mMaj7',  zh: '小大七',     roman: 'low'  },
+    '0,4,8,11':  { suffix: 'maj7♯5', zh: '增大七',     roman: 'aug'  },
+    '0,4,8,10':  { suffix: '7♯5',    zh: '增屬七',     roman: 'aug'  },
+    '0,3,7,9':   { suffix: 'm6',     zh: '小六和絃',   roman: 'low'  },
+    '0,4,7,9':   { suffix: '6',      zh: '大六和絃',   roman: 'up'   },
+};
+const ROMAN_UP  = ['I','II','III','IV','V','VI','VII'];
+const ROMAN_LOW = ['i','ii','iii','iv','v','vi','vii'];
+
+// 七個級數的固定配色（換調不變，看顏色就知道級數）
+const DEG_COLORS = ['#c0392b','#e8713a','#d4a853','#27ae60','#2e86ab','#8e44ad','#16a085'];
+const DEG_DARK   = ['#962d21','#c85a26','#b08a35','#1f8b4c','#22698a','#743a90','#12806a'];
+
+// 和絃內音角色標籤
+function toneLabel(idxInChord, semis) {
+    if (idxInChord === 0) return 'R';
+    if (idxInChord === 1) return semis === 3 ? '♭3' : semis === 4 ? '3' : semis === 2 ? '2' : '4';
+    if (idxInChord === 2) return semis === 6 ? '♭5' : semis === 7 ? '5' : '♯5';
+    return semis === 9 ? '°7' : semis === 10 ? '♭7' : '7';
+}
+const SCALE_DEG_LABEL = ['1','2','3','4','5','6','7'];
+
+// ============ 狀態 ============
+let currentKey   = 0;
+let currentMode  = 0;
+let chordSize    = 3;
+let labelMode    = 'chord';   // 'chord' | 'note' | 'scale'
+let showBox      = false;
+let autoPlay     = true;
+let focusString  = true;      // 單弦聚焦
+let selections   = [];        // [{degree, si, fret, midi}]（degree 唯一）
+
+// 爬梯狀態
+let ladderSi   = 2;           // 預設 3 弦 G
+let ladderDir  = 'up';
+let ladderStart= 0;
+let ladderLen  = 8;
+let pattern    = 'up';        // 'up' | 'updown' | 'chord'
+let bpm        = 76;
+let ladderLoop = false;
+let ladderSeq  = [];
+let ladderTruncated = 0;   // 指板長度不夠時少掉幾級
+let playIdx    = -1;
+let ladderTimer= null;
+
+// ============ 音訊 ============
+let synth = null;
+function initAudio() {
+    if (synth) return;
+    synth = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.005, decay: 0.3, sustain: 0.12, release: 0.9 },
+        volume: -7
+    }).toDestination();
+}
+function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+// ============ 音名拼寫 ============
+function noteNames() {
+    const ionianRoot = (currentKey - MODES[currentMode].ionianOffset + 24) % 12;
+    return FLAT_IONIAN_ROOTS.has(ionianRoot) ? NOTES_FLAT : NOTES_SHARP;
+}
+function nn(idx) { return noteNames()[((idx % 12) + 12) % 12]; }
+
+// ============ 音階與順階和絃 ============
+function scaleIntervals() { return MODES[currentMode].intervals; }
+function scaleNoteIdxs()  { return scaleIntervals().map(i => (currentKey + i) % 12); }
+function degreeOfNote(noteIdx) { return scaleNoteIdxs().indexOf(((noteIdx % 12) + 12) % 12); }
+
+function diatonicChord(d) {
+    const S = scaleIntervals();
+    const abs = [];
+    for (let k = 0; k < chordSize; k++) {
+        const p = d + k * 2;
+        abs.push(S[p % 7] + Math.floor(p / 7) * 12);
+    }
+    const rootSemis = abs[0];
+    const intervals = abs.map(a => (((a - rootSemis) % 12) + 12) % 12);
+    const rootIdx = (currentKey + rootSemis) % 12;
+    const q = QUALITY[intervals.join(',')] || { suffix: '?', zh: '特殊和絃', roman: 'up' };
+
+    let roman;
+    if (q.roman === 'up')        roman = ROMAN_UP[d];
+    else if (q.roman === 'low')  roman = ROMAN_LOW[d];
+    else if (q.roman === 'dim')  roman = ROMAN_LOW[d] + '°';
+    else if (q.roman === 'half') roman = ROMAN_LOW[d] + 'ø';
+    else                         roman = ROMAN_UP[d] + '+';
+    if (chordSize === 4 && q.roman !== 'dim' && q.roman !== 'half') roman += '7';
+
+    const noteIdxs = intervals.map(i => (rootIdx + i) % 12);
+    return {
+        degree: d, rootIdx, intervals, noteIdxs, roman,
+        suffix: q.suffix, zh: q.zh,
+        name: nn(rootIdx) + q.suffix,
+        color: DEG_COLORS[d], dark: DEG_DARK[d],
+        toneNames: noteIdxs.map(n => nn(n)),
+        toneLabels: intervals.map((s, i) => toneLabel(i, s)),
+    };
+}
+function allDiatonic() { return [0,1,2,3,4,5,6].map(d => diatonicChord(d)); }
+
+// ============ 爬梯計算 ============
+// 爬梯弦上所有調內音（升序）
+function ladderPositions() {
+    const open = STRINGS[ladderSi].midi;
+    const scale = scaleNoteIdxs();
+    const list = [];
+    for (let f = 0; f <= FRETS; f++) {
+        const midi = open + f;
+        const d = scale.indexOf(midi % 12);
+        if (d >= 0) list.push({ fret: f, midi, degree: d });
+    }
+    return list;
+}
+
+function buildLadder() {
+    const all = ladderPositions();
+    if (!all.length) { ladderSeq = []; ladderTruncated = 0; return; }
+    let startI = all.findIndex(p => p.fret >= ladderStart);
+    if (startI < 0) startI = all.length - 1;
+    // 指板長度不夠時「截短」而不是把起點往前拉 —— 起點永遠聽 Roy 的
+    const seq = all.slice(startI, startI + ladderLen);
+    ladderTruncated = ladderLen - seq.length;
+    ladderSeq = (ladderDir === 'down') ? seq.slice().reverse() : seq;
+}
+
+// 目前爬梯涵蓋的級數（去重）
+function ladderDegrees() {
+    const seen = new Set(); const out = [];
+    ladderSeq.forEach(p => { if (!seen.has(p.degree)) { seen.add(p.degree); out.push(p); } });
+    return out;
+}
+
+// ============ 選取邏輯 ============
+function pickAt(si, fret, midi) {
+    const d = degreeOfNote(midi % 12);
+    if (d < 0) return;
+    const i = selections.findIndex(s => s.degree === d);
+    if (i >= 0) {
+        const s = selections[i];
+        if (s.si === si && s.fret === fret) { selections.splice(i, 1); }
+        else { s.si = si; s.fret = fret; s.midi = midi; if (autoPlay) playChordAt(s); }
+    } else {
+        const s = { degree: d, si, fret, midi };
+        selections.push(s);
+        if (autoPlay) playChordAt(s);
+    }
+    selections.sort((a, b) => a.degree - b.degree);
+    render();
+}
+
+function addByDegree(d) {
+    const i = selections.findIndex(s => s.degree === d);
+    if (i >= 0) { selections.splice(i, 1); render(); return; }
+    const ch = diatonicChord(d);
+    const center = selections.length
+        ? Math.round(selections.reduce((a, s) => a + s.fret, 0) / selections.length) : 5;
+    let best = null;
+    // 優先落在爬梯弦上
+    [ladderSi, 3, 2, 4, 1, 5, 0].forEach(si => {
+        for (let f = 0; f <= FRETS; f++) {
+            if ((STRINGS[si].midi + f) % 12 !== ch.rootIdx) continue;
+            const cost = Math.abs(f - center) + (si === ladderSi ? 0 : 20) + (f === 0 ? 3 : 0);
+            if (!best || cost < best.cost) best = { si, fret: f, midi: STRINGS[si].midi + f, cost };
+        }
+    });
+    if (!best) return;
+    const s = { degree: d, si: best.si, fret: best.fret, midi: best.midi };
+    selections.push(s);
+    selections.sort((a, b) => a.degree - b.degree);
+    if (autoPlay) playChordAt(s);
+    render();
+}
+
+function removeSelection(d) {
+    const i = selections.findIndex(s => s.degree === d);
+    if (i >= 0) selections.splice(i, 1);
+    render();
+}
+function clearSelections() { stopAll(); selections = []; render(); }
+
+// 把整條爬梯鋪上指板
+function spreadLadder() {
+    selections = ladderDegrees().map(p => ({ degree: p.degree, si: ladderSi, fret: p.fret, midi: p.midi }));
+    selections.sort((a, b) => a.degree - b.degree);
+    render();
+}
+
+// 某個音屬於哪些「目前顯示中的和絃」
+function activeChords() {
+    if (playIdx >= 0 && ladderSeq[playIdx]) {
+        const p = ladderSeq[playIdx];
+        return [{ degree: p.degree, si: ladderSi, fret: p.fret, midi: p.midi }];
+    }
+    return selections;
+}
+function membership(noteIdx) {
+    const out = [];
+    activeChords().forEach(s => {
+        const ch = diatonicChord(s.degree);
+        const k = ch.noteIdxs.indexOf(((noteIdx % 12) + 12) % 12);
+        if (k >= 0) out.push({ color: ch.color, dark: ch.dark, label: ch.toneLabels[k], isRoot: k === 0, sel: s });
+    });
+    return out;
+}
+
+// ============ 指板繪製 ============
+const ML = 74, MT = 88, FW = 60, SG = 38, NR = 14;
+const SVG_W = ML + FRETS * FW + 34;
+const SVG_H = MT + 5 * SG + 58;
+const INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
+const DOUBLE_INLAY = [12];
+
+function getNoteX(fret) { return fret === 0 ? ML - 24 : ML + (fret - 0.5) * FW; }
+function getStringY(si) { return MT + si * SG; }
+
+function wedgePath(cx, cy, r, i, n) {
+    const a0 = -Math.PI / 2 + (2 * Math.PI * i) / n;
+    const a1 = -Math.PI / 2 + (2 * Math.PI * (i + 1)) / n;
+    const x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0);
+    const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+    const large = (a1 - a0) > Math.PI ? 1 : 0;
+    return `M ${cx} ${cy} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`;
+}
+
+function buildFretboard() {
+    const scaleIdxs = scaleNoteIdxs();
+    const ladderFrets = new Set(ladderSeq.map(p => p.fret));
+    let svg = '';
+
+    // 指板底
+    svg += `<rect x="${ML}" y="${MT - 17}" width="${FRETS * FW}" height="${5 * SG + 34}" rx="4" fill="#3e2723" opacity="0.22"/>`;
+
+    // 爬梯弦底色帶
+    const ly = getStringY(ladderSi);
+    svg += `<rect x="${ML}" y="${ly - 18}" width="${FRETS * FW}" height="36" fill="#e8713a" opacity="0.09"/>`;
+
+    // 把位框
+    if (showBox) {
+        activeChords().forEach(s => {
+            const ch = diatonicChord(s.degree);
+            const from = Math.max(0, s.fret - 1), to = Math.min(FRETS, s.fret + 4);
+            const x = ML + (from === 0 ? 0 : (from - 1) * FW);
+            const w = (to - (from === 0 ? 0 : from - 1)) * FW;
+            svg += `<rect x="${x}" y="${MT - 17}" width="${w}" height="${5 * SG + 34}" rx="6" fill="${ch.color}" opacity="0.05" stroke="${ch.color}" stroke-width="1.6" stroke-dasharray="6,4" stroke-opacity="0.4"/>`;
+        });
+    }
+
+    // Inlay
+    const midY = MT + 2.5 * SG;
+    INLAYS.forEach(f => { if (f <= FRETS) svg += `<circle cx="${ML + (f - 0.5) * FW}" cy="${midY}" r="7" fill="#bba07a" opacity="0.45"/>`; });
+    DOUBLE_INLAY.forEach(f => {
+        if (f > FRETS) return;
+        const cx = ML + (f - 0.5) * FW;
+        svg += `<circle cx="${cx}" cy="${midY - 44}" r="7" fill="#bba07a" opacity="0.45"/>`;
+        svg += `<circle cx="${cx}" cy="${midY + 44}" r="7" fill="#bba07a" opacity="0.45"/>`;
+    });
+
+    // 上弦枕 + 琶格線
+    svg += `<line x1="${ML}" y1="${MT - 17}" x2="${ML}" y2="${MT + 5 * SG + 17}" stroke="#6b4226" stroke-width="5"/>`;
+    for (let f = 1; f <= FRETS; f++) {
+        const x = ML + f * FW;
+        svg += `<line x1="${x}" y1="${MT - 17}" x2="${x}" y2="${MT + 5 * SG + 17}" stroke="#999" stroke-width="2" opacity="0.55"/>`;
+    }
+    // 弦線 + 弦名
+    for (let si = 0; si < 6; si++) {
+        const y = getStringY(si);
+        const isL = si === ladderSi;
+        svg += `<line x1="${ML - 32}" y1="${y}" x2="${ML + FRETS * FW}" y2="${y}" stroke="${isL ? '#c58a5c' : '#8b7355'}" stroke-width="${1.2 + si * 0.5}" opacity="0.75"/>`;
+        svg += `<text x="${ML - 52}" y="${y + 5}" text-anchor="middle" fill="${isL ? '#e8713a' : '#aaa'}" font-size="12" font-family="monospace" font-weight="${isL ? '700' : '600'}">${STRING_LABELS[si]}</text>`;
+    }
+    // 琶格編號
+    for (let f = 0; f <= FRETS; f++) {
+        const x = f === 0 ? ML - 24 : ML + (f - 0.5) * FW;
+        const isMark = INLAYS.includes(f) || DOUBLE_INLAY.includes(f);
+        svg += `<text x="${x}" y="${MT + 5 * SG + 44}" text-anchor="middle" fill="${isMark ? '#e8713a' : '#aaa'}" font-size="11" font-weight="${isMark ? '700' : '400'}">${f}</text>`;
+    }
+
+    // 音符
+    STRINGS.forEach((str, si) => {
+        const dim = focusString && si !== ladderSi;
+        for (let f = 0; f <= FRETS; f++) {
+            const midi = str.midi + f;
+            const noteIdx = midi % 12;
+            const deg = scaleIdxs.indexOf(noteIdx);
+            if (deg < 0) continue;
+
+            const cx = getNoteX(f), cy = getStringY(si);
+            const mem = membership(noteIdx);
+            const onLadder = (si === ladderSi) && ladderFrets.has(f);
+
+            if (mem.length === 0) {
+                // 調內經過音：其他弦淡掉，爬梯弦上保持看得見
+                const isTonic = deg === 0;
+                const r = onLadder ? NR - 1 : NR - 4;
+                const fill = isTonic ? '#f7e2d3' : (si === ladderSi ? '#f5e9d8' : '#f2ece0');
+                const stroke = isTonic ? '#e0ac8c' : (si === ladderSi ? '#cdb99b' : '#ddd3c0');
+                const txt = isTonic ? '#b56a45' : (si === ladderSi ? '#9c8a70' : '#a89880');
+                const lbl = labelMode === 'scale' ? SCALE_DEG_LABEL[deg] : nn(noteIdx);
+                svg += `<g opacity="${dim ? 0.32 : 1}">`;
+                svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${onLadder ? 2 : 1.2}" class="hit" data-si="${si}" data-fret="${f}" data-midi="${midi}"/>`;
+                svg += `<text x="${cx}" y="${cy + 3.8}" text-anchor="middle" fill="${txt}" font-size="${lbl.length > 1 ? 9 : 10.5}" font-weight="600" font-family="-apple-system,sans-serif" pointer-events="none">${lbl}</text>`;
+                svg += `</g>`;
+                continue;
+            }
+
+            const isAnyRoot = mem.some(m => m.isRoot);
+            const r = isAnyRoot ? NR + 2 : NR;
+            const anchor = activeChords().find(s => s.si === si && s.fret === f && diatonicChord(s.degree).rootIdx === noteIdx);
+
+            // 和絃內音即使不在爬梯弦上也要看得見（Roy：其他音用淡色留著）
+            svg += `<g opacity="${dim ? 0.55 : 1}">`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="${r + 3.5}" fill="${mem[0].color}" opacity="0.16"/>`;
+            if (mem.length === 1) {
+                svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${mem[0].color}" stroke="rgba(255,255,255,0.35)" stroke-width="2" class="hit" data-si="${si}" data-fret="${f}" data-midi="${midi}"/>`;
+            } else {
+                mem.forEach((m, i) => {
+                    svg += `<path d="${wedgePath(cx, cy, r, i, mem.length)}" fill="${m.color}" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" class="hit" data-si="${si}" data-fret="${f}" data-midi="${midi}"/>`;
+                });
+                svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2" pointer-events="none"/>`;
+            }
+            if (isAnyRoot) svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="white" stroke-width="3" opacity="0.55" pointer-events="none"/>`;
+            if (anchor) {
+                const ch = diatonicChord(anchor.degree);
+                svg += `<circle cx="${cx}" cy="${cy}" r="${r + 7}" fill="none" stroke="${ch.dark}" stroke-width="2.6" stroke-dasharray="4,2.6" opacity="0.95" pointer-events="none"/>`;
+            }
+            let lbl;
+            if (labelMode === 'note')       lbl = nn(noteIdx);
+            else if (labelMode === 'scale') lbl = SCALE_DEG_LABEL[deg];
+            else                            lbl = mem.length === 1 ? mem[0].label : nn(noteIdx);
+            const fs = lbl.length > 1 ? 10 : 12;
+            svg += `<text x="${cx}" y="${cy + 4.3}" text-anchor="middle" fill="white" font-size="${fs}" font-weight="bold" font-family="-apple-system,sans-serif" stroke="rgba(0,0,0,0.35)" stroke-width="2.4" paint-order="stroke" pointer-events="none">${lbl}</text>`;
+            svg += `</g>`;
+        }
+    });
+
+    // ===== 爬梯軌跡（獨立軌道，畫在指板上方，不壓到弦）=====
+    if (ladderSeq.length) {
+        const by = MT - 46; // 徽章軌道 y
+        // 軌道底
+        svg += `<rect x="${ML - 30}" y="${by - 15}" width="${FRETS * FW + 30}" height="30" rx="15" fill="#fff1e0" stroke="#f0d9bf" stroke-width="1.5"/>`;
+        svg += `<text x="${ML - 52}" y="${by + 4}" text-anchor="middle" fill="#e8713a" font-size="10" font-weight="700" font-family="'Baloo 2',sans-serif">${ladderDir === 'up' ? '↑' : '↓'}</text>`;
+
+        // 連接箭頭（依實際行進方向）
+        for (let i = 0; i < ladderSeq.length - 1; i++) {
+            const x1 = getNoteX(ladderSeq[i].fret), x2 = getNoteX(ladderSeq[i + 1].fret);
+            const mid = (x1 + x2) / 2;
+            const dir = x2 >= x1 ? 1 : -1;
+            svg += `<line x1="${x1 + dir * 12}" y1="${by}" x2="${x2 - dir * 12}" y2="${by}" stroke="#e8713a" stroke-width="2" opacity="0.5" stroke-dasharray="4,3"/>`;
+            svg += `<path d="M ${mid + dir * 4.5} ${by} L ${mid - dir * 3.5} ${by - 4} L ${mid - dir * 3.5} ${by + 4} Z" fill="#e8713a" opacity="0.7"/>`;
+        }
+        // 徽章
+        ladderSeq.forEach((p, i) => {
+            const x = getNoteX(p.fret);
+            const ch = diatonicChord(p.degree);
+            const now = i === playIdx;
+            const r = now ? 13 : 10.5;
+            if (now) {
+                // 當前級：從徽章拉一條線到爬梯弦上的根音
+                svg += `<line x1="${x}" y1="${by + r}" x2="${x}" y2="${getStringY(ladderSi) - NR - 5}" stroke="${ch.dark}" stroke-width="2" opacity="0.55" stroke-dasharray="3,3"/>`;
+                svg += `<text x="${x}" y="${by - 20}" text-anchor="middle" fill="${ch.dark}" font-size="13" font-weight="800" font-family="'Baloo 2',sans-serif" pointer-events="none">${ch.roman} ${ch.name}</text>`;
+            }
+            svg += `<circle cx="${x}" cy="${by}" r="${r}" fill="${ch.color}" stroke="${now ? '#1a1a1a' : 'white'}" stroke-width="${now ? 3 : 2}"/>`;
+            svg += `<text x="${x}" y="${by + 4}" text-anchor="middle" fill="white" font-size="${now ? 12 : 11}" font-weight="800" font-family="'Baloo 2',sans-serif" pointer-events="none">${i + 1}</text>`;
+        });
+    }
+
+    const el = document.getElementById('fretboardSvg');
+    el.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
+    el.innerHTML = svg;
+    el.querySelectorAll('.hit').forEach(node => {
+        node.addEventListener('click', () => {
+            pickAt(parseInt(node.dataset.si), parseInt(node.dataset.fret), parseInt(node.dataset.midi));
+        });
+    });
+}
+
+// ============ UI 渲染 ============
+function buildSelectors() {
+    document.getElementById('keyRow').innerHTML = NOTES_SHARP.map((_, i) =>
+        `<button class="sel-btn" onclick="setKey(${i})">${nn(i)}</button>`).join('');
+    document.getElementById('modeRow').innerHTML = MODES.map((m, i) =>
+        `<button class="sel-btn" onclick="setMode(${i})">${m.name}</button>`).join('');
+}
+function updateSelectors() {
+    document.querySelectorAll('#keyRow .sel-btn').forEach((b, i) => {
+        b.classList.toggle('active', i === currentKey); b.textContent = nn(i);
+    });
+    document.querySelectorAll('#modeRow .sel-btn').forEach((b, i) => b.classList.toggle('active', i === currentMode));
+}
+function updateKeyInfo() {
+    const m = MODES[currentMode];
+    document.getElementById('keyName').textContent = `${nn(currentKey)} ${m.name}`;
+    document.getElementById('keyNotes').textContent = scaleNoteIdxs().map(n => nn(n)).join(' ');
+    document.getElementById('keyFormula').textContent = m.formula;
+}
+function renderDiatonic() {
+    document.getElementById('diatonicRow').innerHTML = allDiatonic().map(ch => {
+        const on = selections.some(s => s.degree === ch.degree);
+        return `<div class="dia-chip" onclick="addByDegree(${ch.degree})" title="${ch.zh}"
+             style="border-color:${on ? ch.color : '#1a1a1a'}; background:${on ? ch.color + '1f' : 'var(--surface)'}; ${on ? 'box-shadow:3px 3px 0 ' + ch.color + ';' : ''}">
+            <span class="dia-roman" style="color:${ch.color}">${ch.roman}</span>
+            <span class="dia-name">${ch.name}</span>
+            <span class="dia-tones">${ch.toneNames.join(' ')}</span>
+        </div>`;
+    }).join('');
+}
+function renderLadderTrack() {
+    const el = document.getElementById('ladderTrack');
+    if (!ladderSeq.length) { el.innerHTML = '<span style="color:#ccc;font-size:0.85rem;">這條弦在此調性沒有可用的音</span>'; return; }
+    el.innerHTML = ladderSeq.map((p, i) => {
+        const ch = diatonicChord(p.degree);
+        const now = i === playIdx;
+        return `<div class="step-chip ${now ? 'now' : ''}" onclick="jumpTo(${i})"
+             style="border-color:${ch.color}; ${now ? 'background:' + ch.color + '14;' : ''}">
+            <span class="step-no" style="background:${ch.color}">${i + 1}</span>
+            <span class="step-roman" style="color:${ch.color}">${ch.roman}</span>
+            <span class="step-name">${ch.name}</span>
+            <span class="step-pos">${STRING_LABELS[ladderSi]} ‧ ${p.fret} 格</span>
+            <span class="step-tones">${ch.toneNames.join(' ')}</span>
+        </div>`;
+    }).join('') + (ladderTruncated > 0
+        ? `<div style="display:flex; align-items:center; padding:0 10px; font-size:0.74rem; color:#c0392b; font-weight:600; line-height:1.5;">
+             指板到底了<br>還差 ${ladderTruncated} 級<br><span style="color:#b3a68f; font-weight:500;">往低把位挪起始格</span>
+           </div>` : '');
+}
+function renderSelChords() {
+    const box = document.getElementById('selChords');
+    if (!selections.length) { box.innerHTML = ''; return; }
+    box.innerHTML = selections.map(s => {
+        const ch = diatonicChord(s.degree);
+        return `<div class="chord-card">
+            <div class="chord-card-head" style="background:${ch.color}">
+                <span>${ch.roman} ‧ ${ch.name}</span>
+                <button class="rm" onclick="removeSelection(${s.degree})" title="移除">✕</button>
+            </div>
+            <div class="chord-card-body">
+                <div class="cc-line"><span>內音</span><b>${ch.toneNames.join(' - ')}</b></div>
+                <div class="cc-line"><span>級數</span><b>${ch.toneLabels.join(' - ')}</b></div>
+                <div class="cc-line"><span>根音</span><b>${STRING_LABELS[s.si]} ‧ ${s.fret} 格</b></div>
+                <div class="cc-actions">
+                    <button class="cc-btn" onclick="playArpDegree(${s.degree})">▶ 琶音</button>
+                    <button class="cc-btn" onclick="playChordDegree(${s.degree})">▶ 和絃</button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+function renderLegend() {
+    let html = allDiatonic().map(ch =>
+        `<span class="legend-item"><span class="legend-dot" style="background:${ch.color}"></span>${ch.roman} ${ch.name}</span>`).join('');
+    html += `<span class="legend-item"><span class="legend-dot" style="background:#f2ece0; border:1px solid #ddd3c0;"></span>調內經過音</span>`;
+    html += `<span class="legend-item" style="font-weight:700; color:var(--warm-brown);">白環＝和絃根音</span>`;
+    document.getElementById('legend').innerHTML = html;
+}
+
+function render() {
+    buildLadder();
+    updateSelectors();
+    updateKeyInfo();
+    renderDiatonic();
+    renderLadderTrack();
+    buildFretboard();
+    renderSelChords();
+    renderLegend();
+    lucide.createIcons();
+}
+// 播放中只重繪會變的部分（省效能）
+function renderPlaying() {
+    renderLadderTrack();
+    buildFretboard();
+}
+
+// ============ 控制項 ============
+// 把起始格對到爬梯弦上的調主音（0~12 格內最低的那個），讓爬梯從 I 級開始
+function updateStartLabel() {
+    // 上行時這格是起點，下行時它是「走到最後停的那一格」
+    document.getElementById('startFretVal').textContent =
+        (ladderDir === 'up' ? '起於 ' : '止於 ') + `第 ${ladderStart} 格`;
+}
+
+function alignTonic(silent) {
+    const open = STRINGS[ladderSi].midi;
+    for (let f = 0; f <= 12; f++) {
+        if ((open + f) % 12 === currentKey) {
+            ladderStart = f;
+            const sl = document.getElementById('startFret');
+            if (sl) sl.value = f;
+            updateStartLabel();
+            break;
+        }
+    }
+    if (!silent) { stopAll(); render(); }
+}
+
+function setKey(i)  { stopAll(); currentKey = i; selections = []; alignTonic(true); render(); }
+function setMode(i) { stopAll(); currentMode = i; selections = []; alignTonic(true); render(); }
+function setChordSize(n) {
+    chordSize = n;
+    document.querySelectorAll('#sizeToggle button').forEach((b, i) => b.classList.toggle('active', (i === 0) === (n === 3)));
+    render();
+}
+function setLadderString(si) {
+    stopAll(); ladderSi = si;
+    const order = [2, 3, 1, 4];
+    document.querySelectorAll('#ladderStringToggle button').forEach((b, i) => b.classList.toggle('active', order[i] === si));
+    alignTonic(true);
+    render();
+}
+function setDir(d) {
+    stopAll(); ladderDir = d;
+    document.querySelectorAll('#dirToggle button').forEach((b, i) => b.classList.toggle('active', (i === 0) === (d === 'up')));
+    updateStartLabel();
+    render();
+}
+function setStart(v) {
+    stopAll(); ladderStart = parseInt(v);
+    updateStartLabel();
+    render();
+}
+function setLen(n) {
+    stopAll(); ladderLen = n;
+    const order = [7, 8, 11, 15];
+    document.querySelectorAll('#lenToggle button').forEach((b, i) => b.classList.toggle('active', order[i] === n));
+    render();
+}
+function setPattern(p) {
+    pattern = p;
+    const order = ['up', 'updown', 'chord'];
+    document.querySelectorAll('#patternToggle button').forEach((b, i) => b.classList.toggle('active', order[i] === p));
+}
+function setBpm(v) { bpm = parseInt(v); document.getElementById('bpmVal').textContent = `${bpm} BPM`; }
+function setLoop(v) {
+    ladderLoop = v;
+    document.querySelectorAll('#loopToggle button').forEach((b, i) => b.classList.toggle('active', (i === 0) === !v));
+}
+function setLabelMode(m) {
+    labelMode = m;
+    const order = ['chord', 'note', 'scale'];
+    document.querySelectorAll('#labelToggle button').forEach((b, i) => b.classList.toggle('active', order[i] === m));
+    buildFretboard();
+}
+function setFocus(v) {
+    focusString = v;
+    document.querySelectorAll('#focusToggle button').forEach((b, i) => b.classList.toggle('active', (i === 0) === v));
+    buildFretboard();
+}
+function setShowBox(v) {
+    showBox = v;
+    document.querySelectorAll('#boxToggle button').forEach((b, i) => b.classList.toggle('active', (i === 0) === v));
+    buildFretboard();
+}
+function setAutoPlay(v) {
+    autoPlay = v;
+    document.querySelectorAll('#autoPlayToggle button').forEach((b, i) => b.classList.toggle('active', (i === 0) === v));
+}
+
+// ============ 播放 ============
+function chordSeqIntervals(ch) {
+    if (pattern === 'chord') return null;
+    if (pattern === 'updown') return [...ch.intervals, 12, ...ch.intervals.slice(1).reverse()];
+    return [...ch.intervals, 12];
+}
+
+async function playChordAt(sel) {
+    await Tone.start(); initAudio();
+    const ch = diatonicChord(sel.degree);
+    const t0 = Tone.now() + 0.03;
+    const seq = chordSeqIntervals(ch);
+    if (!seq) { ch.intervals.forEach((iv, k) => synth.triggerAttackRelease(midiToFreq(sel.midi + iv), '2n', t0 + k * 0.03)); return; }
+    seq.forEach((iv, k) => synth.triggerAttackRelease(midiToFreq(sel.midi + iv), '8n', t0 + k * 0.15));
+}
+function playArpDegree(d)   { const s = selections.find(x => x.degree === d); if (s) playChordAt(s); }
+function playChordDegree(d) {
+    const s = selections.find(x => x.degree === d); if (!s) return;
+    Tone.start().then(() => {
+        initAudio();
+        const ch = diatonicChord(d), t0 = Tone.now() + 0.03;
+        ch.intervals.forEach((iv, k) => synth.triggerAttackRelease(midiToFreq(s.midi + iv), '2n', t0 + k * 0.03));
+    });
+}
+
+// 逐級跑爬梯
+async function playLadder() {
+    stopAll();
+    buildLadder();
+    if (!ladderSeq.length) return;
+    await Tone.start(); initAudio();
+    playIdx = 0;
+    stepLadder();
+}
+
+function stepLadder() {
+    if (playIdx >= ladderSeq.length) {
+        if (ladderLoop) { playIdx = 0; }
+        else { playIdx = -1; render(); return; }
+    }
+    const p = ladderSeq[playIdx];
+    const ch = diatonicChord(p.degree);
+    const beat = 60 / bpm;              // 一拍秒數
+    const stepDur = beat * 2;           // 每一級 = 兩拍
+    const t0 = Tone.now() + 0.02;
+
+    const seq = chordSeqIntervals(ch);
+    if (!seq) {
+        ch.intervals.forEach((iv, k) => synth.triggerAttackRelease(midiToFreq(p.midi + iv), '2n', t0 + k * 0.03));
+    } else {
+        const gap = Math.min(stepDur / seq.length, beat / 2);
+        seq.forEach((iv, k) => synth.triggerAttackRelease(midiToFreq(p.midi + iv), '8n', t0 + k * gap));
+    }
+
+    renderPlaying();
+    ladderTimer = setTimeout(() => { playIdx++; stepLadder(); }, stepDur * 1000);
+}
+
+function jumpTo(i) {
+    stopAll();
+    playIdx = i;
+    renderPlaying();
+    const p = ladderSeq[i];
+    if (p) playChordAt({ degree: p.degree, si: ladderSi, fret: p.fret, midi: p.midi });
+    // 單次點選不自動往下跑，1.4 秒後還原顯示
+    ladderTimer = setTimeout(() => { playIdx = -1; render(); }, 1600);
+}
+
+// 指板上已選和絃依序播放
+async function playAllArp() {
+    stopAll();
+    if (!selections.length) return;
+    await Tone.start(); initAudio();
+    let t = Tone.now() + 0.06;
+    selections.forEach(s => {
+        const ch = diatonicChord(s.degree);
+        const seq = [...ch.intervals, 12, ...ch.intervals.slice(1).reverse()];
+        seq.forEach((iv, k) => synth.triggerAttackRelease(midiToFreq(s.midi + iv), '8n', t + k * 0.16));
+        t += seq.length * 0.16 + 0.22;
+    });
+}
+async function playAllChords() {
+    stopAll();
+    if (!selections.length) return;
+    await Tone.start(); initAudio();
+    let t = Tone.now() + 0.06;
+    selections.forEach(s => {
+        const ch = diatonicChord(s.degree);
+        ch.intervals.forEach((iv, k) => synth.triggerAttackRelease(midiToFreq(s.midi + iv), '2n', t + k * 0.035));
+        t += 1.2;
+    });
+}
+
+function stopAll() {
+    if (ladderTimer) { clearTimeout(ladderTimer); ladderTimer = null; }
+    if (playIdx !== -1) { playIdx = -1; }
+    if (synth) { try { synth.releaseAll(); } catch (e) {} }
+    renderLadderTrack();
+    buildFretboard();
+}
+
+// ============ 啟動 ============
+buildSelectors();
+alignTonic(true);   // 預設從 I 級開始爬（3 弦 C 大調 → 第 5 格）
+buildLadder();
+// 開場先把爬梯第一級放上指板，一進來就看得到和絃內音長什麼樣
+if (ladderSeq.length) {
+    const p0 = ladderSeq[0];
+    selections = [{ degree: p0.degree, si: ladderSi, fret: p0.fret, midi: p0.midi }];
+}
+render();
+</script>
+</body>
+</html>
