@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artificial Analysis 怎麼讀 — 從 agentic 排行榜到 30B 以下地端選型</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans TC',sans-serif; background:#fdf6e3; background-image:radial-gradient(circle,#d4b896 1px,transparent 1px); background-size:18px 18px; color:#1a1a1a; min-height:100vh; padding:24px 16px; font-size:17px; }
+.page { max-width:1000px; margin:0 auto; }
+.back-link { display:inline-block; margin-bottom:16px; color:#e8713a; text-decoration:none; font-size:0.85rem; font-weight:700; }
+.back-link:hover { text-decoration:underline; }
+.header { border:3px solid #1a1a1a; border-radius:14px; background:#fff8ee; box-shadow:5px 5px 0 #1a1a1a; padding:30px 34px; margin-bottom:20px; }
+.header-badge { display:inline-block; background:#2b5cb8; color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:0.88rem; padding:5px 16px; border-radius:20px; border:2px solid #1a1a1a; box-shadow:2px 2px 0 #1a1a1a; margin-bottom:14px; }
+.header .kicker { font-family:'Baloo 2',cursive; font-size:0.9rem; color:#6b4226; font-weight:700; margin-bottom:6px; }
+.header h1 { font-family:'Baloo 2',cursive; font-size:1.95rem; font-weight:800; line-height:1.3; margin-bottom:12px; }
+.header h1 span { color:#2b5cb8; }
+.header p { color:#6b4226; font-size:1.05rem; line-height:1.78; }
+.tab-nav { display:flex; gap:4px; flex-wrap:wrap; }
+.tab-btn { font-family:'Baloo 2',cursive; font-weight:700; font-size:0.92rem; padding:10px 15px; border:3px solid #1a1a1a; border-bottom:none; border-radius:10px 10px 0 0; background:#fff8ee; cursor:pointer; transition:all .12s; color:#6b4226; }
+.tab-btn.active { background:#2b5cb8; color:#fff; }
+.tab-btn:hover:not(.active) { background:#fdf6e3; transform:translateY(-2px); }
+.tab-panel { display:none; border:3px solid #1a1a1a; border-radius:0 8px 8px 8px; padding:30px 30px 34px; background:#fdf6e3; box-shadow:5px 5px 0 #1a1a1a; }
+.tab-panel.active { display:block; }
+.section-title { font-family:'Baloo 2',cursive; font-size:1.3rem; font-weight:800; color:#6b4226; margin:26px 0 16px; line-height:1.35; }
+.tab-panel > .section-title:first-child { margin-top:4px; }
+.lead { font-size:1.02rem; color:#5a4a38; line-height:1.9; margin-bottom:20px; }
+.quote-box { border-left:5px solid #2b5cb8; background:#fff8ee; padding:16px 22px; border-radius:0 8px 8px 0; margin:20px 0; font-size:1rem; line-height:1.85; color:#333; }
+.quote-box cite { display:block; font-style:normal; font-weight:700; color:#2b5cb8; font-size:0.9rem; margin-top:8px; }
+.insight { background:#2b5cb8; color:#fff; border:3px solid #1a1a1a; border-radius:10px; padding:22px 26px; box-shadow:4px 4px 0 #1a1a1a; margin:24px 0; font-size:1rem; line-height:1.88; }
+.insight strong.h { display:block; font-size:1.18rem; margin-bottom:8px; font-family:'Baloo 2',cursive; }
+.warn { background:#fff4e0; border:3px solid #1a1a1a; border-radius:10px; box-shadow:4px 4px 0 #1a1a1a; padding:20px 24px; margin:22px 0; font-size:0.97rem; line-height:1.85; color:#7a4a10; }
+.warn strong.h { display:block; font-family:'Baloo 2',cursive; font-size:1.1rem; color:#b45309; margin-bottom:6px; }
+.svgcard { background:#fff; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.06); margin:22px 0; overflow:hidden; }
+.svgcard figcaption { padding:14px 22px; font-size:0.94rem; color:#555; border-top:1px solid #f0f0f0; line-height:1.75; }
+.svgcard figcaption strong { color:#333; }
+.stack-card { background:#fff; border-radius:12px; padding:22px 26px; box-shadow:0 2px 12px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.06); margin-bottom:20px; }
+.stack-card h4 { font-family:'Inter','Noto Sans TC',sans-serif; font-size:1.06rem; font-weight:700; margin-bottom:12px; }
+.stack-card .layer { display:flex; align-items:flex-start; gap:16px; padding:12px 0; border-bottom:1px solid #f0f0f0; }
+.stack-card .layer:last-child { border-bottom:none; }
+.stack-card .layer-num { font-size:1.5rem; min-width:40px; line-height:1.2; }
+.stack-card .layer-info h5 { font-family:'Inter','Noto Sans TC',sans-serif; font-size:0.98rem; font-weight:700; color:#333; margin-bottom:4px; }
+.stack-card .layer-info p { font-size:0.92rem; color:#555; line-height:1.75; }
+code { background:#f4f4f4; padding:1px 7px; border-radius:3px; font-size:0.88rem; font-family:'Inter',monospace; }
+.maptable { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.06); margin-bottom:22px; font-size:0.92rem; }
+.maptable th { background:#1a1a1a; color:#fff; font-family:'Baloo 2',cursive; font-weight:700; text-align:left; padding:11px 14px; font-size:0.93rem; }
+.maptable td { padding:11px 14px; border-top:1px solid #eee; line-height:1.65; vertical-align:top; }
+.maptable tr:nth-child(even) td { background:#faf9f6; }
+.maptable td.n { text-align:right; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; }
+.maptable td strong { color:#1a1a1a; }
+.tbl-wrap { overflow-x:auto; }
+.badge-cn { display:inline-block; font-size:0.72rem; font-weight:700; background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; padding:1px 7px; border-radius:5px; }
+.badge-us { display:inline-block; font-size:0.72rem; font-weight:700; background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; padding:1px 7px; border-radius:5px; }
+.badge-ok { display:inline-block; font-size:0.72rem; font-weight:700; background:#dcfce7; color:#166534; border:1px solid #86efac; padding:1px 7px; border-radius:5px; }
+.scen-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:8px; }
+@media (max-width:680px){ .scen-grid{ grid-template-columns:1fr; } body{font-size:16px;} .tab-panel{padding:22px 18px 26px;} }
+.scen-card { background:#fff; border-radius:12px; padding:20px 22px; box-shadow:0 2px 12px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.06); border-top:5px solid #2b5cb8; }
+.scen-card .ic { font-size:1.7rem; margin-bottom:6px; }
+.scen-card h4 { font-family:'Inter','Noto Sans TC',sans-serif; font-size:1.02rem; font-weight:700; margin-bottom:8px; line-height:1.45; }
+.scen-card p { font-size:0.9rem; color:#555; line-height:1.72; }
+.scen-card .tech { margin-top:10px; font-size:0.82rem; color:#1e40af; }
+.sources { background:#fff; border-radius:12px; padding:20px 26px; box-shadow:0 2px 12px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.05); margin-top:26px; font-size:0.88rem; color:#666; line-height:2.0; }
+.sources h3 { font-family:'Baloo 2',cursive; font-size:1.05rem; color:#6b4226; margin-bottom:8px; }
+.sources a { color:#2b5cb8; text-decoration:none; }
+.sources a:hover { text-decoration:underline; }
+footer { text-align:center; margin-top:20px; color:#aaa; font-size:0.85rem; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">← 回到知識分享</a>
+
+  <header class="header">
+    <div class="header-badge">📊 模型評測與選型研究</div>
+    <div class="kicker">Artificial Analysis × LMArena × 地端小模型 · 資安技術長 翁瑞鋒</div>
+    <h1>不要問「誰最聰明」，<br>要問<span>「牠一天要吃多少電」</span><br>—— Artificial Analysis 怎麼讀，30B 以下怎麼選</h1>
+    <p>一句話講完這份研究：<strong>Artificial Analysis 不是「更公正」，而是「更可重現、而且是唯一把智慧、價格、速度擺進同一張表」的量尺——這正是 agent 時代選型真正需要的東西。</strong>本頁拆解 AA 的方法論與它自己也有的偏誤，比對 LMArena 的結構性問題，整理 2026 年 8 月 agentic／coding 排行，最後聚焦在<strong>一台主機就養得起的 30B 以下開源模型</strong>——並把 cost 與能耗當成第一級選型指標，另外特別區分出「非中國」的可用選項。</p>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">① 🔬 AA 是什麼</button>
+    <button class="tab-btn" onclick="switchTab(1)">② ⚖️ AA vs LMArena</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ 🤖 線上模型排行</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ ⚡ 30B 以下與能耗</button>
+    <button class="tab-btn" onclick="switchTab(4)">⑤ 🎯 選型建議</button>
+  </div>
+
+  <!-- ========== TAB 1 ========== -->
+  <div class="tab-panel active">
+    <div class="section-title">🔬 一個雪梨地下室長出來的第三方量尺</div>
+    <p class="lead">Artificial Analysis 由 <strong>Micah Hill-Smith（CEO）</strong>與 <strong>George Cameron（CPO）</strong>創辦，2024 年在雪梨的地下室起家，最初只是想比較「哪個模型、哪家 API 供應商比較划算」，後來透過 <strong>AI Grant</strong>（Nat Friedman 與 Daniel Gross）取得種子資金，成為正式公司，目前總部在舊金山。它的核心主張是<strong>獨立</strong>——不隸屬任何模型開發商，同時衡量 intelligence／price／performance／speed 四個面向。</p>
+
+    <div class="stack-card">
+      <h4>📇 基本資料</h4>
+      <div class="layer"><div class="layer-num">🏠</div><div class="layer-info"><h5>網址與定位</h5><p><code>artificialanalysis.ai</code>——獨立第三方 AI 模型與 API 供應商評測平台，追蹤 600+ 模型。</p></div></div>
+      <div class="layer"><div class="layer-num">👥</div><div class="layer-info"><h5>創辦人</h5><p>Micah Hill-Smith（CEO，資工背景，GPT-2 時代就在鑽研怎麼把模型用好）、George Cameron（CPO，前策略顧問，專攻資料中心與科技業）。</p></div></div>
+      <div class="layer"><div class="layer-num">💰</div><div class="layer-info"><h5>資金</h5><p>AI Grant 種子資金（Nat Friedman、Daniel Gross）。文件公開提示詞範本、評分標準與已知限制。</p></div></div>
+    </div>
+
+    <div class="section-title">📐 Intelligence Index v4.1.1 的組成</div>
+    <p class="lead">這是 AA 的招牌分數：<strong>9 個評測加權平均，0–100 分</strong>。最關鍵的一件事是——<strong>Agents 佔了 34%</strong>。也就是說，這張榜單本質上是在問「這個模型能不能當一個把事情做完的 agent」，而不是「它會不會聊天」。</p>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="430" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">Intelligence Index v4.1.1 — 權重是誰決定的？</text>
+        <text x="430" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" fill="#888">9 個評測 · 加權平均 · 0–100 分 · 95% 信賴區間 &lt; ±1%</text>
+        <!-- stacked bar -->
+        <g transform="translate(50,80)">
+          <rect x="0" y="0" width="258" height="46" rx="6" fill="#2b5cb8"/>
+          <rect x="258" y="0" width="182" height="46" fill="#4b83d8"/>
+          <rect x="440" y="0" width="182" height="46" fill="#7aa9e8"/>
+          <rect x="622" y="0" width="136" height="46" rx="6" fill="#b9d2f2"/>
+          <text x="129" y="29" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="#fff">Agents 34%</text>
+          <text x="349" y="29" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#fff">Coding 24%</text>
+          <text x="531" y="29" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#1a3a6a">Science 24%</text>
+          <text x="690" y="29" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#1a3a6a">General 18%</text>
+        </g>
+        <!-- detail columns -->
+        <g font-family="Inter,sans-serif" font-size="12" fill="#555">
+          <line x1="180" y1="126" x2="180" y2="150" stroke="#ccc"/>
+          <line x1="400" y1="126" x2="400" y2="150" stroke="#ccc"/>
+          <line x1="580" y1="126" x2="580" y2="150" stroke="#ccc"/>
+          <line x1="740" y1="126" x2="740" y2="150" stroke="#ccc"/>
+          <g transform="translate(60,168)">
+            <text font-size="12.5" font-weight="600" fill="#2b5cb8">GDPval-AA v2 …… 20%</text>
+            <text y="20" font-size="12.5" font-weight="600" fill="#2b5cb8">τ³-Banking ……… 14%</text>
+            <text y="46" font-size="11" fill="#999">真實職業任務 · 多回合工具使用</text>
+          </g>
+          <g transform="translate(285,168)">
+            <text font-size="12.5" font-weight="600" fill="#4b83d8">Terminal-Bench v2.1 … 16%</text>
+            <text y="20" font-size="12.5" font-weight="600" fill="#4b83d8">SciCode ………………… 8%</text>
+            <text y="46" font-size="11" fill="#999">終端機端到端完成任務</text>
+          </g>
+          <g transform="translate(505,168)">
+            <text font-size="12.5" font-weight="600" fill="#3a6aa8">HLE ……………… 12%</text>
+            <text y="20" font-size="12.5" font-weight="600" fill="#3a6aa8">GPQA Diamond … 6%</text>
+            <text y="40" font-size="12.5" font-weight="600" fill="#3a6aa8">CritPt ……………… 6%</text>
+          </g>
+          <g transform="translate(690,168)">
+            <text font-size="12.5" font-weight="600" fill="#3a6aa8">AA-Omniscience 12%</text>
+            <text y="20" font-size="12.5" font-weight="600" fill="#3a6aa8">AA-LCR …………… 6%</text>
+            <text y="46" font-size="11" fill="#999">知識 · 長文推理</text>
+          </g>
+        </g>
+        <rect x="50" y="252" width="758" height="34" rx="7" fill="#fff8ee" stroke="#e8c9a0"/>
+        <text x="429" y="274" text-anchor="middle" font-family="Inter,sans-serif" font-size="12.5" fill="#8a5a20">⚠️ 這些權重是 Artificial Analysis 的價值判斷，不是宇宙真理——你的任務不是 agentic，這張榜就未必適用你</text>
+      </svg>
+      <figcaption><strong>怎麼讀：</strong>看到一個模型「Intelligence 61」時，實際意思是「它在一套<strong>三分之一權重壓在 agent 任務</strong>的綜合考卷上拿了 61 分」。如果你要做的是客服 FAQ 或文案生成，這個分數對你的參考價值會大幅打折。</figcaption>
+    </figure>
+
+    <div class="section-title">🧪 跑法：為什麼說它「可重現」</div>
+    <div class="stack-card">
+      <div class="layer"><div class="layer-num">🌡️</div><div class="layer-info"><h5>參數固定</h5><p>非推理模型 <code>temperature = 0</code>；推理模型 <code>0.6</code>（或依原廠建議）。標準模型輸出上限 16,384 token，推理模型用其最大容量。</p></div></div>
+      <div class="layer"><div class="layer-num">🔁</div><div class="layer-info"><h5>pass@1 多次重跑</h5><p>可重跑時取多次平均，逐題計算成功率。以 10 次以上重跑的實驗估算，Intelligence Index 的 <strong>95% 信賴區間 &lt; ±1%</strong>。</p></div></div>
+      <div class="layer"><div class="layer-num">📦</div><div class="layer-info"><h5>統一的 agentic harness</h5><p>agent 題目跑在隔離的 <strong>E2B 沙箱</strong>，使用開源的 <strong>Stirrup harness</strong>，提供程式執行、網頁搜尋、看圖、檔案操作工具。GDPval-AA v2 上限 250 turns（agent 可提早放棄）；Terminal-Bench v2.1 每題可跑 2 小時以上。</p></div></div>
+      <div class="layer"><div class="layer-num">🧾</div><div class="layer-info"><h5>成本以實際帳單計</h5><p>使用各家 API 回報的 token 數（無回報時用標準 tokenizer），把輸入、快取命中、快取寫入、推理與答案 token 全部計入。</p></div></div>
+    </div>
+
+    <div class="section-title">💸 全站最被低估的欄位：Cost per Task</div>
+    <p class="lead">大家都盯著 Intelligence 那一欄，但真正會在月底咬人的是 <strong>cost per task</strong>——AA 實際跑完整套 Index 的帳單除以題數。</p>
+
+    <div class="tbl-wrap"><table class="maptable">
+      <tr><th>觀察</th><th>數字</th><th>意義</th></tr>
+      <tr><td><strong>Claude Sonnet 5</strong></td><td class="n">$2.29 / task</td><td>比 Sonnet 4.6 貴約 2 倍——<strong>成因完全是 token 用量上升，不是單價漲</strong></td></tr>
+      <tr><td><strong>Granite 4.2 3B</strong></td><td class="n">$0.0047 / task</td><td>全榜每題成本最低</td></tr>
+      <tr><td>跑完 GLM-5.3-Flash 全套</td><td class="n">$138.02</td><td>評測一個模型的實際花費也公開</td></tr>
+      <tr><td>跑完 Ling 3.0 Tiny 全套</td><td class="n">$0.00</td><td>小模型的評測幾乎零成本</td></tr>
+    </table></div>
+
+    <div class="insight">
+      <strong class="h">💡 洞見一：帳單不是被單價決定，是被「話多不多」決定</strong>
+      同樣答對一題，用 3 萬 token 跟用 30 萬 token，成本差十倍。Agent 要跑很多步，每一步都在燒 token——所以選型時 <strong>$/M token 是誤導性指標，$/task 才是真的</strong>。這也是為什麼「最聰明的模型」常常不是「最適合當 agent 的模型」：<strong>聰明是單次的，耐力是連續的。</strong>
+    </div>
+  </div>
+
+  <!-- ========== TAB 2 ========== -->
+  <div class="tab-panel">
+    <div class="section-title">⚖️ 兩種評審：觀眾票選 vs 樂器檢定</div>
+    <p class="lead">Roy 的問題是「AA 是不是比 LMArena 更公正、更有參考性？」——這題要先拆一半：<strong>兩者測的根本不是同一件事。</strong>LMArena 是人類盲測兩兩對戰、算 Elo，回答「人類比較喜歡誰」；AA 是同一套題、同一個 harness、同一組參數跑出來的成績，回答「誰能把事做完、要多少錢、多快」。</p>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 860 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="430" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">兩種量尺，測的是兩件不同的事</text>
+        <g transform="translate(30,50)">
+          <rect width="380" height="248" rx="12" fill="#fdf3f3" stroke="#c26060" stroke-width="2"/>
+          <text x="190" y="30" text-anchor="middle" font-size="14.5" font-weight="700" fill="#b23b3b">🎤 LMArena — 觀眾票選</text>
+          <g font-family="Inter,sans-serif" font-size="12.5" fill="#7a3030">
+            <circle cx="70" cy="72" r="18" fill="#f3cccc"/><text x="70" y="77" text-anchor="middle" font-size="11">模型A</text>
+            <circle cx="310" cy="72" r="18" fill="#f3cccc"/><text x="310" y="77" text-anchor="middle" font-size="11">模型B</text>
+            <text x="190" y="77" text-anchor="middle" font-size="15" font-weight="700">VS</text>
+            <path d="M110 90 L175 118 M270 90 L205 118" stroke="#c99" stroke-width="1.5"/>
+            <rect x="115" y="122" width="150" height="34" rx="8" fill="#fff" stroke="#c26060"/>
+            <text x="190" y="144" text-anchor="middle" font-size="12.5" font-weight="600">人類盲測投票</text>
+            <text x="190" y="180" text-anchor="middle" font-size="12.5">→ Elo 排名</text>
+          </g>
+          <text x="190" y="210" text-anchor="middle" font-size="12" font-weight="600" fill="#b23b3b">✅ 最貼近「體感好不好用」</text>
+          <text x="190" y="232" text-anchor="middle" font-size="12" fill="#8a4a4a">❌ 可被最佳化成「討喜」而非「更強」</text>
+        </g>
+        <g transform="translate(450,50)">
+          <rect width="380" height="248" rx="12" fill="#f2f6fd" stroke="#2b5cb8" stroke-width="2.5"/>
+          <text x="190" y="30" text-anchor="middle" font-size="14.5" font-weight="700" fill="#1e40af">🎻 Artificial Analysis — 樂器檢定</text>
+          <g font-family="Inter,sans-serif" font-size="12" fill="#1e3a6a">
+            <rect x="24" y="52" width="110" height="40" rx="7" fill="#fff" stroke="#7aa9e8"/><text x="79" y="77" text-anchor="middle">同一套題</text>
+            <rect x="135" y="52" width="110" height="40" rx="7" fill="#fff" stroke="#7aa9e8"/><text x="190" y="77" text-anchor="middle">同一 harness</text>
+            <rect x="246" y="52" width="110" height="40" rx="7" fill="#fff" stroke="#7aa9e8"/><text x="301" y="77" text-anchor="middle">同一參數</text>
+            <text x="190" y="112" text-anchor="middle" font-size="16" fill="#4b83d8">↓</text>
+            <rect x="55" y="120" width="270" height="44" rx="8" fill="#2b5cb8"/>
+            <text x="190" y="140" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">Intelligence · $/task · tok/s</text>
+            <text x="190" y="157" text-anchor="middle" font-size="11" fill="#cfe0f7">三個數字並排在同一列</text>
+          </g>
+          <text x="190" y="196" text-anchor="middle" font-size="12" font-weight="600" fill="#1e40af">✅ 可重現、跨模型同條件、成本同表</text>
+          <text x="190" y="218" text-anchor="middle" font-size="12" fill="#3a5a8a">❌ 權重由 AA 主觀設定</text>
+          <text x="190" y="238" text-anchor="middle" font-size="12" fill="#3a5a8a">❌ 題目公開 → 有汙染風險</text>
+        </g>
+      </svg>
+      <figcaption><strong>卡拉的比喻：</strong>觀眾票選會選出討喜的人，樂器檢定會選出穩定的人。<strong>要組樂團上台看台下反應；要找一個每天陪你練團的夥伴，你要的是「同樣的曲子彈一百次都不會走音」。</strong></figcaption>
+    </figure>
+
+    <div class="section-title">🚨 LMArena 的結構性問題：《The Leaderboard Illusion》</div>
+    <p class="lead">這篇 2025 年的研究分析了 <strong>43 家供應商、238 個模型、280 萬場對戰</strong>（2024-11 至 2025-03），指出三個系統性問題：</p>
+
+    <div class="stack-card">
+      <div class="layer"><div class="layer-num">🕶️</div><div class="layer-info"><h5>1. 未揭露的私下測試</h5><p>模型供應商可以先私下測試多個變體，<strong>只把分數最好的那一個公開送上榜</strong>。等於用「最好的一次」代表平均實力。</p></div></div>
+      <div class="layer"><div class="layer-num">🎯</div><div class="layer-info"><h5>2. 針對投票偏好調校（Goodhart's Law）</h5><p>模型被微調成「贏得對戰」而非「變得更強」。<strong>「當一個量測變成目標，它就不再是好的量測。」</strong>——這是教科書等級的案例。</p></div></div>
+      <div class="layer"><div class="layer-num">📉</div><div class="layer-info"><h5>3. 開源模型的系統性劣勢</h5><p>被<strong>靜默下架</strong>（silently deprecated）的模型中，<strong>66% 是開放權重或完全開源模型</strong>，導致它們的評分不可靠。對「評估地端開源模型」這件事，是致命的偏誤。</p></div></div>
+    </div>
+
+    <div class="quote-box">
+      LMArena 已公開回應這篇研究，主張其測試政策對所有實驗室一致：任何實驗室都能依自身量能提交公開或私有的變體。
+      <cite>—— LMArena 官方回應（arena.ai/blog/our-response）</cite>
+    </div>
+
+    <div class="warn">
+      <strong class="h">⚠️ 別給 AA 免死金牌</strong>
+      AA 自己也有兩個實打實的限制：<strong>（1）加權是 AA 決定的</strong>——Agents 佔 34% 是它的價值判斷，不是你的；<strong>（2）題目公開就有汙染風險</strong>，這點所有靜態 benchmark 都逃不掉。「可重現」不等於「客觀」。
+    </div>
+
+    <div class="insight">
+      <strong class="h">💡 洞見二：不要二選一，要三角驗證</strong>
+      這也是 2026 年多數認真評估模型的人在做的事：<br>
+      • 想知道「能不能把工作做完、要花多少錢」→ <strong>看 Artificial Analysis</strong><br>
+      • 想知道「使用者會不會喜歡這個回答」→ <strong>看 LMArena</strong><br>
+      • 想真的下決策 → <strong>一定要跑自家任務的私有 eval</strong><br>
+      回到 Roy 的問題：對「選一個要花錢跑 agent 的模型」這個決策，<strong>AA 確實明顯更有參考性</strong>——因為它是唯一把 intelligence、$/task、tok/s 擺在同一張表的地方。
+    </div>
+  </div>
+
+  <!-- ========== TAB 3 ========== -->
+  <div class="tab-panel">
+    <div class="section-title">🤖 2026 年 8 月 · Intelligence Index 前段班</div>
+    <p class="lead">下表同時列出智慧分數、綜合價格與輸出速度——<strong>請橫著讀，不要只讀第一欄</strong>。</p>
+
+    <div class="tbl-wrap"><table class="maptable">
+      <tr><th>模型</th><th style="text-align:right">Intelligence</th><th style="text-align:right">價格 $/M</th><th style="text-align:right">速度 tok/s</th></tr>
+      <tr><td><strong>Claude Opus 5</strong>（Max Effort）</td><td class="n"><strong>63</strong></td><td class="n">2.34</td><td class="n">55</td></tr>
+      <tr><td>Claude Opus 5（xhigh）</td><td class="n">63</td><td class="n">1.80</td><td class="n">54</td></tr>
+      <tr><td>Claude Fable 5（Max，Opus 4.8 fallback）</td><td class="n">62</td><td class="n">3.14</td><td class="n">62</td></tr>
+      <tr><td>Claude Opus 5（high）</td><td class="n">61</td><td class="n">1.23</td><td class="n">53</td></tr>
+      <tr><td><strong>GPT-5.6 Sol</strong>（max）</td><td class="n">61</td><td class="n">0.95</td><td class="n">74</td></tr>
+      <tr><td>Grok 4.6（high）</td><td class="n">61</td><td class="n">0.94</td><td class="n">58</td></tr>
+      <tr><td>Kimi K3（max） <span class="badge-cn">中國</span></td><td class="n">60</td><td class="n">0.84</td><td class="n">36</td></tr>
+      <tr><td>GLM-5.3（max） <span class="badge-cn">中國</span></td><td class="n">60</td><td class="n">0.68</td><td class="n">66</td></tr>
+      <tr><td>Qwen3.8 2.4T A95B <span class="badge-cn">中國</span></td><td class="n">58</td><td class="n">0.81</td><td class="n">27</td></tr>
+      <tr><td><strong>GLM-5.3-Flash</strong> <span class="badge-cn">中國</span></td><td class="n">57</td><td class="n"><strong>0.09</strong></td><td class="n">49</td></tr>
+      <tr><td>GPT-5.6 Sol（high）</td><td class="n">57</td><td class="n">0.43</td><td class="n">74</td></tr>
+      <tr><td><strong>Gemini 3.7 Flash</strong>（high）</td><td class="n">56</td><td class="n">0.40</td><td class="n"><strong>324</strong></td></tr>
+      <tr><td>Qwen3.8-Flash-Next <span class="badge-cn">中國</span></td><td class="n">56</td><td class="n">0.10</td><td class="n">75</td></tr>
+    </table></div>
+
+    <div class="section-title">💻 Agentic / Coding 專項排行</div>
+    <div class="scen-grid">
+      <div class="scen-card">
+        <div class="ic">🖥️</div>
+        <h4>Terminal-Bench v2.1 — 終端機端到端</h4>
+        <p><strong>GPT-5.6 Sol 89.5%</strong>，Claude Opus 5 <strong>89.1%</strong>，兩者幾乎並駕齊驅。這題型是「丟給你一個終端機，你自己想辦法把任務做完」。</p>
+        <div class="tech">⚠️ 它評的是「agent + 模型」這一對，不是模型本身——換 harness 分數會變。</div>
+      </div>
+      <div class="scen-card">
+        <div class="ic">🐛</div>
+        <h4>SWE-bench Verified — 自主修 bug</h4>
+        <p><strong>Claude Fable 5 達 95%</strong>，是這份資料中的最高分。題目是 500 個經人工驗證的真實 GitHub Python issue。</p>
+        <div class="tech">進階版 SWE-bench Pro 用商業規模程式庫，抗汙染更強，難度更高。</div>
+      </div>
+      <div class="scen-card">
+        <div class="ic">⚡</div>
+        <h4>速度型選項</h4>
+        <p>Gemini 3.7 Flash 在 Intelligence 56 的水準下跑出 <strong>324 tok/s</strong>——互動式應用（打字回應、即時翻譯）的最佳解。</p>
+        <div class="tech">高吞吐 ≠ 高智慧，但對「使用者在等」的場景，延遲就是體驗。</div>
+      </div>
+      <div class="scen-card">
+        <div class="ic">💵</div>
+        <h4>平價量產型</h4>
+        <p>GLM-5.3-Flash（57 / $0.09）與 Qwen3.8-Flash-Next（56 / $0.10）——<strong>用不到前段班十分之一的價格，換到九成的智慧</strong>。</p>
+        <div class="tech">批次處理、大量分類抽取的首選；但需評估中國模型的資料與法遵風險。</div>
+      </div>
+    </div>
+
+    <div class="section-title">🌏 開放權重榜：一個尷尬的事實</div>
+    <p class="lead">AA 的開放權重（open weights）排行上，領先群是 <strong>Kimi K3（60）、GLM-5.3（60）、Qwen3.8 2.4T A95B（58）</strong>——<strong>全部來自中國實驗室</strong>。稍早 v4.1 的榜上，GLM 5.2 以 51 居開源第一，<strong>NVIDIA Nemotron 3 Ultra（48）是最強的西方開源模型</strong>。</p>
+    <p class="lead">OpenRouter 的觀察補上另一面：<strong>DeepSeek V4 Flash（$0.054 / $0.242 per M token）</strong>是第一個被團隊直接丟進正式 agentic pipeline 的開源模型，成本效能碾壓——但它的第一方 API <strong>會保留並用於訓練你的資料</strong>，這對政府與企業機敏案是硬止血點。</p>
+
+    <div class="warn">
+      <strong class="h">❗ 歐洲公資助模型，一個都沒進榜</strong>
+      <strong>EuroLLM、Apertus、ALIA、Teuken、Bielik</strong>——這些由歐洲公部門資助的模型，在 AA 的開放權重追蹤中<strong>沒有任何一個上榜</strong>。主權 AI 的政策論述滿天飛，但真正能打的開源模型，目前仍集中在美、中兩地。這件事對台灣談主權 AI 是很直接的提醒：<strong>補助不等於能力，能力要看榜。</strong>
+    </div>
+  </div>
+
+  <!-- ========== TAB 4 ========== -->
+  <div class="tab-panel">
+    <div class="section-title">⚡ 為什麼天花板剛好卡在 30B？這是物理，不是喜好</div>
+    <p class="lead">「一台主機就能裝起來的地端算力服務」這個判斷是對的，而且它有一個很硬的物理理由——<strong>顯存</strong>。</p>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 860 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="430" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">單卡顯存牆：為什麼 30B 是甜蜜點，70B 是懸崖</text>
+        <!-- vram bar -->
+        <g transform="translate(60,56)">
+          <text x="0" y="0" font-family="Inter,sans-serif" font-size="12.5" font-weight="600" fill="#666">RTX 5090 顯存容量 = 32GB</text>
+          <rect x="0" y="12" width="440" height="26" rx="5" fill="#eef3fa" stroke="#c8d8ee"/>
+          <line x1="440" y1="4" x2="440" y2="48" stroke="#b23b3b" stroke-width="2" stroke-dasharray="4 3"/>
+          <text x="452" y="30" font-family="Inter,sans-serif" font-size="11.5" fill="#b23b3b" font-weight="600">32GB 牆</text>
+        </g>
+        <g transform="translate(60,112)" font-family="Inter,sans-serif" font-size="12">
+          <text x="0" y="0" font-size="12.5" font-weight="600" fill="#166534">✅ 30B @ Q4 ≈ 塞得進去</text>
+          <rect x="0" y="10" width="400" height="30" rx="5" fill="#5aa86f"/>
+          <text x="200" y="30" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">約 66 tok/s · 流暢可用</text>
+        </g>
+        <g transform="translate(60,172)" font-family="Inter,sans-serif" font-size="12">
+          <text x="0" y="0" font-size="12.5" font-weight="600" fill="#b23b3b">❌ 70B @ Q4 ≈ 35GB → 超出</text>
+          <rect x="0" y="10" width="440" height="30" rx="5" fill="#d98686"/>
+          <rect x="440" y="10" width="60" height="30" rx="5" fill="#f0b8b8" stroke="#b23b3b" stroke-dasharray="3 2"/>
+          <text x="220" y="30" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">只能降 Q3/Q2，或 offload</text>
+          <text x="0" y="60" font-size="11.5" fill="#b23b3b">→ 一旦 offload 到系統記憶體走 PCIe，吞吐崩到<tspan font-weight="700">個位數 tok/s</tspan></text>
+        </g>
+        <!-- power comparison -->
+        <g transform="translate(560,100)">
+          <rect width="250" height="200" rx="12" fill="#fafafa" stroke="#e4e4e4"/>
+          <text x="125" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="13.5" font-weight="700" fill="#333">功耗差距</text>
+          <rect x="40" y="46" width="52" height="118" rx="4" fill="#e08a5a"/>
+          <text x="66" y="182" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" fill="#666">RTX 5090</text>
+          <text x="66" y="40" text-anchor="middle" font-family="Inter,sans-serif" font-size="12.5" font-weight="700" fill="#c05a2a">450W</text>
+          <rect x="158" y="138" width="52" height="26" rx="4" fill="#5a86c8"/>
+          <text x="184" y="182" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" fill="#666">Mac Studio</text>
+          <text x="184" y="132" text-anchor="middle" font-family="Inter,sans-serif" font-size="12.5" font-weight="700" fill="#2b5cb8">&lt;100W</text>
+        </g>
+      </svg>
+      <figcaption><strong>結論：</strong>「30B 以下 5090 表現優異；到 70B 就是拿錯工具了。」Mac Studio（M4 Max／M3 Ultra，最高 192GB 統一記憶體）可以跑更大的模型且不會 offload，<strong>全速常低於 100W</strong>，但在小模型上速度輸給 5090。<strong>選硬體＝在「速度」與「每瓦 token」之間選一邊。</strong></figcaption>
+    </figure>
+
+    <div class="section-title">🔋 能耗：被忽略的第三個軸</div>
+    <div class="tbl-wrap"><table class="maptable">
+      <tr><th>指標</th><th>數值</th><th>意義</th></tr>
+      <tr><td>每輸出 token 能耗</td><td><strong>0.0001–0.002 Wh</strong>（中位換算約 1.8 J）</td><td>目前實測區間</td></tr>
+      <tr><td>LLaMA3-70B @ H100 FP8</td><td><strong>0.39 J / token</strong></td><td>相較 V100 時代的 3–4 J，改善約 10 倍</td></tr>
+      <tr><td>7B → 70B</td><td>每 token 能耗約 <strong>×100</strong></td><td>模型大小對能效的影響是壓倒性的</td></tr>
+      <tr><td>GPU vs CPU</td><td>同 batch 下 GPU 省 <strong>2–3 倍</strong></td><td>純 CPU 推論在能效上不划算</td></tr>
+      <tr><td>放大 batch size</td><td>每 token 能耗↓、每瓦吞吐↑</td><td>地端服務要盡量批次化，不要一次一題</td></tr>
+    </table></div>
+    <p class="lead">量測工具方面，<strong>TokenPowerBench</strong>（AAAI）不需外接電表就能量 GPU／node／系統層級功耗，並分析 batch size、context 長度、平行策略、量化方式對 <strong>joules per token</strong> 的影響——要做 TCO 報告時這是可引用的方法。</p>
+
+    <div class="insight">
+      <strong class="h">💡 洞見三：選 30B 以下不是將就，是在買「每瓦 token」</strong>
+      450W 對 100W 不只是規格差異，是兩種生活方式——一種是養一頭需要冷氣和獨立電源迴路的猛獸，一種是養一隻可以放在書桌上、安靜、不吵、每天陪你上班的狗。<strong>30B 以下的模型，是「能住在家裡的智慧」。</strong>對政府與企業的地端案，這句話比任何排行榜分數都更接近未來。
+    </div>
+
+    <div class="section-title">🌍 30B 以下候選：非中國選項</div>
+    <p class="lead">授權與資料落地較好處理的一批。<strong>Apache 2.0 / MIT 是採購與轉授權上最沒爭議的選擇。</strong></p>
+    <div class="tbl-wrap"><table class="maptable">
+      <tr><th>模型</th><th>參數</th><th>授權</th><th>出處</th><th>備註</th></tr>
+      <tr><td><strong>Gemma 4 31B</strong></td><td>30.7B dense</td><td><span class="badge-ok">Apache 2.0</span></td><td>Google <span class="badge-us">美</span></td><td>AA Intelligence <strong>30</strong>；<strong>256k context</strong>；AA 頁面顯示 $0.00（可免費取用）</td></tr>
+      <tr><td>Gemma 4 26B A4B</td><td>26B / 4B active</td><td><span class="badge-ok">Apache 2.0</span></td><td>Google <span class="badge-us">美</span></td><td>品質 × 效率 × 授權的平衡首選（MoE）</td></tr>
+      <tr><td><strong>gpt-oss-20b</strong></td><td>21B / 3.6B active</td><td><span class="badge-ok">Apache 2.0</span></td><td>OpenAI <span class="badge-us">美</span></td><td>AA Intelligence 15（high）；131k context；<strong>120 tok/s</strong>；<strong>16GB 記憶體就能跑</strong></td></tr>
+      <tr><td><strong>Nemotron 3 Nano</strong></td><td>31.6B / 3.2B active</td><td>NVIDIA Open</td><td>NVIDIA <span class="badge-us">美</span></td><td>Mamba-2 × Transformer 混合 MoE；<strong>1M context</strong>；RTX 4090 可跑；家族專為多代理系統最佳化</td></tr>
+      <tr><td>Phi-5 14B / Phi-4-Reasoning 14B</td><td>14B</td><td><span class="badge-ok">MIT</span></td><td>Microsoft <span class="badge-us">美</span></td><td>12GB VRAM 可跑；Phi-4-Reasoning 於 AIME 2024 達 75.3%</td></tr>
+      <tr><td>Granite 4.2 3B</td><td>3B</td><td><span class="badge-ok">Apache 2.0</span></td><td>IBM <span class="badge-us">美</span></td><td><strong>每題成本 $0.0047，全榜最低</strong></td></tr>
+      <tr><td>Tiny Aya Global</td><td>3.35B</td><td>開放</td><td>Cohere <span class="badge-us">加</span></td><td>支援 70+ 語言，筆電離線可跑</td></tr>
+    </table></div>
+
+    <div class="section-title">🇨🇳 30B 以下候選：中國系（能力強，需評估風險）</div>
+    <div class="tbl-wrap"><table class="maptable">
+      <tr><th>模型</th><th>參數</th><th>授權</th><th>備註</th></tr>
+      <tr><td><strong>Qwen3-Coder 30B</strong>（A3B）</td><td>30B / 3B active</td><td>Apache 2.0</td><td>目前地端 coding 全能首選；Ollama 產物約 <strong>19GB</strong>；256k context；深度推理較強但互動延遲較高</td></tr>
+      <tr><td><strong>GLM-4.7-Flash</strong></td><td>30B / 3B active</td><td>MIT</td><td>coding／terminal／tool use 場景 <strong>40.7%</strong> vs Qwen3-Coder 26.0%；128k context；為快速可控執行最佳化</td></tr>
+      <tr><td>Qwen3.8-27B、DeepSeek V4-Flash、Muse Glimmer 30B、Nemotron 3.5 Lightning 30B</td><td>約 27–30B</td><td>各異</td><td>2026 年企業地端部署的新一批候選</td></tr>
+    </table></div>
+  </div>
+
+  <!-- ========== TAB 5 ========== -->
+  <div class="tab-panel">
+    <div class="section-title">🎯 依用途分三層來選</div>
+
+    <div class="scen-grid">
+      <div class="scen-card">
+        <div class="ic">🥇</div>
+        <h4>① 前線 agentic／coding<br><span style="font-weight:400;font-size:0.88rem;color:#888">「要它把難事做完」</span></h4>
+        <p><strong>Claude Opus 5</strong>（Index 63、Terminal-Bench 89.1%）或 <strong>GPT-5.6 Sol</strong>（61、Terminal-Bench 89.5%）。自主修 bug 找 <strong>Claude Fable 5</strong>（SWE-bench Verified 95%）。</p>
+        <div class="tech">🔑 決策關鍵：同時看 <strong>$/task</strong>，不要只看 $/M token。</div>
+      </div>
+      <div class="scen-card">
+        <div class="ic">🏭</div>
+        <h4>② 量產批次<br><span style="font-weight:400;font-size:0.88rem;color:#888">「要它便宜地做完很多事」</span></h4>
+        <p><strong>GLM-5.3-Flash</strong>（57 / $0.09）、<strong>Qwen3.8-Flash-Next</strong>（56 / $0.10）。需要高吞吐互動時用 <strong>Gemini 3.7 Flash</strong>（56 / 324 tok/s）。</p>
+        <div class="tech">🔑 用不到前段班十分之一的價格，換九成的智慧。</div>
+      </div>
+      <div class="scen-card">
+        <div class="ic">🏠</div>
+        <h4>③ 地端單機<br><span style="font-weight:400;font-size:0.88rem;color:#888">「資料不能出門」</span></h4>
+        <p>通用＋授權乾淨：<strong>Gemma 4 31B</strong>。邊緣／低記憶體：<strong>gpt-oss-20b</strong>（16GB、120 tok/s）。長文與多代理：<strong>Nemotron 3 Nano</strong>（1M context）。極省成本的分類抽取：<strong>Granite 4.2 3B</strong>。</p>
+        <div class="tech">🔑 純 coding 且可接受中國模型：Qwen3-Coder 30B 或 GLM-4.7-Flash。</div>
+      </div>
+      <div class="scen-card">
+        <div class="ic">🧭</div>
+        <h4>地端選型三支柱</h4>
+        <p><strong>1. 授權</strong>：Apache 2.0 / MIT 優先，商用與轉授權無爭議。<br><strong>2. 顯存</strong>：Q4 量化後要整包塞進單卡，否則吞吐崩潰。<br><strong>3. 每瓦 token</strong>：整機功耗 × 電價算進 3 年 TCO，再跟雲端 API 對打。</p>
+        <div class="tech">🔑 三項缺一就不要進入 POC。</div>
+      </div>
+    </div>
+
+    <figure class="svgcard">
+      <svg viewBox="0 0 860 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <text x="430" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#333">選型決策樹：從「資料能不能出門」開始問</text>
+        <g font-family="Inter,sans-serif">
+          <rect x="320" y="46" width="220" height="44" rx="10" fill="#2b5cb8"/>
+          <text x="430" y="73" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">資料可以送到雲端嗎？</text>
+          <path d="M430 90 L430 106 M240 106 L620 106 M240 106 L240 128 M620 106 L620 128" stroke="#c4c4c4" stroke-width="1.5" fill="none"/>
+          <text x="330" y="122" text-anchor="middle" font-size="12" fill="#888">可以 ✅</text>
+          <text x="530" y="122" text-anchor="middle" font-size="12" fill="#888">不行 ❌（政府／機敏）</text>
+
+          <rect x="120" y="128" width="240" height="42" rx="9" fill="#fff" stroke="#7aa9e8" stroke-width="1.5"/>
+          <text x="240" y="154" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">任務多步、要它自己做完？</text>
+          <path d="M240 170 L240 186 M150 186 L330 186 M150 186 L150 208 M330 186 L330 208" stroke="#c4c4c4" stroke-width="1.5" fill="none"/>
+          <text x="150" y="202" text-anchor="middle" font-size="11.5" fill="#888">是</text>
+          <text x="330" y="202" text-anchor="middle" font-size="11.5" fill="#888">否 / 量大</text>
+          <rect x="52" y="208" width="196" height="62" rx="9" fill="#eaf2fd" stroke="#4b83d8"/>
+          <text x="150" y="232" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e40af">Claude Opus 5</text>
+          <text x="150" y="250" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e40af">GPT-5.6 Sol</text>
+          <text x="150" y="264" text-anchor="middle" font-size="10.5" fill="#5a7aa8">盯緊 $/task</text>
+          <rect x="256" y="208" width="196" height="62" rx="9" fill="#eaf2fd" stroke="#4b83d8"/>
+          <text x="354" y="232" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e40af">GLM-5.3-Flash</text>
+          <text x="354" y="250" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e40af">Gemini 3.7 Flash</text>
+          <text x="354" y="264" text-anchor="middle" font-size="10.5" fill="#5a7aa8">便宜 / 高吞吐</text>
+
+          <rect x="500" y="128" width="250" height="42" rx="9" fill="#fff" stroke="#5aa86f" stroke-width="1.5"/>
+          <text x="625" y="154" text-anchor="middle" font-size="13" font-weight="600" fill="#166534">單卡顯存有多少？</text>
+          <path d="M625 170 L625 186 M540 186 L712 186 M540 186 L540 208 M712 186 L712 208" stroke="#c4c4c4" stroke-width="1.5" fill="none"/>
+          <text x="540" y="202" text-anchor="middle" font-size="11.5" fill="#888">≥24–32GB</text>
+          <text x="712" y="202" text-anchor="middle" font-size="11.5" fill="#888">12–16GB</text>
+          <rect x="452" y="208" width="176" height="62" rx="9" fill="#eafaf0" stroke="#5aa86f"/>
+          <text x="540" y="230" text-anchor="middle" font-size="12.5" font-weight="700" fill="#166534">Gemma 4 31B</text>
+          <text x="540" y="248" text-anchor="middle" font-size="12.5" font-weight="700" fill="#166534">Nemotron 3 Nano</text>
+          <text x="540" y="263" text-anchor="middle" font-size="10.5" fill="#4a7a5a">Apache 2.0 / 1M ctx</text>
+          <rect x="636" y="208" width="176" height="62" rx="9" fill="#eafaf0" stroke="#5aa86f"/>
+          <text x="724" y="230" text-anchor="middle" font-size="12.5" font-weight="700" fill="#166534">gpt-oss-20b</text>
+          <text x="724" y="248" text-anchor="middle" font-size="12.5" font-weight="700" fill="#166534">Phi-5 14B</text>
+          <text x="724" y="263" text-anchor="middle" font-size="10.5" fill="#4a7a5a">16GB / MIT</text>
+
+          <rect x="120" y="300" width="620" height="72" rx="10" fill="#fff8ee" stroke="#e8c9a0" stroke-width="1.5"/>
+          <text x="430" y="326" text-anchor="middle" font-size="13.5" font-weight="700" fill="#8a5a20">⚠️ 最後一步，任何路徑都一樣：跑自家任務的私有 eval</text>
+          <text x="430" y="348" text-anchor="middle" font-size="12" fill="#8a6a40">量測 tok/s、每題 token 數、整機功耗 → 做成 3 年 TCO 表</text>
+          <text x="430" y="365" text-anchor="middle" font-size="11.5" fill="#a08a60">排行榜只負責幫你篩掉 90% 的候選，最後 10% 要用你自己的題目決定</text>
+        </g>
+      </svg>
+      <figcaption><strong>怎麼用：</strong>先問「資料能不能出門」——這一題會直接砍掉一半選項，而且是法遵問題不是技術問題。再問「任務是不是多步 agentic」或「單卡有多少顯存」。<strong>排行榜幫你篩掉 90%，剩下 10% 只能用你自己的題目決定。</strong></figcaption>
+    </figure>
+
+    <div class="section-title">✅ 五點結論</div>
+    <div class="stack-card">
+      <div class="layer"><div class="layer-num">1️⃣</div><div class="layer-info"><h5>不要二選一，要三角驗證</h5><p>AA 看能力／成本／速度的可重現數字，LMArena 看人類主觀偏好，導入前一定要跑自家任務的私有 eval。</p></div></div>
+      <div class="layer"><div class="layer-num">2️⃣</div><div class="layer-info"><h5>agentic／coding 看 Terminal-Bench 與 SWE-bench，但一定要同時看 $/task</h5><p>Claude Sonnet 5 每題 $2.29、比前代貴一倍，成因純粹是<strong>吐的 token 變多</strong>。</p></div></div>
+      <div class="layer"><div class="layer-num">3️⃣</div><div class="layer-info"><h5>30B 以下是「一台主機養得起」的甜蜜點</h5><p>理由是顯存牆：30B Q4 塞得進 32GB，70B Q4 需 35GB 就爆。選型三支柱＝授權、顯存、每瓦 token。</p></div></div>
+      <div class="layer"><div class="layer-num">4️⃣</div><div class="layer-info"><h5>非中國選項目前實際可用的就這幾個</h5><p>Gemma 4 31B、gpt-oss-20b、Nemotron 3 Nano、Phi-5 14B、Granite、Tiny Aya。<strong>歐洲公資助模型尚未進榜。</strong></p></div></div>
+      <div class="layer"><div class="layer-num">5️⃣</div><div class="layer-info"><h5>下一步：把 TCO 表做出來</h5><p>拿實際的公文／輿情任務做私有 eval，用地端候選模型對打，量測 tok/s、每題 token 數與整機功耗——<strong>這比引用任何排行榜都更有說服力。</strong></p></div></div>
+    </div>
+
+    <div class="insight">
+      <strong class="h">🐻 × 🎨 團隊對話節錄</strong>
+      🎨 卡拉：最聰明的模型不一定最適合當 agent，因為 agent 要跑很多步，每一步都在燒 token 和電。<strong>聰明是單次的，耐力是連續的。</strong><br>
+      🐻 肉乙：這正是 AA 把 cost per task 跟 output tokens per task 一起列出來的原因。同樣答對，用 3 萬 token 跟用 30 萬 token，帳單差十倍。<br>
+      🎨 卡拉：所以選型不是選第一名，<strong>是選「在你的預算和插座容量裡，跑得最久的那一個」。</strong>
+    </div>
+
+    <div class="sources">
+      <h3>📚 資料來源</h3>
+      • <a href="https://artificialanalysis.ai/methodology/intelligence-benchmarking" target="_blank">Artificial Analysis — Intelligence Benchmarking Methodology</a><br>
+      • <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index" target="_blank">Artificial Analysis Intelligence Index v4.1.1</a><br>
+      • <a href="https://artificialanalysis.ai/leaderboards/models" target="_blank">Artificial Analysis — LLM Leaderboard</a><br>
+      • <a href="https://artificialanalysis.ai/about" target="_blank">Artificial Analysis — About</a><br>
+      • <a href="https://www.latent.space/p/artificialanalysis" target="_blank">Latent Space — Independent LLM Evals as a Service（創辦人專訪）</a><br>
+      • <a href="https://arxiv.org/html/2504.20879v1" target="_blank">The Leaderboard Illusion（arXiv 2504.20879）</a><br>
+      • <a href="https://arena.ai/blog/our-response/" target="_blank">LMArena 官方回應</a><br>
+      • <a href="https://www.aichatdaily.com/tools/artificial-analysis" target="_blank">Artificial Analysis vs LMArena：該相信哪個？</a><br>
+      • <a href="https://www.morphllm.com/best-ai-coding-agents-2026" target="_blank">Best AI Coding Agents（2026-08 計分排行）</a><br>
+      • <a href="https://openrouter.ai/blog/insights/the-open-weight-models-that-matter-june-2026/" target="_blank">OpenRouter — The Open Weight Models that Matter: June 2026</a><br>
+      • <a href="https://artificialanalysis.ai/models/comparisons/gemma-4-31b-vs-gpt-oss-20b" target="_blank">Gemma 4 31B vs gpt-oss-20b（AA 比較頁）</a><br>
+      • <a href="https://joshuaschultz.com/cheatsheets/open-weight-models-2026/" target="_blank">Every Open-Weight AI Model Worth Running in 2026</a><br>
+      • <a href="https://www.buildmvpfast.com/blog/nvidia-nemotron-open-source-llm-models-2026" target="_blank">NVIDIA Nemotron 3 開放權重模型家族</a><br>
+      • <a href="https://ojs.aaai.org/index.php/AAAI/article/view/40535" target="_blank">TokenPowerBench（AAAI）— LLM 推論功耗量測</a><br>
+      • <a href="https://arxiv.org/pdf/2601.22076" target="_blank">Where Do the Joules Go? Diagnosing Inference Energy Consumption</a><br>
+      • <a href="https://bizon-tech.com/blog/mac-studio-mac-mini-vs-nvidia-gpus-llm" target="_blank">Mac Studio vs NVIDIA GPUs for Local LLMs（BIZON）</a><br>
+      • <a href="https://blogs.novita.ai/glm-4-7-flash-vs-qwen3-coder-30b/" target="_blank">GLM-4.7-Flash vs Qwen3-Coder-30B</a>
+    </div>
+  </div>
+
+  <footer>
+    2026-08-29 · 模型評測與選型研究 · Roy's Lab<br>
+    數據為研究當下之公開資訊快照，模型排行變動快速，實際採用前請回原站查證
+  </footer>
+</div>
+<script>
+function switchTab(i){
+  document.querySelectorAll('.tab-btn').forEach((b,n)=>b.classList.toggle('active',n===i));
+  document.querySelectorAll('.tab-panel').forEach((p,n)=>p.classList.toggle('active',n===i));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
