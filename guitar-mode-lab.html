@@ -391,16 +391,21 @@ let S={ root:9, qual:'m7', mode:'dorian', pos:5, showDeg:false, triad:null };
 /* ============ 指板常數 ============ */
 const OPEN=[64,59,55,50,45,40];         // index 0 = 高 e
 const SNAME=['e','B','G','D','A','E'];
-const ML=92, MT=32, FW=52, SG=34, NR=13, FRETS=15;
-const INLAY=[3,5,7,9,15], DINLAY=[12];
+const ML=92, MT=32, FW=44, SG=34, NR=13, FRETS=22;
+const INLAY=[3,5,7,9,15,17,19,21], DINLAY=[12];
 
 /* ============ 音訊 ============ */
-let pluck=null, poly=null, droneOn=false;
+let pluckPool=[], pluckIdx=0, poly=null, droneOn=false;
+/* 六個 PluckSynth 輪流用（等同六條弦）。單一 monophonic 合成器連續排程
+   會撞到 Tone.js「Start time must be strictly greater than previous start time」，
+   因為 triggerAttackRelease 的放音時間會晚於下一個音的起音時間。 */
 async function audio(){
   await Tone.start();
-  if(!pluck){
-    pluck=new Tone.PluckSynth({attackNoise:1.2,dampening:3600,resonance:.93}).toDestination();
-    pluck.volume.value=-4;
+  if(!pluckPool.length){
+    for(let i=0;i<8;i++){
+      const pk=new Tone.PluckSynth({attackNoise:1.2,dampening:3600,resonance:.93}).toDestination();
+      pk.volume.value=-4; pk._lastT=-1; pluckPool.push(pk);
+    }
   }
   if(!poly){
     poly=new Tone.PolySynth(Tone.Synth,{
@@ -411,7 +416,21 @@ async function audio(){
   }
 }
 const f=m=>440*Math.pow(2,(m-69)/12);
-async function ping(midi){ await audio(); pluck.triggerAttackRelease(f(midi),'2n'); }
+/* 挑一個「上次排程時間早於 when」的合成器，避免時間倒退報錯 */
+function nextPluck(when){
+  for(let i=0;i<pluckPool.length;i++){
+    const pk=pluckPool[(pluckIdx+i)%pluckPool.length];
+    if(pk._lastT < when){ pluckIdx=(pluckIdx+i+1)%pluckPool.length; pk._lastT=when; return pk; }
+  }
+  let best=pluckPool[0];
+  for(const pk of pluckPool) if(pk._lastT<best._lastT) best=pk;
+  best._lastT=when; return best;
+}
+/* 單音失敗不能拖垮整句 */
+function strike(midi,when){
+  try{ nextPluck(when).triggerAttack(f(midi),when); }catch(e){}
+}
+async function ping(midi){ await audio(); strike(midi, Tone.now()+0.02); }
 
 async function toggleDrone(){
   await audio();
@@ -540,10 +559,10 @@ function rootFret6(){ let fr=((S.root-4)%12+12)%12; if(fr<2) fr+=12; return fr; 
 async function playLick(i){
   await audio();
   const L=LICKS[S.mode][i], B=buildTab(L);
-  const now=Tone.now(); let t=0;
+  const now=Tone.now()+0.08; let t=0;
   B.midis.forEach((m,k)=>{
-    if(m!==null) pluck.triggerAttackRelease(f(m), k===B.long?1.4:.42, now+t);
-    t += (k===B.long? .95 : .34);
+    if(m!==null) strike(m, now+t);            // 只排起音，讓弦自然衰減
+    t += (k===B.long? 1.05 : .34);
   });
 }
 
@@ -641,7 +660,7 @@ document.getElementById('droneBtn').onclick=toggleDrone;
 (function initPos(){
   const sel=document.getElementById('pos');
   let h='<option value="0">全指板</option>';
-  for(let i=1;i<=12;i++) h+=`<option value="${i}">第 ${i} 把位（${i}–${i+4} 格）</option>`;
+  for(let i=1;i<=18;i++) h+=`<option value="${i}">第 ${i} 把位（${i}–${i+4} 格）</option>`;
   sel.innerHTML=h;
   sel.onchange=()=>{ S.pos=parseInt(sel.value); drawBoard(); renderLicks(); };
 })();
