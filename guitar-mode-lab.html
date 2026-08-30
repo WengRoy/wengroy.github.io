@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>調式實驗室 Mode Lab — 特徵音 × 疊置三和弦</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Noto+Sans+TC:wght@400;500;700&family=Righteous&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+<style>
+:root{
+  --comic-black:#1a1a1a; --warm-cream:#fdf6e3; --warm-orange:#e8713a;
+  --warm-brown:#6b4226; --warm-gold:#d4a853; --warm-red:#c0392b;
+  --warm-blue:#2e86ab; --warm-green:#27ae60; --warm-purple:#8e44ad;
+  --grey:#9aa0a6;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; padding:0 0 60px; background:var(--warm-cream);
+  font-family:'Noto Sans TC',sans-serif; color:var(--comic-black);
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:radial-gradient(circle,#d4b896 1px,transparent 1px);
+  background-size:18px 18px; opacity:.55;
+}
+.wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 16px;}
+
+header{ text-align:center; padding:30px 0 18px; position:relative; }
+header h1{
+  font-family:'Baloo 2',cursive; font-size:2.5rem; margin:0 0 6px;
+  color:var(--warm-brown); text-shadow:3px 3px 0 rgba(232,113,58,.25);
+}
+header p{ margin:0; color:#7a6a55; font-size:.95rem; }
+.sfx{
+  position:absolute; font-family:'Baloo 2',cursive; font-weight:800;
+  opacity:.07; font-size:3.4rem; transform:rotate(-9deg);
+  left:8px; top:22px; pointer-events:none; user-select:none;
+}
+.sfx2{ left:auto; right:10px; top:56px; transform:rotate(8deg); font-size:2.8rem; }
+
+.panel{
+  background:#fff; border:3px solid var(--comic-black); border-radius:14px;
+  padding:16px 18px; box-shadow:4px 4px 0 var(--comic-black); margin-bottom:18px;
+}
+.panel h2{
+  font-family:'Baloo 2',cursive; font-size:1.25rem; margin:0 0 12px;
+  color:var(--warm-brown); display:flex; align-items:center; gap:8px;
+}
+.panel h2 .num{
+  background:var(--warm-orange); color:#fff; width:26px; height:26px;
+  border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  font-size:.85rem; border:2px solid var(--comic-black);
+}
+
+.row{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
+.row:last-child{ margin-bottom:0; }
+.lbl{
+  font-size:.78rem; font-weight:700; color:var(--warm-brown);
+  min-width:74px; letter-spacing:.5px;
+}
+button.chip{
+  font-family:'Noto Sans TC',sans-serif; font-weight:700; font-size:.85rem;
+  padding:6px 12px; border:2px solid var(--comic-black); border-radius:9px;
+  background:#fff; cursor:pointer; transition:.12s; box-shadow:2px 2px 0 var(--comic-black);
+}
+button.chip:hover{ transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--comic-black); }
+button.chip:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--comic-black); }
+button.chip.on{ background:var(--warm-orange); color:#fff; }
+button.chip.adv{ border-style:dashed; }
+button.chip.adv.on{ background:var(--warm-purple); }
+button.chip small{ display:block; font-size:.65rem; font-weight:500; opacity:.75; }
+select.chip{ font-family:inherit; }
+
+/* ---- 指板 ---- */
+.board-wrap{ overflow-x:auto; padding:4px 0 2px; }
+svg#board{ display:block; }
+@keyframes pulse{
+  0%,100%{ r:13; }
+  50%{ r:15.5; }
+}
+.charnote circle.dot{ animation:pulse 1.15s ease-in-out infinite; }
+
+.legend{ display:flex; flex-wrap:wrap; gap:14px; margin-top:10px; font-size:.78rem; }
+.legend span{ display:flex; align-items:center; gap:6px; }
+.legend i{
+  width:15px; height:15px; border-radius:50%; border:2px solid var(--comic-black);
+  display:inline-block;
+}
+
+/* ---- 資訊卡 ---- */
+.info-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; }
+.card{
+  border:2px solid var(--comic-black); border-radius:11px; padding:12px 14px;
+  background:#fffdf7;
+}
+.card h3{
+  margin:0 0 7px; font-size:.9rem; font-family:'Baloo 2',cursive; color:var(--warm-brown);
+}
+.card p{ margin:0 0 6px; font-size:.83rem; line-height:1.65; }
+.card p:last-child{ margin-bottom:0; }
+.formula{
+  font-family:'Righteous',monospace; font-size:1rem; letter-spacing:2px;
+  color:var(--warm-brown); background:#fff3dc; padding:7px 10px;
+  border-radius:7px; border:2px solid var(--warm-gold); display:inline-block;
+}
+.formula b{ color:var(--warm-orange); font-size:1.15rem; }
+.tag{
+  display:inline-block; font-size:.7rem; font-weight:700; padding:2px 8px;
+  border-radius:20px; border:2px solid var(--comic-black); margin-left:6px;
+  vertical-align:middle;
+}
+.tag.excl{ background:var(--warm-orange); color:#fff; }
+.tag.gen{ background:#eee; color:#555; }
+.tag.advb{ background:var(--warm-purple); color:#fff; }
+
+.diffbox{ font-size:.83rem; line-height:1.9; }
+.diffbox b{ color:var(--warm-orange); }
+.diffbox code{
+  background:#fff3dc; padding:1px 6px; border-radius:4px;
+  border:1px solid var(--warm-gold); font-family:'Righteous',monospace;
+}
+
+/* ---- 句子練習 ---- */
+.licks{ display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
+.lick{
+  border:2px solid var(--comic-black); border-radius:11px; padding:12px 14px;
+  background:#fffdf7;
+}
+.lick .top{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+.lick h4{ margin:0; font-size:.9rem; font-family:'Baloo 2',cursive; color:var(--warm-brown); }
+.lick .desc{ font-size:.78rem; color:#6b5f4d; line-height:1.6; margin:0 0 8px; }
+.tab{
+  font-family:'Menlo','Courier New',monospace; font-size:.76rem; line-height:1.5;
+  background:#2b2b2b; color:#f3e6c8; padding:10px 12px; border-radius:8px;
+  white-space:pre; overflow-x:auto; border:2px solid var(--comic-black);
+}
+button.play{
+  background:var(--warm-green); color:#fff; border:2px solid var(--comic-black);
+  border-radius:8px; padding:4px 11px; font-weight:700; font-size:.78rem;
+  cursor:pointer; box-shadow:2px 2px 0 var(--comic-black); font-family:inherit; flex-shrink:0;
+}
+button.play:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--comic-black); }
+button.drone{ background:var(--warm-red); color:#fff; }
+button.drone.on{ background:var(--warm-green); }
+
+.hint{
+  background:#fff3dc; border-left:5px solid var(--warm-orange);
+  padding:10px 14px; border-radius:0 9px 9px 0; font-size:.83rem; line-height:1.75;
+  margin-top:12px;
+}
+.hint b{ color:var(--warm-orange); }
+footer{ text-align:center; font-size:.78rem; color:#8a7a63; padding:16px; }
+@media(max-width:640px){
+  header h1{ font-size:1.8rem; } .sfx{ display:none; }
+  .lbl{ min-width:100%; margin-bottom:2px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="sfx">MODE!</span><span class="sfx sfx2">TWANG~</span>
+  <h1>調式實驗室 Mode Lab</h1>
+  <p>特徵音 × 疊置三和弦 × 句子練習　—　同一個和弦，換一個音就換一種顏色</p>
+</header>
+
+<!-- 1. 選和弦 -->
+<div class="panel">
+  <h2><span class="num">1</span>選一個和弦</h2>
+  <div class="row">
+    <span class="lbl">根音</span>
+    <div id="roots" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+  </div>
+  <div class="row">
+    <span class="lbl">和弦性質</span>
+    <div id="quals" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+  </div>
+  <div class="row">
+    <span class="lbl">可用調式</span>
+    <div id="modes" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+  </div>
+</div>
+
+<!-- 2. 指板 -->
+<div class="panel">
+  <h2><span class="num">2</span>指板　<span id="boardTitle" style="font-size:.95rem;color:var(--warm-orange);"></span></h2>
+  <div class="row">
+    <span class="lbl">把位</span>
+    <select id="pos" class="chip"></select>
+    <span class="lbl" style="min-width:auto;margin-left:8px;">顯示</span>
+    <button class="chip on" id="showName">音名</button>
+    <button class="chip" id="showDeg">級數</button>
+    <span class="lbl" style="min-width:auto;margin-left:8px;">聲音</span>
+    <button class="chip drone" id="droneBtn">▶ 和弦持續音</button>
+  </div>
+  <div class="board-wrap"><svg id="board"></svg></div>
+  <div class="legend">
+    <span><i style="background:var(--warm-red)"></i>根音</span>
+    <span><i style="background:var(--warm-blue)"></i>和弦內音</span>
+    <span><i style="background:var(--warm-orange)"></i><b>特徵音（色彩來源）</b></span>
+    <span><i style="background:var(--warm-gold)"></i>其他音階音</span>
+    <span><i style="background:var(--grey)"></i>Avoid 音（別停在這）</span>
+    <span><i style="background:var(--warm-purple)"></i>疊置三和弦</span>
+  </div>
+  <div class="hint">💡 <b>點指板上任何一個音都會發聲。</b>先按下「和弦持續音」讓和弦一直響著，再去點特徵音——你會立刻聽到它跟和弦磨出來的那個顏色。</div>
+</div>
+
+<!-- 3. 特徵音說明 -->
+<div class="panel">
+  <h2><span class="num">3</span>這個調式在幹嘛</h2>
+  <div class="info-grid">
+    <div class="card">
+      <h3>音階公式</h3>
+      <div class="formula" id="formulaBox"></div>
+      <p style="margin-top:9px;" id="charDesc"></p>
+    </div>
+    <div class="card">
+      <h3>跟同性質的其他調式差在哪</h3>
+      <div class="diffbox" id="diffBox"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. 疊置三和弦 -->
+<div class="panel">
+  <h2><span class="num">4</span>疊置三和弦（Superimposition）</h2>
+  <div class="hint" style="margin-top:0;margin-bottom:12px;">
+    與其想「我在彈第 6 度」，不如想「<b>我在這個和弦上面彈另一個和弦</b>」。
+    三和弦形狀你本來就會按，不用邊彈邊算級數——這是爵士樂手真正在腦袋裡跑的東西。
+  </div>
+  <div class="row">
+    <span class="lbl">疊上去</span>
+    <div id="triads" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+  </div>
+  <div id="triadInfo"></div>
+</div>
+
+<!-- 5. 句子練習 -->
+<div class="panel">
+  <h2><span class="num">5</span>句子練習　<span style="font-size:.8rem;color:#8a7a63;font-family:'Noto Sans TC';font-weight:400;">TAB 會依你選的把位自動重算</span></h2>
+  <div class="licks" id="licks"></div>
+  <div class="hint">
+    🎯 <b>練習鐵律：每一句都要碰到特徵音，而且要碰在強拍或長音上。</b>
+    如果 F♯ 只是十六分音符快速跑過去，耳朵抓不到，聽起來還是「在跑音階」。<br>
+    色彩不是來自「你彈了那個音」，是來自「<b>你把那個音放在聽得見的位置</b>」。
+  </div>
+</div>
+
+
+<!-- 6. 和弦進行分析 -->
+<div class="panel">
+  <h2><span class="num">6</span>和弦進行分析　<span style="font-size:.8rem;color:#8a7a63;font-family:'Noto Sans TC';font-weight:400;">丟一段進行進來，我告訴你每個和弦該彈什麼</span></h2>
+  <div class="row">
+    <input id="progIn" type="text" value="Dm7 - G7 - Cmaj7"
+      style="flex:1;min-width:240px;font-family:'Righteous',monospace;font-size:1rem;padding:9px 12px;border:2px solid var(--comic-black);border-radius:9px;background:#fffdf7;">
+    <button class="chip on" id="progGo">分析</button>
+    <button class="chip drone" id="progPlay">▶ 循環播放</button>
+  </div>
+  <div class="row">
+    <span class="lbl">範例</span>
+    <div id="progPresets" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+  </div>
+  <div id="progOut"></div>
+</div>
+
+<footer>調式實驗室 · Roy × Claude Code 🐻　|　點擊發聲需要先與頁面互動一次（瀏覽器政策）</footer>
+</div>
+
+<script>
+/* ============ 樂理資料 ============ */
+const SHARP=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const FLAT =['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+const ROOTS=[0,1,2,3,4,5,6,7,8,9,10,11];
+const ROOT_LBL=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+
+/* 調式：iv=半音組成, deg=級數標籤, char=特徵音半音, avoid=避免音半音 */
+const MODES={
+  ionian:    {zh:'Ionian 大調',    iv:[0,2,4,5,7,9,11], deg:['1','2','3','4','5','6','7'],
+              char:null, avoid:[5], desc:'標準大調。沒有特徵音——它就是基準線。第 4 度是 avoid 音，經過可以，別停在上面（會蓋掉大三度）。'},
+  lydian:    {zh:'Lydian',         iv:[0,2,4,6,7,9,11], deg:['1','2','3','♯4','5','6','7'],
+              char:6, avoid:[], desc:'大調把第 4 度升半音。那個 ♯11 是整個調式的靈魂——飄浮、明亮、電影配樂感。沒有 avoid 音，是最好用的大七和弦調式。'},
+  mixolydian:{zh:'Mixolydian',     iv:[0,2,4,5,7,9,10], deg:['1','2','3','4','5','6','♭7'],
+              char:10, avoid:[5], desc:'大調把第 7 度降半音。♭7 讓和弦有了「想解決」的推力——藍調、放克、搖滾的骨幹。第 4 度一樣是 avoid 音。'},
+  dorian:    {zh:'Dorian',         iv:[0,2,3,5,7,9,10], deg:['1','2','♭3','4','5','6','♭7'],
+              char:9, avoid:[], desc:'小調把第 6 度升回大六度。這個 ♮6（13 音）讓小調「透光」——不像自然小調那麼沉。Santana、Miles Davis〈So What〉的聲音。沒有 avoid 音。'},
+  aeolian:   {zh:'Aeolian 自然小調',iv:[0,2,3,5,7,8,10], deg:['1','2','♭3','4','5','♭6','♭7'],
+              char:8, avoid:[], desc:'標準自然小調。♭6 是它的顏色——比 Dorian 暗、比 Phrygian 溫和。大部分人一抓小調就是這個，所以它反而最沒有「特色」。'},
+  phrygian:  {zh:'Phrygian',       iv:[0,1,3,5,7,8,10], deg:['1','♭2','♭3','4','5','♭6','♭7'],
+              char:1, avoid:[], desc:'小調再把第 2 度降半音。♭9 貼著根音只差半音，摩擦力極強——西班牙佛朗明哥、金屬樂的陰暗感全從這裡來。'},
+  locrian:   {zh:'Locrian',        iv:[0,1,3,5,6,8,10], deg:['1','♭2','♭3','4','♭5','♭6','♭7'],
+              char:6, avoid:[1], desc:'唯一根音不穩定的調式（♭5 讓主和弦是半減）。幾乎只用在 ii-V-i 小調進行的 ii°7 上，很少單獨使用。'},
+  locrian2:  {zh:'Locrian ♮2',     iv:[0,2,3,5,6,8,10], deg:['1','2','♭3','4','♭5','♭6','♭7'],
+              char:2, avoid:[], adv:true, desc:'Locrian 但第 2 度是自然的。少了 ♭9 的擠壓感，在 m7♭5 上比正統 Locrian 好聽得多——爵士實務上幾乎都用這個。'},
+  lydianDom: {zh:'Lydian ♭7',      iv:[0,2,4,6,7,9,10], deg:['1','2','3','♯4','5','6','♭7'],
+              char:6, avoid:[], adv:true, desc:'屬七和弦 + ♯11。比 Mixolydian 更亮、更爵士，而且沒有 avoid 音（第 4 度被升掉了）。放克與融合樂的招牌聲音。'},
+  altered:   {zh:'Altered 變化音階',iv:[0,1,3,4,6,8,10], deg:['1','♭9','♯9','3','♯11','♭13','♭7'],
+              char:1, avoid:[], adv:true, desc:'屬七和弦所有可以變化的音全部變化。張力最大值——解決到 I 的時候爆發力最強。這是爵士樂手在 V7 上最常用的武器。'}
+};
+
+/* 和弦性質 */
+const QUALS={
+  m7:   {lbl:'m7',    zh:'小七', tones:[0,3,7,10], modes:['dorian','aeolian','phrygian'],
+         triads:[
+           {off:5, q:'M',  lbl:'IV 大三',  deg:'11 · 13 · 1',    imp:'dorian',   note:'★ Dorian 專屬。含 ♮6，只有 Dorian 有這個音——想聽 Dorian 就彈這個，一秒到位。'},
+           {off:1, q:'M',  lbl:'♭II 大三', deg:'♭9 · 11 · ♭13',  imp:'phrygian', note:'★ Phrygian 專屬。♭9 是西班牙味的來源，張力極強。'},
+           {off:2, q:'dim',lbl:'ii° 減三', deg:'9 · 11 · ♭13',   imp:'aeolian',  note:'★ Aeolian 專屬。同時含 ♮9 和 ♭13，Dorian（無 ♭6）跟 Phrygian（無 ♮2）都做不到。'},
+           {off:7, q:'m',  lbl:'v 小三',   deg:'5 · ♭7 · 9',     imp:null,       note:'通用色。Dorian／Aeolian 都在裡面，順但不專屬——聽不出調式差別。'},
+           {off:10,q:'M',  lbl:'♭VII 大三',deg:'♭7 · 9 · 11',    imp:null,       note:'通用、明亮，三個小調調式都有。適合當句子的過門。'},
+           {off:3, q:'M',  lbl:'♭III 大三',deg:'♭3 · 5 · ♭7',    imp:null,       note:'就是 m7 和弦本身的上三音，最安全、最沒有色彩。想穩住的時候用。'}
+         ]},
+  maj7: {lbl:'maj7',  zh:'大七', tones:[0,4,7,11], modes:['ionian','lydian'],
+         triads:[
+           {off:2, q:'M', lbl:'II 大三',  deg:'9 · ♯11 · 13', imp:'lydian', note:'★ Lydian 專屬。♯11 一出來立刻有飄浮感——這是 Lydian 最快的入口。'},
+           {off:2, q:'m', lbl:'ii 小三',  deg:'9 · 11 · 13',  imp:'ionian', note:'★ Ionian 側。含自然 4 度（avoid 音），要當經過音快速帶過，別停。'},
+           {off:7, q:'M', lbl:'V 大三',   deg:'5 · 7 · 9',    imp:null,     note:'通用。明亮安全，Ionian／Lydian 都可用。'},
+           {off:4, q:'m', lbl:'iii 小三', deg:'3 · 5 · 7',    imp:null,     note:'就是 maj7 的上三音，最保險的骨架。'},
+           {off:9, q:'m', lbl:'vi 小三',  deg:'13 · 1 · 3',   imp:null,     note:'柔和，兩個調式都可用。適合結尾。'}
+         ]},
+  dom7: {lbl:'7',     zh:'屬七', tones:[0,4,7,10], modes:['mixolydian','lydianDom','altered'],
+         triads:[
+           {off:10,q:'M', lbl:'♭VII 大三',deg:'♭7 · 9 · 11',   imp:'mixolydian',note:'Mixolydian 標準色。藍調、放克最常用的疊置。'},
+           {off:2, q:'M', lbl:'II 大三',  deg:'9 · ♯11 · 13',  imp:'lydianDom', note:'★ Lydian ♭7。加上 ♯11，比 Mixolydian 更亮更爵士。'},
+           {off:8, q:'M', lbl:'♭VI 大三', deg:'♭13 · 1 · ♯9',  imp:'altered',   note:'★ Altered。♭13 + ♯9 的組合是變化音階的核心，解決到 I 時張力最大。'},
+           {off:7, q:'m', lbl:'v 小三',   deg:'5 · ♭7 · 9',    imp:'mixolydian',note:'順暢、藍調感。最容易上手的屬七疊置。'},
+           {off:4, q:'dim',lbl:'iii° 減三',deg:'3 · 5 · ♭7',   imp:null,        note:'就是屬七的三全音核心（3 與 ♭7），最能表達「想解決」的張力。'}
+         ]},
+  m7b5: {lbl:'m7♭5',  zh:'半減', tones:[0,3,6,10], modes:['locrian','locrian2'],
+         triads:[
+           {off:8, q:'M', lbl:'♭VI 大三', deg:'♭13 · 1 · ♭3', imp:'locrian', note:'Locrian 標準色，暗而穩。'},
+           {off:2, q:'dim', lbl:'ii° 減三', deg:'9 · 11 · ♭13', imp:'locrian2',note:'★ Locrian ♮2 專屬。含自然 9 度，聽起來比正統 Locrian 舒服很多。'},
+           {off:3, q:'m', lbl:'♭III 小三',deg:'♭3 · ♭5 · ♭7', imp:null,      note:'就是 m7♭5 的上三音，最安全的骨架。'},
+           {off:5, q:'m', lbl:'iv 小三',  deg:'11 · ♭13 · 1', imp:null,      note:'通用，適合連接到解決和弦。'}
+         ]}
+};
+const TRIAD_IV={ M:[0,4,7], m:[0,3,7], dim:[0,3,6] };
+
+/* 句子練習：n=半音（可超過 12 表示高八度），long=第幾個音要拉長 */
+const LICKS={
+  dorian:[
+    {t:'13 度拉長解決',d:'最直接的 Dorian 句。把 ♮6 拉長讓耳朵認得它，再解決到 5 度。先把這句練成反射動作。',n:[12,10,9,7],long:2},
+    {t:'上行經過',d:'5 → ♮6 → ♭7 → 1 → 9。這裡 ♮6 是經過音，顏色比較淡，適合當句子的推進段。',n:[7,9,10,12,14],long:-1},
+    {t:'★ IV 大三和弦疊置',d:'殺手鐧。在小七和弦上直接彈 IV 級大三和弦琶音，聽起來 100% 是 Dorian，不可能被誤認成自然小調。',n:[5,9,12,17,12,9],long:-1}
+  ],
+  aeolian:[
+    {t:'♭13 下行解決',d:'♭6 拉長再落到 5 度，是自然小調最經典的嘆息感。跟 Dorian 那句只差一個音，直接 A／B 比對。',n:[12,10,8,7],long:2},
+    {t:'自然小調下行',d:'從 9 度一路走下來，途中經過 ♭13。這是最「本能」的小調句型，也是你要刻意跳脫的舒適圈。',n:[14,12,10,8,7,5,3],long:-1},
+    {t:'★ ii° 減三和弦疊置',d:'♮9 + 11 + ♭13 同時出現，這組合只有 Aeolian 有。比單純跑音階更能框住自然小調的色彩。',n:[2,5,8,14,8,5],long:-1}
+  ],
+  phrygian:[
+    {t:'♭9 半音摩擦',d:'♭2 貼著根音只差半音，這半音就是佛朗明哥的全部。拉長 ♭9 再解決到根音，張力立刻出來。',n:[3,1,0,1],long:3},
+    {t:'★ ♭II 大三和弦疊置',d:'在小七和弦上疊 ♭II 大三和弦——Phrygian 專屬。西班牙、金屬樂最愛的聲音。',n:[1,5,8,13,8,5],long:-1},
+    {t:'Phrygian 全下行',d:'從八度一路降到根音，♭13 和 ♭9 都會被踩到。彈慢一點，讓每個降音都被聽見。',n:[12,10,8,7,5,3,1,0],long:-1}
+  ],
+  ionian:[
+    {t:'大七度解決',d:'7 → 1 是大調最強的引力。拉長大七度再落到根音，聽起來就是「回家」。',n:[9,11,12,9,7],long:2},
+    {t:'避開 Avoid 音',d:'完整上行音階，注意第 4 度（灰色那顆）要快速帶過、不要停——停在上面會把大三度的明亮感蓋掉。',n:[0,2,4,5,7,9,11,12],long:-1},
+    {t:'iii 小三和弦疊置',d:'3-5-7 就是大七和弦的上三音，最保險的骨架句。想穩住的時候用這個。',n:[4,7,11,16,11,7],long:-1}
+  ],
+  lydian:[
+    {t:'♯11 拉長',d:'Lydian 的全部就在這個音。把 ♯4 拉長，飄浮感立刻出現——這是它跟大調唯一的差別。',n:[4,6,7,11],long:1},
+    {t:'★ II 大三和弦疊置',d:'在大七和弦上疊 II 級大三和弦，含 9、♯11、13 三個延伸音。一秒進入電影配樂模式。',n:[2,6,9,14,9,6],long:-1},
+    {t:'Lydian 上行',d:'完整音階。注意第 4 度是升的——這裡沒有 avoid 音，你可以停在任何一個音上，這是 Lydian 最舒服的地方。',n:[0,2,4,6,7,9,11,12],long:-1}
+  ],
+  mixolydian:[
+    {t:'♭7 → 3 解決',d:'♭7 和 3 是屬七和弦的三全音核心。拉長 ♭7 再落到大三度，這就是「屬七想解決」的聲音。',n:[12,10,9,7,4],long:1},
+    {t:'★ ♭VII 大三和弦疊置',d:'♭7-9-11，Mixolydian 最標準的疊置。藍調、放克的日常語彙。',n:[10,14,17,22,17,14],long:-1},
+    {t:'Mixolydian 上行',d:'完整音階。第 4 度是 avoid 音（灰色），快速經過就好。♭7 才是你要強調的目標。',n:[0,2,4,5,7,9,10,12],long:-1}
+  ],
+  lydianDom:[
+    {t:'♯11 + ♭7 雙色',d:'同時有 ♯11 的明亮和 ♭7 的推力。這是融合樂最典型的屬七聲音。',n:[0,2,4,6,7,9,10,12],long:3},
+    {t:'★ II 大三和弦疊置',d:'9-♯11-13，全是延伸音，完全不碰和弦內音。這種「只彈上層結構」的做法非常爵士。',n:[2,6,9,14,9,6],long:-1}
+  ],
+  altered:[
+    {t:'全變化上行',d:'♭9、♯9、♯11、♭13 全部到齊。單獨聽很不協和，但接到解決和弦時爆發力最強。',n:[0,1,3,4,6,8,10,12],long:-1},
+    {t:'★ ♭VI 大三和弦疊置',d:'♭13-1-♯9。變化音階最實用的入口——不用記七個變化音，記一個大三和弦形狀就好。',n:[8,12,15,20,15,12],long:-1}
+  ],
+  locrian:[
+    {t:'♭5 拉長',d:'♭5 是半減和弦的核心。拉長它，不穩定感就出來了——這個不穩定正是它要解決到下一個和弦的動力。',n:[0,1,3,5,6,8,10,12],long:4},
+    {t:'★ ♭VI 大三和弦疊置',d:'♭13-1-♭3，Locrian 標準色。暗而穩，適合 ii-V-i 小調進行的第一個和弦。',n:[8,12,15,20,15,12],long:-1}
+  ],
+  locrian2:[
+    {t:'♮9 讓它變好聽',d:'跟正統 Locrian 只差第 2 度。♮9 一出來，半減和弦立刻沒那麼刺耳——爵士實務上幾乎都用這個。',n:[0,2,3,5,6,8,10,12],long:1},
+    {t:'★ ii° 減三和弦疊置',d:'9-11-♭13，含自然 9 度，是 Locrian ♮2 的專屬色。',n:[2,5,8,14,8,5],long:-1}
+  ]
+};
+
+/* ============ 狀態 ============ */
+let S={ root:9, qual:'m7', mode:'dorian', pos:5, showDeg:false, triad:null };
+
+/* ============ 指板常數 ============ */
+const OPEN=[64,59,55,50,45,40];         // index 0 = 高 e
+const SNAME=['e','B','G','D','A','E'];
+const ML=92, MT=32, FW=52, SG=34, NR=13, FRETS=15;
+const INLAY=[3,5,7,9,15], DINLAY=[12];
+
+/* ============ 音訊 ============ */
+let pluck=null, poly=null, droneOn=false;
+async function audio(){
+  await Tone.start();
+  if(!pluck){
+    pluck=new Tone.PluckSynth({attackNoise:1.2,dampening:3600,resonance:.93}).toDestination();
+    pluck.volume.value=-4;
+  }
+  if(!poly){
+    poly=new Tone.PolySynth(Tone.Synth,{
+      oscillator:{type:'triangle'},
+      envelope:{attack:.5,decay:.3,sustain:.65,release:1.4}
+    }).toDestination();
+    poly.volume.value=-20;
+  }
+}
+const f=m=>440*Math.pow(2,(m-69)/12);
+async function ping(midi){ await audio(); pluck.triggerAttackRelease(f(midi),'2n'); }
+
+async function toggleDrone(){
+  await audio();
+  const b=document.getElementById('droneBtn');
+  if(droneOn){ poly.releaseAll(); droneOn=false; b.classList.remove('on'); b.textContent='▶ 和弦持續音'; return; }
+  const base=45+((S.root-9)%12+12)%12;          // 讓根音落在低音區
+  const notes=QUALS[S.qual].tones.map(t=>f(base+t));
+  poly.triggerAttack(notes);
+  droneOn=true; b.classList.add('on'); b.textContent='■ 停止持續音';
+}
+
+/* ============ 工具 ============ */
+function scaleOf(){ return MODES[S.mode].iv; }
+function degOf(sem){
+  const M=MODES[S.mode]; const i=M.iv.indexOf(((sem%12)+12)%12);
+  return i<0?null:M.deg[i];
+}
+function nameOf(pc){
+  const d=degOf(((pc-S.root)%12+12)%12);
+  return (d&&d.includes('♭')) ? FLAT[((pc%12)+12)%12] : SHARP[((pc%12)+12)%12];
+}
+function triadPcs(){
+  if(S.triad===null) return null;
+  const t=QUALS[S.qual].triads[S.triad];
+  return TRIAD_IV[t.q].map(x=>(S.root+t.off+x)%12);
+}
+function window_(){
+  if(S.pos===0) return [0,FRETS];
+  return [S.pos,S.pos+4];
+}
+
+/* ============ 指板繪製 ============ */
+function drawBoard(){
+  const W=ML+FW*FRETS+26, H=MT+SG*5+44;
+  const sc=scaleOf(), M=MODES[S.mode], ct=QUALS[S.qual].tones, tri=triadPcs();
+  const [wMin,wMax]=window_();
+  let s=`<svg id="board" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<rect x="${ML}" y="${MT-16}" width="${FW*FRETS}" height="${SG*5+32}" fill="#f0e0c0" stroke="#6b4226" stroke-width="2" rx="4"/>`;
+  // inlay
+  const cy=MT+SG*2.5;
+  INLAY.forEach(fr=>{ if(fr<=FRETS) s+=`<circle cx="${ML+FW*(fr-.5)}" cy="${cy}" r="7" fill="#d9c4a0"/>`; });
+  DINLAY.forEach(fr=>{ if(fr<=FRETS){ s+=`<circle cx="${ML+FW*(fr-.5)}" cy="${cy-24}" r="7" fill="#d9c4a0"/><circle cx="${ML+FW*(fr-.5)}" cy="${cy+24}" r="7" fill="#d9c4a0"/>`; }});
+  // 把位遮罩
+  if(S.pos!==0){
+    s+=`<rect x="${ML}" y="${MT-16}" width="${FW*Math.max(0,wMin)}" height="${SG*5+32}" fill="#fdf6e3" opacity=".78"/>`;
+    const startF=Math.min(wMax+1,FRETS);
+    s+=`<rect x="${ML+FW*startF}" y="${MT-16}" width="${Math.max(0,FW*(FRETS-startF))}" height="${SG*5+32}" fill="#fdf6e3" opacity=".78"/>`;
+  }
+  // 上弦枕 + 琴衍
+  s+=`<line x1="${ML}" y1="${MT-16}" x2="${ML}" y2="${MT+SG*5+16}" stroke="#6b4226" stroke-width="7"/>`;
+  for(let i=1;i<=FRETS;i++) s+=`<line x1="${ML+FW*i}" y1="${MT-16}" x2="${ML+FW*i}" y2="${MT+SG*5+16}" stroke="#a89878" stroke-width="2"/>`;
+  // 弦
+  for(let i=0;i<6;i++){
+    const y=MT+SG*i;
+    s+=`<line x1="${ML}" y1="${y}" x2="${ML+FW*FRETS}" y2="${y}" stroke="#8a7a5c" stroke-width="${1+i*.45}"/>`;
+    s+=`<text x="${ML-56}" y="${y+5}" font-family="Righteous" font-size="15" fill="#6b4226" text-anchor="middle">${SNAME[i]}</text>`;
+  }
+  // 格號
+  for(let i=1;i<=FRETS;i++){
+    const on=(S.pos!==0&&i>=wMin&&i<=wMax);
+    s+=`<text x="${ML+FW*(i-.5)}" y="${MT+SG*5+38}" font-family="Righteous" font-size="13" text-anchor="middle" fill="${on?'#e8713a':'#a89878'}" font-weight="${on?'bold':'normal'}">${i}</text>`;
+  }
+  // 音符
+  for(let st=0; st<6; st++){
+    for(let fr=0; fr<=FRETS; fr++){
+      const midi=OPEN[st]+fr, pc=((midi-S.root)%12+12)%12;
+      if(!sc.includes(pc)) continue;
+      const inWin = (S.pos===0)||(fr>=wMin&&fr<=wMax);
+      let fill, cls='', ring=2.5, txt=S.showDeg?degOf(pc):nameOf((midi)%12);
+      const isChar=(M.char!==null&&pc===M.char), isAvoid=M.avoid.includes(pc);
+      if(tri){
+        if(tri.includes(midi%12)){ fill='var(--warm-purple)'; }
+        else continue;
+      } else if(pc===0){ fill='var(--warm-red)'; ring=3; }
+      else if(isChar){ fill='var(--warm-orange)'; cls='charnote'; ring=3.5; }
+      else if(ct.includes(pc)){ fill='var(--warm-blue)'; }
+      else if(isAvoid){ fill='var(--grey)'; }
+      else{ fill='var(--warm-gold)'; }
+      const x=fr===0?ML-26:ML+FW*(fr-.5), y=MT+SG*st;
+      const op=inWin?1:.15;
+      s+=`<g class="${cls}" opacity="${op}" style="cursor:pointer" onclick="ping(${midi})">`;
+      s+=`<circle class="dot" cx="${x}" cy="${y}" r="${NR}" fill="${fill}" stroke="#1a1a1a" stroke-width="${ring}"/>`;
+      if(isAvoid&&!tri) s+=`<line x1="${x-9}" y1="${y+9}" x2="${x+9}" y2="${y-9}" stroke="#fff" stroke-width="2" opacity=".5" pointer-events="none"/>`;
+      s+=`<text x="${x}" y="${y+4}" font-family="Righteous" font-size="${txt&&txt.length>2?9:11}" fill="#fff" stroke="#1a1a1a" stroke-width="2" paint-order="stroke" text-anchor="middle" pointer-events="none">${txt||''}</text></g>`;
+    }
+  }
+  s+=`</svg>`;
+  document.getElementById('board').outerHTML=s;
+}
+
+/* ============ TAB 產生 ============ */
+function mapNote(midi,pMin,pMax,prev){
+  let c=[];
+  for(let st=0;st<6;st++){ const fr=midi-OPEN[st]; if(fr>=pMin&&fr<=pMax) c.push({st,fr}); }
+  if(!c.length) return null;
+  if(prev===null) return c[Math.floor(c.length/2)];
+  c.sort((a,b)=>Math.abs(a.st-prev)-Math.abs(b.st-prev)||a.fr-b.fr);
+  return c[0];
+}
+function buildTab(lick){
+  const [wMin]=window_();
+  const pMin=S.pos===0?Math.max(1,rootFret6()):wMin;
+  const lo=Math.max(0,pMin-1), hi=pMin+4;
+  const base=OPEN[4]+pMin;
+  let rm=base; while(((rm-S.root)%12+12)%12!==0) rm++;
+  const pos=[]; let prev=null;
+  for(const n of lick.n){
+    let p=mapNote(rm+n,lo,hi,prev);
+    if(!p) p=mapNote(rm+n,Math.max(0,lo-3),hi+4,prev);
+    if(!p){ pos.push(null); continue; }
+    pos.push(p); prev=p.st;
+  }
+  const lines=SNAME.map(n=>n.padEnd(1)+'|');
+  pos.forEach((p,i)=>{
+    const isLong=(i===lick.long);
+    for(let st=0;st<6;st++){
+      const here = !!(p && p.st===st);
+      let cell = here ? String(p.fr).padStart(2,'-') : '--';
+      lines[st]+= cell + (isLong ? (here?'~~~~~~':'------') : '--');
+    }
+  });
+  return {tab:lines.map(l=>l+'-|').join('\n'), midis:pos.map((p,i)=>p?OPEN[p.st]+p.fr:null), long:lick.long};
+}
+function rootFret6(){ let fr=((S.root-4)%12+12)%12; if(fr<2) fr+=12; return fr; }
+
+async function playLick(i){
+  await audio();
+  const L=LICKS[S.mode][i], B=buildTab(L);
+  const now=Tone.now(); let t=0;
+  B.midis.forEach((m,k)=>{
+    if(m!==null) pluck.triggerAttackRelease(f(m), k===B.long?1.4:.42, now+t);
+    t += (k===B.long? .95 : .34);
+  });
+}
+
+/* ============ UI 渲染 ============ */
+function renderChips(){
+  document.getElementById('roots').innerHTML=ROOTS.map(r=>
+    `<button class="chip${S.root===r?' on':''}" onclick="setRoot(${r})">${ROOT_LBL[r]}</button>`).join('');
+  document.getElementById('quals').innerHTML=Object.keys(QUALS).map(q=>
+    `<button class="chip${S.qual===q?' on':''}" onclick="setQual('${q}')">${QUALS[q].lbl}<small>${QUALS[q].zh}</small></button>`).join('');
+  document.getElementById('modes').innerHTML=QUALS[S.qual].modes.map(m=>
+    `<button class="chip${MODES[m].adv?' adv':''}${S.mode===m?' on':''}" onclick="setMode('${m}')">${MODES[m].zh}${MODES[m].adv?'<small>進階</small>':''}</button>`).join('');
+  document.getElementById('triads').innerHTML=
+    `<button class="chip${S.triad===null?' on':''}" onclick="setTriad(null)">關閉（看完整音階）</button>`+
+    QUALS[S.qual].triads.map((t,i)=>{
+      const rn=ROOT_LBL[(S.root+t.off)%12]+(t.q==='m'?'m':t.q==='dim'?'dim':'');
+      return `<button class="chip${S.triad===i?' on':''}" onclick="setTriad(${i})">${rn}<small>${t.lbl}</small></button>`;
+    }).join('');
+}
+function renderInfo(){
+  const M=MODES[S.mode], rn=ROOT_LBL[S.root];
+  document.getElementById('boardTitle').textContent=`${rn}${QUALS[S.qual].lbl}　—　${rn} ${M.zh}`;
+  // 公式
+  document.getElementById('formulaBox').innerHTML=M.iv.map((iv,i)=>{
+    const isC=(M.char!==null&&iv===M.char);
+    return isC?`<b>${M.deg[i]}</b>`:M.deg[i];
+  }).join(' ');
+  // 特徵音說明
+  let cd=`<span style="font-size:.83rem;line-height:1.7;">${M.desc}</span>`;
+  if(M.char!==null){
+    const cn=nameOf((S.root+M.char)%12), cdg=degOf(M.char);
+    cd=`<b style="color:var(--warm-orange);">特徵音 = ${cdg}（${cn}）</b><br>`+cd;
+  }
+  document.getElementById('charDesc').innerHTML=cd;
+  // 差異
+  const sibs=QUALS[S.qual].modes.filter(m=>m!==S.mode);
+  document.getElementById('diffBox').innerHTML = sibs.length? sibs.map(m=>{
+    const a=MODES[S.mode].iv, b=MODES[m].iv;
+    const onlyA=a.filter(x=>!b.includes(x)), onlyB=b.filter(x=>!a.includes(x));
+    if(!onlyA.length&&!onlyB.length) return `vs <b>${MODES[m].zh}</b>：完全相同`;
+    const pairs=onlyA.map((x,i)=>{
+      const y=onlyB[i];
+      const na=nameOf((S.root+x)%12);
+      const M2=MODES[m], j=M2.iv.indexOf(y);
+      const dy=j<0?'':M2.deg[j];
+      const ny=(dy.includes('♭')?FLAT:SHARP)[(S.root+y)%12];
+      return y===undefined?`<code>${na}</code>`:`<code>${na}</code> ↔ <code>${ny}</code>`;
+    }).join('、');
+    const n=Math.max(onlyA.length,onlyB.length);
+    return `vs <b>${MODES[m].zh}</b>：只差 <b>${n}</b> 個音　${pairs}`;
+  }).join('<br>') : '這個和弦性質下只有這一個常用調式。';
+  // 疊置說明
+  const ti=document.getElementById('triadInfo');
+  if(S.triad===null){ ti.innerHTML=`<p style="font-size:.83rem;color:#8a7a63;margin:6px 0 0;">選一個疊置三和弦，指板會只留下那三個音——先把形狀記住，再回去看它在音階裡的位置。</p>`; }
+  else{
+    const t=QUALS[S.qual].triads[S.triad];
+    const rn2=ROOT_LBL[(S.root+t.off)%12]+(t.q==='m'?'m':t.q==='dim'?'dim':'');
+    const notes=TRIAD_IV[t.q].map(x=>nameOf((S.root+t.off+x)%12)).join(' · ');
+    const excl=t.imp?`<span class="tag ${MODES[t.imp].adv?'advb':'excl'}">${MODES[t.imp].zh}</span>`:`<span class="tag gen">通用</span>`;
+    ti.innerHTML=`<div class="card" style="margin-top:10px;">
+      <h3>在 ${ROOT_LBL[S.root]}${QUALS[S.qual].lbl} 上疊 ${rn2} ${excl}</h3>
+      <p><b>音：</b>${notes}　　<b>級數：</b>${t.deg}</p>
+      <p>${t.note}</p>
+      ${t.imp&&t.imp!==S.mode?`<p style="color:var(--warm-orange);"><b>→ 這組疊置對應的是「${MODES[t.imp].zh}」，點上面的調式按鈕切過去看完整音階。</b></p>`:''}
+    </div>`;
+  }
+}
+function renderLicks(){
+  const arr=LICKS[S.mode]||[];
+  document.getElementById('licks').innerHTML=arr.map((L,i)=>{
+    const B=buildTab(L);
+    return `<div class="lick">
+      <div class="top"><h4>${L.t}</h4><button class="play" onclick="playLick(${i})">▶ 播放</button></div>
+      <p class="desc">${L.d}</p>
+      <div class="tab">${B.tab}</div>
+      ${L.long>=0?`<p class="desc" style="margin:7px 0 0;color:var(--warm-orange);"><b>~~~ 代表拉長</b>——色彩就在這一拍發生。</p>`:''}
+    </div>`;
+  }).join('');
+}
+function renderAll(){ renderChips(); drawBoard(); renderInfo(); renderLicks(); }
+
+/* ============ 事件 ============ */
+function setRoot(r){ S.root=r; if(droneOn){poly.releaseAll();droneOn=false;const b=document.getElementById('droneBtn');b.classList.remove('on');b.textContent='▶ 和弦持續音';} S.pos=defaultPos(); syncPos(); renderAll(); }
+function setQual(q){ S.qual=q; S.mode=QUALS[q].modes[0]; S.triad=null;
+  if(droneOn){poly.releaseAll();droneOn=false;const b=document.getElementById('droneBtn');b.classList.remove('on');b.textContent='▶ 和弦持續音';}
+  renderAll(); }
+function setMode(m){ S.mode=m; renderAll(); }
+function setTriad(i){ S.triad=i; drawBoard(); renderInfo(); }
+function defaultPos(){ return rootFret6(); }
+function syncPos(){ document.getElementById('pos').value=S.pos; }
+
+document.getElementById('showName').onclick=e=>{ S.showDeg=false; e.target.classList.add('on'); document.getElementById('showDeg').classList.remove('on'); drawBoard(); };
+document.getElementById('showDeg').onclick=e=>{ S.showDeg=true; e.target.classList.add('on'); document.getElementById('showName').classList.remove('on'); drawBoard(); };
+document.getElementById('droneBtn').onclick=toggleDrone;
+
+(function initPos(){
+  const sel=document.getElementById('pos');
+  let h='<option value="0">全指板</option>';
+  for(let i=1;i<=12;i++) h+=`<option value="${i}">第 ${i} 把位（${i}–${i+4} 格）</option>`;
+  sel.innerHTML=h;
+  sel.onchange=()=>{ S.pos=parseInt(sel.value); drawBoard(); renderLicks(); };
+})();
+
+S.pos=defaultPos(); syncPos(); renderAll();
+
+/* ============ 和弦進行分析 ============ */
+const PC_LTR={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const MAJ_DIA=[{o:0,q:'maj7',r:'I'},{o:2,q:'m7',r:'ii'},{o:4,q:'m7',r:'iii'},{o:5,q:'maj7',r:'IV'},
+               {o:7,q:'dom7',r:'V'},{o:9,q:'m7',r:'vi'},{o:11,q:'m7b5',r:'vii°'}];
+const MIN_DIA=[{o:0,q:'m7',r:'i'},{o:2,q:'m7b5',r:'ii°'},{o:3,q:'maj7',r:'♭III'},{o:5,q:'m7',r:'iv'},
+               {o:7,q:'m7',r:'v'},{o:8,q:'maj7',r:'♭VI'},{o:10,q:'dom7',r:'♭VII'},
+               {o:7,q:'dom7',r:'V7',hm:true}];
+const DEG2MODE={0:'ionian',2:'dorian',4:'phrygian',5:'lydian',7:'mixolydian',9:'aeolian',11:'locrian'};
+const PRESETS=[
+  {n:'ii-V-I 大調',  v:'Dm7 - G7 - Cmaj7'},
+  {n:'ii-V-i 小調',  v:'Bm7b5 - E7 - Am7'},
+  {n:'小調＋和聲 V7',v:'Am7 - Dm7 - E7 - Am7'},
+  {n:'Dorian vamp',  v:'Am7 - Am7'},
+  {n:'Lydian vamp',  v:'Cmaj7 - Cmaj7'},
+  {n:'放克兩和弦',   v:'Cm7 - F7'},
+  {n:'爵士循環',     v:'Cmaj7 - A7 - Dm7 - G7'}
+];
+let progChords=[], progOn=false, progIdx=0;
+
+function parseChord(s){
+  s=s.trim(); if(!s) return null;
+  const m=s.match(/^([A-Ga-g])([#♯b♭]?)(.*)$/); if(!m) return null;
+  let pc=PC_LTR[m[1].toUpperCase()] + (/[#♯]/.test(m[2])?1 : /[b♭]/.test(m[2])?-1 : 0);
+  pc=((pc%12)+12)%12;
+  const t=m[3].replace(/♭/g,'b').replace(/♯/g,'#').replace(/\s/g,'');
+  const lo=t.toLowerCase();
+  let q;
+  if(/7b5|ø|m7-5|half/.test(lo))             q='m7b5';
+  else if(/^(dim|°|o7|º)/.test(lo))          q='m7b5';
+  else if(/^(maj|ma|M|Δ|△)/.test(t))         q='maj7';
+  else if(/^(m|min|-)/.test(t))              q='m7';
+  else if(/^(7|9|11|13|alt|sus|\+)/.test(lo))q='dom7';
+  else                                        q='maj7';
+  return {pc,q,label:s.trim()};
+}
+function parseProg(str){
+  return str.split(/\s*[|,、\/]\s*|\s+-\s+|\s+/).map(x=>x.trim()).filter(Boolean)
+            .map(parseChord).filter(Boolean);
+}
+function findKey(cs){
+  const out=[];
+  for(let k=0;k<12;k++){
+    for(const mode of ['major','minor']){
+      const dia = mode==='major'?MAJ_DIA:MIN_DIA;
+      let hit=0;
+      cs.forEach(c=>{ const o=((c.pc-k)%12+12)%12;
+        if(dia.some(d=>d.o===o&&d.q===c.q)) hit++; });
+      let b=0;
+      const tq = mode==='major'?'maj7':'m7';
+      if(cs.some(function(c){return c.pc===k && c.q===tq;})) b+=3;   // 主和弦真的出現過
+      if(cs.length){ if(cs[cs.length-1].pc===k) b+=2; if(cs[0].pc===k) b+=1; }
+      if(mode==='major') b+=0.5;                                      // 平手時偏向大調
+      out.push({k,mode,hit,total:hit*10+b});
+    }
+  }
+  out.sort((a,b)=>b.total-a.total);
+  return out[0];
+}
+function roleOf(c,key){
+  const dia = key.mode==='major'?MAJ_DIA:MIN_DIA;
+  const o=((c.pc-key.k)%12+12)%12;
+  const d=dia.find(x=>x.o===o&&x.q===c.q);
+  return d ? {role:d.r, dia:true, hm:!!d.hm} : {role:null, dia:false, hm:false};
+}
+function modeFor(c,key,inf,nextC){
+  if(inf.dia && !inf.hm){
+    const rm = key.mode==='major'? key.k : (key.k+3)%12;
+    const o=((c.pc-rm)%12+12)%12;
+    const m=DEG2MODE[o];
+    if(m && QUALS[c.q].modes.includes(m)) return {m, why:'順階'};
+  }
+  if(c.q==='dom7'){
+    const to = nextC ? ((nextC.pc-c.pc)%12+12)%12 : null;
+    if(to===5 && nextC && (nextC.q==='m7'||nextC.q==='m7b5'))
+      return {m:'altered', why:'解決到小和弦 → Altered 張力最強（保守可用 Mixolydian）'};
+    if(inf.hm) return {m:'altered', why:'和聲小調 V7 → Altered 或 Mixolydian'};
+    return {m:'mixolydian', why: to===5 ? '二次屬和弦 → 穩用 Mixolydian，要張力換 Altered' : '非順階屬七'};
+  }
+  if(c.q==='m7')   return {m:'dorian',   why:'非順階小七 → Dorian 最安全'};
+  if(c.q==='maj7') return {m:'lydian',   why:'非順階大七（多為借用和弦）→ Lydian'};
+  return {m:'locrian2', why:'非順階半減 → Locrian ♮2'};
+}
+function charNameFor(pc,mode){
+  const M=MODES[mode]; if(M.char===null) return '—';
+  const sv=S.root, sm=S.mode; S.root=pc; S.mode=mode;
+  const n=nameOf((pc+M.char)%12)+'（'+degOf(M.char)+'）';
+  S.root=sv; S.mode=sm; return n;
+}
+function analyzeProg(str){
+  const cs=parseProg(str), box=document.getElementById('progOut');
+  if(!cs.length){ box.innerHTML='<p style="color:var(--warm-red);font-size:.85rem;">看不懂這段進行，試試「Dm7 - G7 - Cmaj7」這種寫法。</p>'; return; }
+  progChords=cs;
+  const key=findKey(cs), kn=ROOT_LBL[key.k]+(key.mode==='major'?' 大調':' 小調');
+  const rows=cs.map((c,i)=>{
+    const inf=roleOf(c,key), sug=modeFor(c,key,inf,cs[i+1]||cs[0]);
+    return {c,inf,sug,M:MODES[sug.m],cn:charNameFor(c.pc,sug.m)};
+  });
+  const allDia=rows.every(r=>r.inf.dia);
+  const uniq=new Set(cs.map(c=>c.pc+'_'+c.q)).size;
+  let verdict;
+  if(uniq<=2){
+    verdict='<div class="hint" style="margin:0 0 12px;">✅ <b>這是「靜止調式 vamp」——最適合練調式的進行。</b>'+
+      '和弦停著不動，耳朵有足夠時間認出特徵音。整段留在同一個調式裡，把特徵音拉長放強拍，色彩就會出來。</div>';
+  } else if(allDia){
+    verdict='<div class="hint" style="margin:0 0 12px;border-left-color:var(--warm-red);">'+
+      '⚠️ <b>這是「功能和聲進行」，全部和弦都順階於 '+kn+'——底下建議的調式其實是同一組音。</b><br>'+
+      '你照著換調式名稱彈，手指位置一個都不會變，聽起來不會有調式色彩。真正的色彩只有兩條路：<br>'+
+      '① <b>換目標音</b>：調式名稱不重要，重要的是每個和弦落在哪個音上（用下表「特徵音」欄當目標）。<br>'+
+      '② <b>在 V7 上用調外音</b>：把 V7 換成 Altered 或 Lydian ♭7，那才是真的按了新的音。</div>';
+  } else {
+    verdict='<div class="hint" style="margin:0 0 12px;">🎯 <b>這段進行有非順階和弦——那正是色彩的來源。</b>'+
+      '順階的部分照 '+kn+' 走就好，注意力放在下表標「非順階」的那幾格，那裡才需要換音階。</div>';
+  }
+  box.innerHTML='<p style="font-size:.9rem;margin:12px 0 8px;">推測調性：<b style="color:var(--warm-orange);font-size:1.05rem;">'+kn+'</b>'+
+      ' <span style="color:#8a7a63;font-size:.8rem;">（'+key.hit+'/'+cs.length+' 個和弦順階）</span></p>'
+    + verdict
+    + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.83rem;"><thead><tr style="background:#fff3dc;">'
+    + ['和弦','級數','建議調式','特徵音（目標音）','為什麼'].map(function(x){
+        return '<th style="border:2px solid var(--comic-black);padding:7px 9px;text-align:left;font-family:\'Baloo 2\';color:var(--warm-brown);">'+x+'</th>'; }).join('')
+    + '</tr></thead><tbody>'
+    + rows.map(function(r){
+        return '<tr style="cursor:pointer;background:#fff;" onclick="jumpTo('+r.c.pc+',\''+r.c.q+'\',\''+r.sug.m+'\')" title="點一下把指板切換到這個和弦">'
+        + '<td style="border:2px solid var(--comic-black);padding:7px 9px;font-family:\'Righteous\';font-size:.95rem;">'+r.c.label+'</td>'
+        + '<td style="border:2px solid var(--comic-black);padding:7px 9px;">'+(r.inf.dia?r.inf.role:'<span style="color:var(--warm-red);font-weight:700;">非順階</span>')+'</td>'
+        + '<td style="border:2px solid var(--comic-black);padding:7px 9px;font-weight:700;color:'+(r.M.adv?'var(--warm-purple)':'var(--warm-orange)')+';">'+r.M.zh+'</td>'
+        + '<td style="border:2px solid var(--comic-black);padding:7px 9px;font-family:\'Righteous\';">'+r.cn+'</td>'
+        + '<td style="border:2px solid var(--comic-black);padding:7px 9px;color:#6b5f4d;font-size:.78rem;">'+r.sug.why+'</td></tr>'; }).join('')
+    + '</tbody></table></div><p style="font-size:.78rem;color:#8a7a63;margin:8px 0 0;">💡 點表格任一列，上方指板會直接切到那個和弦與調式。</p>';
+}
+function jumpTo(pc,q,m){
+  S.root=pc; S.qual=q; S.mode=m; S.triad=null;
+  S.pos=defaultPos(); syncPos(); renderAll();
+  document.getElementById('board').scrollIntoView({behavior:'smooth',block:'center'});
+}
+async function toggleProg(){
+  await audio();
+  const b=document.getElementById('progPlay');
+  if(progOn){
+    Tone.Transport.stop(); Tone.Transport.cancel(); poly.releaseAll();
+    progOn=false; b.classList.remove('on'); b.textContent='▶ 循環播放'; return;
+  }
+  if(!progChords.length) analyzeProg(document.getElementById('progIn').value);
+  if(!progChords.length) return;
+  if(droneOn) await toggleDrone();
+  progIdx=0; Tone.Transport.bpm.value=72;
+  Tone.Transport.scheduleRepeat(function(time){
+    const c=progChords[progIdx%progChords.length];
+    poly.releaseAll(time);
+    poly.triggerAttack(QUALS[c.q].tones.map(function(t){return f(48+c.pc+t);}), time+0.02);
+    progIdx++;
+  },'1m','0');
+  Tone.Transport.start();
+  progOn=true; b.classList.add('on'); b.textContent='■ 停止';
+}
+document.getElementById('progGo').onclick=function(){ analyzeProg(document.getElementById('progIn').value); };
+document.getElementById('progIn').onkeydown=function(e){ if(e.key==='Enter') analyzeProg(e.target.value); };
+document.getElementById('progPlay').onclick=toggleProg;
+function usePreset(i){
+  document.getElementById('progIn').value=PRESETS[i].v;
+  if(progOn) toggleProg();
+  analyzeProg(PRESETS[i].v);
+}
+document.getElementById('progPresets').innerHTML=PRESETS.map(function(p,i){
+  return '<button class="chip" onclick="usePreset('+i+')">'+p.n+'<small>'+p.v+'</small></button>'; }).join('');
+analyzeProg(document.getElementById('progIn').value);
+
+</script>
+</body>
+</html>
