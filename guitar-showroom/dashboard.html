@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Martin 木吉他選購儀表板</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fdf6e3; --ink:#1d1a16; --accent:#e8713a; --accent2:#2f7d6f;
+  --warn:#c9472f; --card:#ffffff; --muted:#7a7268; --line:#1d1a16;
+  --soft:0 6px 18px rgba(29,26,22,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Noto Sans TC",system-ui,sans-serif; line-height:1.7;
+  background-image:radial-gradient(rgba(29,26,22,.09) 1.4px, transparent 1.4px);
+  background-size:16px 16px;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 18px 80px}
+h1,h2,h3,.num{font-family:"Baloo 2","Noto Sans TC",sans-serif;letter-spacing:.5px}
+
+/* 漫畫風外框 */
+.panel{
+  background:var(--card); border:3px solid var(--line); border-radius:18px;
+  box-shadow:6px 6px 0 var(--line); padding:22px 24px; margin:0 0 26px;
+}
+.panel.tint{background:#fffaf2}
+
+/* Header */
+header.hero{
+  border:3px solid var(--line); border-radius:22px; box-shadow:8px 8px 0 var(--line);
+  background:linear-gradient(135deg,#fff6ec 0%,#ffe9d6 100%);
+  padding:26px 28px; margin-bottom:26px; position:relative; overflow:hidden;
+}
+header.hero h1{margin:0 0 6px;font-size:clamp(26px,4.2vw,40px)}
+.kicker{display:inline-block;background:var(--accent);color:#fff;border:2px solid var(--line);
+  border-radius:999px;padding:3px 14px;font-weight:700;font-size:13px;margin-bottom:12px}
+.sub{color:#5a5248;margin:0;max-width:760px}
+.bubble{
+  margin-top:16px;background:#fff;border:3px solid var(--line);border-radius:16px;
+  padding:14px 16px;position:relative;font-size:15px;max-width:780px
+}
+.bubble:before{content:"";position:absolute;left:30px;bottom:-14px;width:0;height:0;
+  border:7px solid transparent;border-top-color:var(--line)}
+.bubble b{color:var(--accent)}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:26px}
+.kpi{background:var(--card);border:3px solid var(--line);border-radius:16px;box-shadow:4px 4px 0 var(--line);
+  padding:16px 18px}
+.kpi .label{font-size:13px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:7px}
+.kpi .num{font-size:30px;font-weight:800;line-height:1.2;margin-top:4px}
+.kpi .foot{font-size:12.5px;color:var(--muted)}
+.kpi.hl .num{color:var(--accent)}
+.kpi.hl2 .num{color:var(--accent2)}
+
+/* 區塊標題 */
+.sec-title{display:flex;align-items:center;gap:10px;margin:0 0 4px;font-size:21px}
+.sec-title .dot{width:13px;height:13px;border-radius:50%;background:var(--accent);border:2px solid var(--line);flex:none}
+.sec-desc{margin:0 0 18px;color:var(--muted);font-size:14px}
+
+/* 圖表 */
+.chart-grid{display:grid;grid-template-columns:1.25fr .95fr;gap:24px}
+@media(max-width:900px){.chart-grid{grid-template-columns:1fr}}
+svg{display:block;max-width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:13px;color:#4e483f}
+.legend i{width:13px;height:13px;border-radius:3px;display:inline-block;border:1.5px solid var(--line);
+  margin-right:6px;vertical-align:-2px}
+
+/* 切換鈕 */
+.toggles{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 14px}
+.tg{font:inherit;font-size:13px;font-weight:700;cursor:pointer;background:#fff;
+  border:2.5px solid var(--line);border-radius:999px;padding:5px 14px;transition:.15s}
+.tg[aria-pressed="true"]{background:var(--accent);color:#fff;transform:translateY(-1px);
+  box-shadow:0 3px 0 var(--line)}
+.tg:hover{background:#ffe9d6}
+.tg[aria-pressed="true"]:hover{background:var(--accent)}
+
+/* 表格 */
+.tbl-scroll{overflow-x:auto;border:2.5px solid var(--line);border-radius:14px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:820px}
+th,td{padding:11px 13px;text-align:left;border-bottom:1px solid #e9e2d6;white-space:nowrap}
+thead th{background:#1d1a16;color:#fff;font-weight:700;position:sticky;top:0}
+tbody tr:hover{background:#fff7ee}
+tbody tr.win{background:#f1f9f6}
+tbody tr.win td:first-child{box-shadow:inset 4px 0 0 var(--accent2)}
+td.c{text-align:center}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:1px 9px;border-radius:999px;
+  border:1.5px solid var(--line)}
+.pill.solid{background:#dff0ea}.pill.hpl{background:#fde8dd}
+
+/* 決策流程 */
+.flow{background:#fff;border:2.5px solid var(--line);border-radius:14px;padding:18px}
+
+/* 結論 */
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.vcard{border:3px solid var(--line);border-radius:16px;padding:18px;box-shadow:4px 4px 0 var(--line);background:#fff}
+.vcard h3{margin:0 0 8px;font-size:18px;display:flex;gap:8px;align-items:center}
+.vcard.gold{background:#fff8ec}
+.vcard .tag{font-size:12px;font-weight:700;border:2px solid var(--line);border-radius:999px;padding:2px 10px;background:var(--accent);color:#fff}
+.vcard ul{margin:8px 0 0;padding-left:20px;font-size:14px}
+.vcard li{margin-bottom:4px}
+.price-tag{font-family:"Baloo 2";font-size:26px;font-weight:800;color:var(--accent)}
+
+/* Motion 風格播放 */
+.motionbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:#1d1a16;color:#fff;border-radius:14px;padding:12px 18px;margin-bottom:26px;
+  border:3px solid var(--line);box-shadow:5px 5px 0 rgba(29,26,22,.25)}
+.motionbar button{font:inherit;font-weight:800;font-family:"Baloo 2";font-size:15px;cursor:pointer;
+  background:var(--accent);color:#fff;border:2.5px solid #fff;border-radius:999px;padding:6px 20px}
+.motionbar button:hover{background:#ff8445}
+.motionbar .hint{font-size:13px;color:#cfc6b8}
+.track{flex:1;min-width:140px;height:8px;background:#443e36;border-radius:999px;overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .35s linear}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+.reveal.on{opacity:1;transform:none}
+.spot{animation:spot 1.1s ease}
+@keyframes spot{0%{box-shadow:6px 6px 0 var(--line)}35%{box-shadow:0 0 0 7px rgba(232,113,58,.35),6px 6px 0 var(--line)}100%{box-shadow:6px 6px 0 var(--line)}}
+
+/* 註腳 */
+.notes{font-size:13px;color:#5a5248}
+.notes h3{font-size:16px;margin:0 0 8px}
+.notes ol{padding-left:22px;margin:0}
+.notes a{color:#b4552a}
+.caveat{background:#fff4ec;border:2.5px dashed var(--line);border-radius:14px;padding:14px 18px;font-size:13.5px;margin-top:18px}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:34px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Claude Dashboards ＋ Motion ‧ 功能 Demo</span>
+  <h1>Martin 木吉他 3 萬元級選購儀表板</h1>
+  <p class="sub">用一句話的需求（「3 萬左右的 Martin 買哪把好？」）＋ 公開店家報價，長出一張可追溯、可互動的決策儀表板。資料擷取日：<b>2026-10-11</b>。</p>
+  <div class="bubble">
+    🐻 <b>肉乙</b>：這張板子就是在模擬 Anthropic 2026/10/08 發的兩個新功能 ——
+    <b>Claude Dashboards</b>（自然語言問，Claude 接資料源生圖表，每格數字都能回溯查詢來源）跟
+    <b>Claude Motion</b>（用「寫程式」而不是影片模型做動畫解說，所以每個字、每個數字都還能改）。
+    下面那條黑色播放條，就是 Motion 的手感：按一下，讓儀表板自己把結論「講」一遍。
+  </div>
+</header>
+
+<div class="motionbar">
+  <button id="playBtn">▶ 播放解說</button>
+  <div class="track"><i id="prog"></i></div>
+  <span class="hint" id="narr">Motion 示意：逐段揭露 → 數字跑動 → 聚焦結論</span>
+</div>
+
+<!-- KPI -->
+<section class="kpis">
+  <div class="kpi reveal" data-step="0">
+    <div class="label">🎸 候選琴款</div>
+    <div class="num" data-count="6">0</div>
+    <div class="foot">X 系列 3 款 ／ Road 系列 3 款</div>
+  </div>
+  <div class="kpi hl reveal" data-step="0">
+    <div class="label">💰 價格區間</div>
+    <div class="num">25.9<span style="font-size:17px">–</span>39.4<span style="font-size:17px">k</span></div>
+    <div class="foot">各店標價，非代理商建議售價</div>
+  </div>
+  <div class="kpi hl2 reveal" data-step="0">
+    <div class="label">⚖️ 預算命中（≤30k）</div>
+    <div class="num" data-count="2">0</div>
+    <div class="foot">D-X2E 系列是唯一硬壓線的</div>
+  </div>
+  <div class="kpi reveal" data-step="0">
+    <div class="label">🏆 吉他手首選</div>
+    <div class="num" style="font-size:22px">D-10E</div>
+    <div class="foot">全實木，會越彈越開（大鼻子 35.7k 起）</div>
+  </div>
+</section>
+
+<!-- 價格 vs 預算 -->
+<section class="panel reveal" data-step="1">
+  <h2 class="sec-title"><span class="dot"></span>價格 vs 3 萬元預算線</h2>
+  <p class="sec-desc">橘色＝面單板（X 系列，側背 HPL 高壓合板）｜綠色＝全實木（Road 系列）。虛線為 NT$30,000 預算線。</p>
+  <div id="barChart"></div>
+  <div class="legend">
+    <span><i style="background:#e8713a"></i>面單板 ‧ X 系列</span>
+    <span><i style="background:#2f7d6f"></i>全實木 ‧ Road 系列</span>
+    <span><i style="background:#1d1a16"></i>預算線 NT$30,000</span>
+    <span><i style="background:#e8713a;opacity:.35;border-style:dashed"></i>虛線段＝跨店價差範圍</span>
+  </div>
+</section>
+
+<!-- 雷達 + 說明 -->
+<section class="panel reveal" data-step="2">
+  <h2 class="sec-title"><span class="dot"></span>六維度體質比較</h2>
+  <p class="sec-desc">點標籤切換疊圖。評分是把規格（板材、桶身、拾音器、產地）換算成「對彈的人的實際差別」，屬綜合判斷，不是實測數據。</p>
+  <div class="toggles" id="radarToggles"></div>
+  <div class="chart-grid">
+    <div><div id="radarChart"></div></div>
+    <div>
+      <div style="background:#fffaf2;border:2.5px solid var(--line);border-radius:14px;padding:16px">
+        <h3 style="margin:0 0 10px;font-size:17px">📐 六個維度怎麼看</h3>
+        <ul style="margin:0;padding-left:20px;font-size:14px">
+          <li><b>音色成長性</b>：全實木會隨彈奏年份開聲，HPL 幾乎不變。</li>
+          <li><b>CP 值</b>：同價位拿到多少實木與配備。</li>
+          <li><b>手感舒適</b>：桶身大小、缺角、肩寬對久彈的影響。</li>
+          <li><b>插電表演</b>：六款都能插電 —— X 系列用 Martin E-1，Road 系列用 Fishman MX-T（含內建調音器）；差在系統與桶身回授控制。</li>
+          <li><b>保值性</b>：二手市場對「全單 Martin」的接受度明顯較高。</li>
+          <li><b>耐候抗操</b>：HPL 不怕濕氣與溫差，實木需控濕（台灣夏天是真課題）。</li>
+        </ul>
+      </div>
+      <div style="background:#fff;border:2.5px solid var(--line);border-radius:14px;padding:16px;margin-top:16px">
+        <h3 style="margin:0 0 8px;font-size:17px">🎨 卡拉的角度</h3>
+        <p style="margin:0;font-size:14px">
+          X 系列像「隨時能出門的球鞋」——下雨天照穿、丟後車廂也不心疼；
+          Road 系列的全實木像「會跟著你變形的皮鞋」——頭一年有點硬，三年後它只合你的手。
+          問題不是哪把好，是你想要<b>一把工具</b>，還是<b>一個會一起老的夥伴</b>。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 規格表 -->
+<section class="panel reveal" data-step="3">
+  <h2 class="sec-title"><span class="dot"></span>規格與報價明細</h2>
+  <p class="sec-desc">綠色列＝我的建議款。價格為各零售店網頁標價，同型號跨店價差最大可達 NT$4,200（D-X2E），務必多比。</p>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr>
+        <th>型號</th><th>台灣標價區間</th><th>桶身</th><th>面板</th><th>側背板</th>
+        <th class="c">結構</th><th>拾音器</th><th class="c">產地</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><b>D-X2E</b> Mahogany</td><td>NT$25,900–30,100</td><td>Dreadnought</td>
+          <td>雲杉單板</td><td>HPL 桃花心木紋</td>
+          <td class="c"><span class="pill hpl">面單</span></td><td>Martin E-1</td><td class="c">墨西哥</td>
+        </tr>
+        <tr>
+          <td><b>D-X2E</b> Brazilian / Ziricote</td><td>NT$25,900–28,900</td><td>Dreadnought</td>
+          <td>雲杉單板</td><td>HPL 玫瑰木／Ziricote 紋</td>
+          <td class="c"><span class="pill hpl">面單</span></td><td>Martin E-1</td><td class="c">墨西哥</td>
+        </tr>
+        <tr>
+          <td><b>GPC-X2E</b> Ziricote</td><td>NT$30,900</td><td>Grand Performance（缺角）</td>
+          <td><b>沙比利</b>（非雲杉）</td><td>HPL Ziricote 紋</td>
+          <td class="c"><span class="pill hpl">HPL 側背</span></td><td>Martin E-1</td><td class="c">墨西哥</td>
+        </tr>
+        <tr>
+          <td><b>GPC-X2E</b> Cocobolo</td><td>NT$34,100</td><td>Grand Performance（缺角）</td>
+          <td>雲杉單板</td><td>HPL Cocobolo 紋</td>
+          <td class="c"><span class="pill hpl">面單</span></td><td>Martin E-1</td><td class="c">墨西哥</td>
+        </tr>
+        <tr class="win">
+          <td><b>D-10E</b>（Road Series）</td><td>NT$35,700–39,400<br><small style="color:#8d8478">大鼻子：沙比利面 35,700／雲杉面 39,400</small></td><td>Dreadnought</td>
+          <td>雲杉／沙比利 實木</td><td>沙比利實木</td>
+          <td class="c"><span class="pill solid">全單</span></td><td>Fishman MX-T</td><td class="c">墨西哥</td>
+        </tr>
+        <tr>
+          <td><b>000-10E</b> Retro Sapele</td><td>NT$35,700</td><td>000（小桶身）</td>
+          <td>實木</td><td>沙比利實木</td>
+          <td class="c"><span class="pill solid">全單</span></td><td>Fishman MX-T</td><td class="c">墨西哥</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="caveat">
+    ⚠️ <b>預算外但值得知道</b>：再往上的 Road Series <b>D-12E / D-13E / 000-13E</b> 落在 <b>NT$50,200–58,590</b>，
+    是另一個級距（同為全單，但用料與做工更高），3 萬預算不用考慮；若你在店裡被推這幾把，那是加價 60%＋的跳級。
+  </div>
+</section>
+
+<!-- 決策樹 -->
+<section class="panel tint reveal" data-step="4">
+  <h2 class="sec-title"><span class="dot"></span>怎麼選：三個問題分流</h2>
+  <p class="sec-desc">預算是硬條件，但真正決定的是「你會把這把琴帶去哪裡」。</p>
+  <div class="flow"><div id="flowChart"></div></div>
+</section>
+
+<!-- 結論 -->
+<section class="panel reveal" data-step="5" id="verdictPanel">
+  <h2 class="sec-title"><span class="dot"></span>結論：三條路</h2>
+  <p class="sec-desc">如果你是會長期彈的吉他手，權重就要改 —— 「音色成長性」跟「手感」要壓過「耐操」。</p>
+  <div class="verdict">
+    <div class="vcard gold">
+      <h3>🏆 <span class="tag">主推</span></h3>
+      <p style="margin:0 0 2px"><b>Martin D-10E</b>（Road Series ‧ 全實木）</p>
+      <div class="price-tag">NT$35,700 起</div>
+      <ul>
+        <li>3 萬級唯一能拿到<b>全實木</b>的現實選項</li>
+        <li>沙比利側背：中頻厚、不像桃花心木那麼乾</li>
+        <li>五年後它會比今天好聽，HPL 不會</li>
+        <li>二手保值明顯優於 X 系列</li>
+        <li>代價：超預算約 19%，且台灣要認真控濕（45–55% RH）</li>
+      </ul>
+    </div>
+    <div class="vcard">
+      <h3>💰 預算硬壓 3 萬</h3>
+      <p style="margin:0 0 2px"><b>Martin D-X2E</b> Mahogany</p>
+      <div class="price-tag" style="color:var(--accent2)">NT$25,900 起</div>
+      <ul>
+        <li>唯一真的壓在 3 萬內的 Martin</li>
+        <li>雲杉單板面 → 音色不是塑膠感</li>
+        <li>側背 HPL：丟車上、帶去海邊都不心慌</li>
+        <li>可插電（Martin E-1 拾音系統）</li>
+        <li>代價：音色不會「開」，保值較弱</li>
+      </ul>
+    </div>
+    <div class="vcard">
+      <h3>🎤 常自彈自唱／久彈</h3>
+      <p style="margin:0 0 2px"><b>GPC-X2E</b> Ziricote 或 <b>000-10E</b></p>
+      <div class="price-tag" style="color:#8a6a2f">NT$30,900 / 35,700</div>
+      <ul>
+        <li>GPC：缺角＋Grand Performance，高把位好跑、抱著舒服</li>
+        <li>000-10E：小桶身全單，指彈與伴唱的平衡最好</li>
+        <li>Dreadnought 太大聲會蓋掉人聲，這兩把不會</li>
+        <li>代價：單純刷和弦的音量與低頻輸給 D 桶</li>
+      </ul>
+    </div>
+  </div>
+  <div class="caveat" style="border-style:solid;background:#f1f9f6">
+    🎯 <b>一句話</b>：能拉到 3.6 萬就買 <b>D-10E</b>，差額是買「十年後的音色」；
+    卡死 3 萬就買 <b>D-X2E Mahogany</b>，別買到次級品牌的全單去換那塊實木 —— 做工與手感才是你每天摸到的東西。
+    <br>實際下單前，用同一支型號去<b>三家以上</b>比價（本表價差證明這很值得），並務必到店試彈同一把琴的手感與電聲。
+  </div>
+</section>
+
+<!-- 來源 -->
+<section class="panel notes">
+  <h3>📚 資料來源（2026-10-11 擷取，皆為零售店公開標價）</h3>
+  <ol>
+    <li><a href="https://www.minfon.com.tw/products/martin-dx2e-mahgonay" target="_blank" rel="noopener">民風樂府 — Martin D-X2E Mahogany</a>（NT$30,100）</li>
+    <li><a href="https://shop.xz.com.tw/products/martin-dx2e-%E9%9D%A2%E5%96%AE%E6%9D%BF%E9%9B%BB%E6%9C%A8%E6%B0%91%E8%AC%A0%E5%90%89%E4%BB%96-%E5%A4%9A%E8%89%B2%E6%AC%BE" target="_blank" rel="noopener">敦煌樂器 — Martin DX2E 多色款</a>（優惠 NT$25,900，原價 28,900）</li>
+    <li><a href="https://www.bignose-guitar.com.tw/products/martin-d-x2e-02" target="_blank" rel="noopener">大鼻子吉他 — Martin D-X2E 02</a>（NT$29,800，原價 35,800）</li>
+    <li><a href="https://shop.cyuncai.com/martin-gpc-x2e-zir" target="_blank" rel="noopener">群彩文創 — Martin GPC-X2E ZIR</a>（NT$30,900）</li>
+    <li><a href="https://www.minfon.com.tw/products/martin-gpcx2e-cocobolo" target="_blank" rel="noopener">民風樂府 — Martin GPC-X2E Cocobolo</a>（NT$34,100）</li>
+    <li><a href="https://www.yourmusic.com.tw/Martin" target="_blank" rel="noopener">Your Music 愉耳樂器 — Martin D10E</a>（NT$33,500 全沙比利 / 37,000 雲杉，頁面顯示已完售）</li>
+    <li><a href="https://www.lubymusicshop.com/products/martin-d10e-01" target="_blank" rel="noopener">陸比音樂 — Martin D10E-01</a>（NT$36,600）</li>
+    <li><a href="https://www.bignose-guitar.com.tw/products/martin-d10e-02" target="_blank" rel="noopener">大鼻子吉他 — Martin D10E-02</a>（雲杉面 NT$39,400）｜<a href="https://www.bignose-guitar.com.tw/products/martin-d10e-01" target="_blank" rel="noopener">大鼻子吉他 — Martin D10E-01</a>（沙比利面 NT$35,700）｜<a href="https://www.minfon.com.tw/products/martin-d10e" target="_blank" rel="noopener">民風樂府 D-10E</a>（NT$41,200，2026-10-11 晚間已下架）</li>
+    <li><a href="https://www.bignose-guitar.com.tw/products/martin-00010e" target="_blank" rel="noopener">大鼻子吉他 — Martin 000-10E Retro Sapele</a>（NT$35,700）</li>
+    <li>預算外參考：<a href="https://www.ensemblemusic.com.tw/products/martin-d-13e" target="_blank" rel="noopener">揚聲堡 D-13E</a>（NT$50,200）、<a href="https://www.yamusic.com.tw/product/11851" target="_blank" rel="noopener">YA! 玩音樂 000-13E</a>（NT$50,300）、<a href="https://shop.cyuncai.com/martin-d-12e" target="_blank" rel="noopener">群彩文創 D-12E</a>（NT$51,400）、<a href="https://24h.pchome.com.tw/prod/DMAFJG-A900HHE2C" target="_blank" rel="noopener">PChome D-12E</a>（NT$58,590）</li>
+    <li>功能說明來源：<a href="https://claude.com/resources/articles/dashboards-and-motion" target="_blank" rel="noopener">Anthropic — Dashboards and Motion（2026-10-08）</a></li>
+  </ol>
+  <div class="caveat">
+    🔍 <b>這張板子的誠實聲明</b>：①價格是「某幾家店某一天的網頁標價」，部分已完售／下架，不是市場均價；
+    ②六維度評分是<b>依規格推論的主觀綜合判斷</b>，無實測數據支撐；
+    ③D-13E 側背板材質各來源說法不一（Siris／Ziricote），本表未採用、僅列價格；
+    ④未找到 Martin 台灣代理商官方建議售價；⑤店家頁面快照與更正紀錄存於私有研究資料夾；市價以大鼻子吉他為準。
+  </div>
+</section>
+
+<footer>波特人樂器行 ‧ 2026-10-12 ｜ Claude Dashboards + Motion 功能 Demo ｜ 單檔 HTML，離線可開</footer>
+</div>
+
+<script>
+/* ===== 資料 ===== */
+const MODELS = [
+  {id:"dx2e",  name:"D-X2E Mahogany", short:"D-X2E", lo:25900, hi:30100, solid:false,
+   scores:[6.5, 9.2, 7.0, 8.0, 6.0, 9.8]},
+  {id:"dx2ez", name:"D-X2E Brazilian/Ziricote", short:"D-X2E ZIR", lo:25900, hi:28900, solid:false,
+   scores:[6.5, 9.0, 7.0, 8.0, 6.2, 9.8]},
+  {id:"gpc",   name:"GPC-X2E Ziricote", short:"GPC-X2E", lo:30900, hi:30900, solid:false,
+   scores:[7.0, 8.2, 9.2, 8.6, 6.4, 9.8]},
+  {id:"gpcc",  name:"GPC-X2E Cocobolo", short:"GPC Cocobolo", lo:34100, hi:34100, solid:false,
+   scores:[7.2, 7.2, 9.2, 8.6, 6.6, 9.8]},
+  {id:"d10e",  name:"D-10E（Road ‧ 全單）", short:"D-10E", lo:35700, hi:39400, solid:true,
+   scores:[9.2, 8.2, 7.4, 8.0, 8.6, 6.0]},
+  {id:"000",   name:"000-10E Retro Sapele", short:"000-10E", lo:35700, hi:35700, solid:true,
+   scores:[8.4, 7.0, 9.5, 8.0, 8.2, 6.2]}
+];
+const DIMS = ["音色成長性","CP 值","手感舒適","插電表演","保值性","耐候抗操"];
+const C_HPL="#e8713a", C_SOLID="#2f7d6f", INK="#1d1a16";
+const NT = n => "NT$" + n.toLocaleString("en-US");
+
+/* ===== 長條圖：價格 vs 預算 ===== */
+function drawBars(){
+  const W=760, rowH=52, padL=168, padR=74, padT=26, H=padT+MODELS.length*rowH+34;
+  const max=44000, sx = v => padL + (v/max)*(W-padL-padR);
+  const budget = sx(30000);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="各型號價格區間與 3 萬元預算線">`;
+  for(let v=0;v<=40000;v+=10000){
+    s+=`<line x1="${sx(v)}" y1="${padT-8}" x2="${sx(v)}" y2="${padT+MODELS.length*rowH}" stroke="#e9e2d6" stroke-width="1"/>
+        <text x="${sx(v)}" y="${padT+MODELS.length*rowH+20}" font-size="11.5" fill="#8d8478" text-anchor="middle">${v/1000}k</text>`;
+  }
+  MODELS.forEach((m,i)=>{
+    const y=padT+i*rowH+13, h=22, col=m.solid?C_SOLID:C_HPL;
+    s+=`<text x="${padL-14}" y="${y+16}" font-size="13" font-weight="700" fill="${INK}" text-anchor="end">${m.short}</text>`;
+    s+=`<rect x="${padL}" y="${y}" width="${W-padL-padR}" height="${h}" rx="5" fill="#f7f2e7"/>`;
+    // 主長條：0 → 最低價
+    s+=`<rect class="bar" data-w="${sx(m.lo)-padL}" x="${padL}" y="${y}" width="0" height="${h}" rx="5"
+         fill="${col}" stroke="${INK}" stroke-width="2"
+         style="transition:width .75s cubic-bezier(.2,.8,.2,1);transition-delay:${i*90}ms"/>`;
+    // 價差延伸段：最低價 → 最高價（跨店價差）
+    if(m.hi>m.lo){
+      s+=`<rect class="bar2" data-x="${sx(m.lo)}" data-w="${sx(m.hi)-sx(m.lo)}" x="${sx(m.lo)}" y="${y+3}" width="0" height="${h-6}" rx="4"
+           fill="${col}" fill-opacity=".3" stroke="${col}" stroke-width="1.6" stroke-dasharray="4 3"
+           style="transition:width .75s cubic-bezier(.2,.8,.2,1);transition-delay:${i*90+420}ms"/>`;
+    }
+    const lbl = m.lo===m.hi ? NT(m.lo) : (m.lo/1000).toFixed(1)+"k–"+(m.hi/1000).toFixed(1)+"k";
+    s+=`<text x="${sx(m.hi)+9}" y="${y+16}" font-size="12" font-weight="700" fill="${col}">${lbl}</text>`;
+  });
+  s+=`<line x1="${budget}" y1="${padT-14}" x2="${budget}" y2="${padT+MODELS.length*rowH+2}" stroke="${INK}" stroke-width="2.5" stroke-dasharray="7 5"/>
+      <rect x="${budget-42}" y="${padT-32}" width="84" height="21" rx="10" fill="${INK}"/>
+      <text x="${budget}" y="${padT-17}" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">預算 30k</text>`;
+  s+=`</svg>`;
+  document.getElementById("barChart").innerHTML=s;
+  requestAnimationFrame(()=>{
+    document.querySelectorAll("#barChart .bar,#barChart .bar2").forEach(b=>b.setAttribute("width", b.dataset.w));
+  });
+}
+
+/* ===== 雷達圖 ===== */
+let active=["dx2e","gpc","d10e","000"];
+function drawRadar(){
+  const S=420, c=S/2, R=142, n=DIMS.length;
+  const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [c+r*Math.cos(a), c+r*Math.sin(a)];};
+  let s=`<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="六維度雷達比較圖">`;
+  for(let k=2;k<=10;k+=2){
+    const r=R*k/10;
+    s+=`<polygon points="${Array.from({length:n},(_,i)=>pt(i,r).join(",")).join(" ")}"
+         fill="${k===10?"#fffdf8":"none"}" stroke="#e2dacb" stroke-width="1.2"/>`;
+  }
+  for(let i=0;i<n;i++){const [x,y]=pt(i,R);s+=`<line x1="${c}" y1="${c}" x2="${x}" y2="${y}" stroke="#e2dacb" stroke-width="1.2"/>`;}
+  const palette={dx2e:"#e8713a",dx2ez:"#f2a65a",gpc:"#c9472f",gpcc:"#a8763f",d10e:"#2f7d6f","000":"#4b7fa8"};
+  MODELS.filter(m=>active.includes(m.id)).forEach(m=>{
+    const col=palette[m.id]||"#999";
+    const pts=m.scores.map((v,i)=>pt(i,R*v/10).join(",")).join(" ");
+    s+=`<polygon points="${pts}" fill="${col}" fill-opacity=".16" stroke="${col}" stroke-width="2.6" stroke-linejoin="round"/>`;
+    m.scores.forEach((v,i)=>{const[x,y]=pt(i,R*v/10);s+=`<circle cx="${x}" cy="${y}" r="3.6" fill="${col}" stroke="#fff" stroke-width="1.4"/>`;});
+  });
+  DIMS.forEach((d,i)=>{
+    const [x,y]=pt(i,R+28);
+    s+=`<text x="${x}" y="${y}" font-size="12.5" font-weight="700" fill="${INK}" text-anchor="middle" dominant-baseline="middle">${d}</text>`;
+  });
+  s+=`</svg>`;
+  document.getElementById("radarChart").innerHTML=s;
+}
+function buildToggles(){
+  const palette={dx2e:"#e8713a",dx2ez:"#f2a65a",gpc:"#c9472f",gpcc:"#a8763f",d10e:"#2f7d6f","000":"#4b7fa8"};
+  const box=document.getElementById("radarToggles");
+  box.innerHTML = MODELS.map(m=>
+    `<button class="tg" data-id="${m.id}" aria-pressed="${active.includes(m.id)}"
+      style="--c:${palette[m.id]}"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${palette[m.id]};border:1.5px solid #1d1a16;margin-right:6px"></span>${m.short}</button>`
+  ).join("");
+  box.querySelectorAll(".tg").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.id;
+    if(active.includes(id)){ if(active.length<=1) return; active=active.filter(x=>x!==id); }
+    else active.push(id);
+    b.setAttribute("aria-pressed", active.includes(id));
+    drawRadar();
+  });
+}
+
+/* ===== 決策流程 SVG ===== */
+function drawFlow(){
+  const W=900,H=330;
+  const box=(x,y,w,h,txt,sub,fill,rx=12)=>
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" stroke="${INK}" stroke-width="2.5"/>
+     <text x="${x+w/2}" y="${y+(sub?24:h/2+5)}" font-size="14.5" font-weight="700" fill="${INK}" text-anchor="middle">${txt}</text>
+     ${sub?`<text x="${x+w/2}" y="${y+44}" font-size="12.5" fill="#5a5248" text-anchor="middle">${sub}</text>`:""}`;
+  const arrow=(x1,y1,x2,y2)=>
+    `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="${INK}" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="選購決策流程圖">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="${INK}"/></marker></defs>`;
+  s+=box(20,132,150,62,"預算能拉到","3.6 萬嗎？","#fff2e2");
+  s+=arrow(176,150,236,96)+arrow(176,176,236,236);
+  s+=`<text x="196" y="112" font-size="12" font-weight="700" fill="${C_SOLID}">能</text>`;
+  s+=`<text x="196" y="226" font-size="12" font-weight="700" fill="${C_HPL}">卡死 30k</text>`;
+
+  s+=box(240,62,186,62,"主要在家／錄音？","實木控濕做得到嗎","#fff");
+  s+=box(240,206,186,62,"會常帶出門／戶外？","丟車上、濕氣重","#fff");
+
+  s+=arrow(432,78,500,52)+arrow(432,108,500,140);
+  s+=arrow(432,222,500,196)+arrow(432,252,500,286);
+
+  s+=box(506,22,186,56,"🏆 D-10E 全單","音色會成長，保值好","#eef8f4");
+  s+=box(506,112,186,56,"000-10E 小桶全單","指彈／伴唱最均衡","#f3faf7");
+  s+=box(506,168,186,56,"GPC-X2E ZIR","缺角好跑、抱著舒服","#fff4ec");
+  s+=box(506,256,186,56,"D-X2E Mahogany","25,900 起 ‧ 不怕操","#ffeede");
+
+  s+=`<text x="${W-96}" y="52" font-size="12.5" font-weight="700" fill="${C_SOLID}">35.7k+</text>`;
+  s+=`<text x="${W-96}" y="142" font-size="12.5" font-weight="700" fill="${C_SOLID}">35.7k</text>`;
+  s+=`<text x="${W-96}" y="198" font-size="12.5" font-weight="700" fill="${C_HPL}">30.9k</text>`;
+  s+=`<text x="${W-96}" y="286" font-size="12.5" font-weight="700" fill="${C_HPL}">25.9k</text>`;
+  s+=`</svg>`;
+  document.getElementById("flowChart").innerHTML=s;
+}
+
+/* ===== Motion 風格播放 ===== */
+const NARR=[
+  "第一幕：3 萬級一共 6 把現實選項，但真的壓在 30k 內的只有 2 把。",
+  "第二幕：價格攤開看 —— 橘色的 X 系列壓線，綠色的全實木都得加價。",
+  "第三幕：體質比較 —— 全實木贏在音色成長與保值，X 系列贏在耐候。",
+  "第四幕：規格細看 —— 同型號跨店價差最大 4,200 元，比價就是省錢。",
+  "第五幕：分流 —— 決定的不是預算，是你會把琴帶去哪裡。",
+  "結論：能拉到 3.6 萬買 D-10E；卡死 30k 買 D-X2E Mahogany。"
+];
+function countUp(el){
+  const t=+el.dataset.count; let i=0;
+  const tick=()=>{ i++; el.textContent=i; if(i<t) setTimeout(tick, 220); };
+  el.textContent=0; tick();
+}
+let playing=false;
+function play(){
+  if(playing) return; playing=true;
+  const steps=[...new Set([...document.querySelectorAll(".reveal")].map(e=>+e.dataset.step))].sort((a,b)=>a-b);
+  const prog=document.getElementById("prog"), narr=document.getElementById("narr");
+  document.querySelectorAll(".reveal").forEach(e=>e.classList.remove("on"));
+  steps.forEach((st,k)=>setTimeout(()=>{
+    document.querySelectorAll(`.reveal[data-step="${st}"]`).forEach(e=>{
+      e.classList.add("on");
+      if(st===0) e.querySelectorAll("[data-count]").forEach(countUp);
+      if(st===5) e.classList.add("spot");
+    });
+    prog.style.width = ((k+1)/steps.length*100)+"%";
+    narr.textContent = NARR[k] || "";
+    if(k===0) document.getElementById("verdictPanel").classList.remove("spot");
+    if(k===steps.length-1){
+      playing=false;
+      document.querySelector(".reveal[data-step='5']").scrollIntoView({behavior:"smooth",block:"center"});
+    }
+  }, k*1500));
+}
+
+/* ===== 初始化 ===== */
+drawBars(); buildToggles(); drawRadar(); drawFlow();
+document.getElementById("playBtn").onclick=play;
+// 捲動自然揭露（沒按播放也看得到）
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){ e.target.classList.add("on");
+    e.target.querySelectorAll?.("[data-count]").forEach(el=>{ if(!el.dataset.done){el.dataset.done=1;countUp(el);} });
+  }
+}),{threshold:.15});
+document.querySelectorAll(".reveal").forEach(e=>io.observe(e));
+</script>
+</body>
+</html>
