@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>波特人吉他展間</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#fdf6e3;--ink:#1d1a16;--accent:#e8713a;--accent2:#2f7d6f;--muted:#7a7268}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#1d1a16;
+  font-family:"Noto Sans TC",system-ui,-apple-system,sans-serif;color:var(--ink)}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+#cv.dragging{cursor:grabbing}
+#cv.hovering{cursor:pointer}
+
+/* 左上：店名 */
+#brand{position:fixed;left:14px;top:14px;background:var(--paper);border:3px solid var(--ink);
+  border-radius:14px;box-shadow:4px 4px 0 var(--ink);padding:7px 14px 8px;z-index:5;max-width:calc(100% - 28px)}
+#brand b{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-size:18px;letter-spacing:.5px}
+#brand small{display:block;font-size:12px;color:#5a5248;line-height:1.5}
+
+/* 右上：工具 */
+#tools{position:fixed;right:14px;top:14px;display:flex;gap:8px;z-index:5}
+.tb{font:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--paper);color:var(--ink);
+  border:2.5px solid var(--ink);border-radius:999px;padding:5px 12px;box-shadow:2px 2px 0 var(--ink);
+  text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.tb:hover{background:#ffe9d6}
+.tb[aria-pressed="true"]{background:var(--accent);color:#fff}
+
+/* 規格卡 */
+#spec{position:fixed;right:14px;top:66px;width:320px;max-height:calc(100% - 290px);overflow:auto;
+  background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink);
+  padding:14px 16px;z-index:4;opacity:0;transform:translateX(16px);pointer-events:none;
+  transition:opacity .35s,transform .35s}
+#spec.on{opacity:1;transform:none;pointer-events:auto}
+#spec .zone{display:inline-block;font-size:11.5px;font-weight:700;border:2px solid var(--ink);border-radius:999px;
+  padding:1px 9px;margin-bottom:6px}
+#spec h3{margin:0;font-family:"Baloo 2","Noto Sans TC",sans-serif;font-size:19px;line-height:1.25}
+#spec .sub{font-size:12.5px;color:#5a5248;margin:2px 0 6px}
+#spec .price{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-size:22px;font-weight:800;color:var(--accent)}
+#spec table{width:100%;border-collapse:collapse;font-size:12.8px;margin-top:6px}
+#spec td{padding:5px 4px;border-bottom:1px solid #eee5d6;vertical-align:top;line-height:1.5}
+#spec td:first-child{color:var(--muted);white-space:nowrap;width:64px}
+#spec .pill{display:inline-block;font-size:11.5px;font-weight:700;border:1.5px solid var(--ink);border-radius:999px;padding:0 8px}
+#spec .verdict{margin-top:9px;background:#fff6ec;border:2px dashed var(--ink);border-radius:10px;padding:7px 10px;font-size:12.8px;line-height:1.6}
+#spec .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:18px;cursor:pointer;color:#8d8478}
+
+/* 底部：站點 + 對話框 */
+#bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:min(920px,calc(100% - 28px));z-index:6}
+#chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.chip{font:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--paper);border:2.5px solid var(--ink);
+  border-radius:999px;padding:4px 12px;box-shadow:2px 2px 0 var(--ink)}
+.chip:hover{background:#ffe9d6}
+.chip.go{background:var(--accent);color:#fff}
+.chip.go:hover{background:#ff8445}
+.chip[aria-current="true"]{background:var(--ink);color:#fff}
+#dlg{display:flex;gap:13px;align-items:stretch;background:var(--paper);border:3px solid var(--ink);
+  border-radius:18px;box-shadow:6px 6px 0 var(--ink);padding:11px 13px}
+#avatar{width:86px;flex:none;display:flex;flex-direction:column;align-items:center;gap:3px}
+#avatar img{width:78px;height:78px;display:block;border-radius:50%;border:3px solid var(--ink);object-fit:cover;background:#bfe0ef;cursor:zoom-in}
+#avatar span{font-size:11px;font-weight:900;line-height:1.2;text-align:center}
+#dlgBody{flex:1;min-width:0;display:flex;flex-direction:column}
+#dlgName{font-size:12px;font-weight:700;color:var(--muted)}
+#dlgText{font-size:15.5px;line-height:1.75;min-height:54px;flex:1}
+#dlgText b{color:#b4552a}
+#dlgNav{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
+#dlgNav .step{font-size:12px;color:var(--muted)}
+#next{font:inherit;font-weight:800;font-size:14px;cursor:pointer;background:var(--ink);color:#fff;border:0;
+  border-radius:999px;padding:5px 15px}
+#next:hover{background:#3a332b}
+#next[hidden]{display:none}
+
+/* 插畫卡（羅伊原畫） */
+#art{position:fixed;z-index:6;left:max(14px,calc(50% - 470px));bottom:200px;width:230px;background:#fff;
+  border:3px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink);padding:7px 7px 6px;
+  opacity:0;transform:translateY(14px) rotate(-2.5deg) scale(.94);transition:opacity .4s,transform .45s cubic-bezier(.2,1.4,.4,1);pointer-events:none}
+#art.on{opacity:1;transform:rotate(-2.5deg);pointer-events:auto}
+#art img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;cursor:zoom-in}
+#art figcaption{font-size:12px;font-weight:700;text-align:center;padding-top:5px;line-height:1.4}
+/* 規格卡照片 */
+#spec figure{margin:4px 0 8px;background:#fff;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
+#spec figure img{display:block;width:100%;height:190px;object-fit:contain;background:#fff;cursor:zoom-in}
+#spec figcaption{font-size:11.5px;color:#5a5248;padding:5px 8px;border-top:1.5px solid #eee5d6;background:#fffaf2;line-height:1.5}
+#spec figcaption a{color:#b4552a}
+#spec .photolink{display:block;margin:4px 0 8px;padding:8px 10px;border:2px dashed var(--ink);border-radius:10px;background:#fffaf2;font-size:12.8px;font-weight:700;color:#b4552a;text-decoration:none}
+#spec .photolink:hover{background:#ffe9d6}
+/* 放大檢視 */
+#lightbox{position:fixed;inset:0;z-index:25;background:rgba(29,26,22,.82);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+#lightbox.on{display:flex}
+#lightbox figure{margin:0;max-width:min(900px,96vw);background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:7px 7px 0 #000;overflow:hidden}
+#lightbox img{display:block;max-width:100%;max-height:78vh;margin:0 auto;object-fit:contain;background:#fff}
+#lightbox figcaption{font-size:13px;padding:8px 12px;background:#fffaf2;border-top:2px solid var(--ink)}
+
+/* 滑過提示 */
+#tip{position:fixed;z-index:7;pointer-events:none;background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;
+  border-radius:9px;padding:4px 10px;opacity:0;transition:opacity .15s;white-space:nowrap}
+
+/* 說明 */
+#help{position:fixed;inset:0;z-index:20;background:rgba(29,26,22,.55);display:none;align-items:center;justify-content:center;padding:16px}
+#help.on{display:flex}
+#help .card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:7px 7px 0 var(--ink);
+  padding:20px 24px;max-width:520px;font-size:14.5px;line-height:1.8}
+#help h3{margin:0 0 8px;font-family:"Baloo 2","Noto Sans TC",sans-serif}
+#help kbd{background:#fff;border:2px solid var(--ink);border-radius:6px;padding:0 6px;font-family:inherit;font-weight:700;font-size:12.5px}
+#help .note{font-size:12.5px;color:#5a5248;margin-top:10px}
+
+/* 載入 */
+#loading{position:fixed;inset:0;z-index:30;background:var(--paper);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;font-weight:700;color:#5a5248;transition:opacity .5s}
+#loading .b{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-size:26px;color:var(--ink)}
+
+
+/* 分頁切換 */
+#tabs{position:fixed;left:50%;transform:translateX(-50%);top:14px;z-index:16;display:flex;gap:0;
+  background:var(--paper);border:3px solid var(--ink);border-radius:999px;box-shadow:4px 4px 0 var(--ink);overflow:hidden}
+#tabs button{font:inherit;font-size:14px;font-weight:800;cursor:pointer;border:0;background:transparent;padding:7px 16px;color:var(--ink)}
+#tabs button[aria-selected="true"]{background:var(--ink);color:#fff}
+#tabs button:not([aria-selected="true"]):hover{background:#ffe9d6}
+
+/* 技術解說頁 */
+#tech{position:fixed;inset:0;z-index:15;overflow:auto;display:none;background:var(--paper);
+  background-image:radial-gradient(rgba(29,26,22,.09) 1.4px,transparent 1.4px);background-size:16px 16px}
+#tech.on{display:block}
+#tech .wrap{max-width:1120px;margin:0 auto;padding:78px 18px 60px}
+#tech h1{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-size:clamp(24px,3.6vw,34px);margin:0 0 4px}
+#tech .lead{color:#5a5248;margin:0 0 20px;max-width:820px;line-height:1.75}
+#tech h2{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-size:21px;margin:30px 0 12px;display:flex;align-items:center;gap:9px}
+#tech h2 .dot{width:13px;height:13px;border-radius:50%;background:var(--accent);border:2px solid var(--ink)}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px}
+.flow .st{flex:1;min-width:150px;background:#fff;border:3px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);
+  padding:11px 12px;font-size:13px;line-height:1.55}
+.flow .st b{display:block;font-size:14.5px;margin:4px 0 2px}
+.flow .st code{font-size:12px;background:#f4ead8;border-radius:5px;padding:0 5px}
+.flow .ar{align-self:center;font-weight:900;font-size:20px;color:var(--accent)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.tc{background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink);padding:15px 16px;display:flex;flex-direction:column;gap:7px}
+.tc .hd{display:flex;align-items:center;gap:11px}
+.ic{width:46px;height:46px;flex:none;border:2.5px solid var(--ink);border-radius:13px;display:grid;place-items:center}
+.ic svg{width:26px;height:26px;fill:none;stroke:#1d1a16;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tc h3{margin:0;font-size:16.5px;line-height:1.3}
+.tc p{margin:0;font-size:13.6px;line-height:1.7;color:#3d3730}
+.tc .chips2{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto}
+.tc .chips2 code{font-size:11.8px;background:#1d1a16;color:#ffd7b8;border-radius:6px;padding:2px 7px}
+.tc .why{font-size:12.6px;background:#fff6ec;border:2px dashed var(--ink);border-radius:10px;padding:6px 9px;line-height:1.6}
+.box{background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink);padding:16px 18px;font-size:14px;line-height:1.75}
+.box ul{margin:6px 0 0;padding-left:20px}
+.res{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.res .box h3{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:8px}
+.res .box h3 .ic{width:34px;height:34px;border-radius:10px}
+.res .box h3 .ic svg{width:19px;height:19px}
+.res a{color:#b4552a;word-break:break-word}
+.res li{margin-bottom:5px;font-size:13.4px}
+.res .meh{color:var(--muted);font-size:12.5px}
+.tfoot{margin-top:26px;text-align:center;color:var(--muted);font-size:13px}
+@media (max-width:760px){#tabs{top:66px}#tabs button{font-size:13px;padding:6px 12px}#tech .wrap{padding-top:120px}}
+
+@media (max-width:760px){
+  #spec{left:14px;right:14px;width:auto;top:auto;bottom:220px;max-height:38vh}
+  #brand small{display:none}
+  #dlgText{font-size:14px;min-height:72px}
+  #avatar{width:60px}#avatar img{width:54px;height:54px}
+  #art{display:none}
+  .tb .t{display:none}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="brand"><b>🎸 波特人樂器行</b><small>拖曳＝轉頭　WASD／方向鍵＝走路　點吉他＝聽店長介紹</small></div>
+<div id="tools">
+  <button class="tb" id="voiceBtn" aria-pressed="false" title="店長語音（瀏覽器內建語音）">🔊<span class="t"> 語音</span></button>
+  <button class="tb" id="helpBtn">❓<span class="t"> 操作</span></button>
+  <a class="tb" href="./dashboard.html" title="看 2D 儀表板與資料來源">📊<span class="t"> 儀表板</span></a>
+</div>
+
+<aside id="spec" aria-live="polite"></aside>
+
+<div id="bottom">
+  <div id="chips"></div>
+  <div id="dlg">
+    <div id="avatar">
+      <img src="./assets/botroy/avatar.jpg" alt="波特人羅伊（台灣黑熊大叔）" id="avatarImg">
+      <span>店長<br>波特人羅伊</span>
+    </div>
+    <div id="dlgBody">
+      <div id="dlgName">🐻 台灣黑熊大叔</div>
+      <div id="dlgText"></div>
+      <div id="dlgNav"><span class="step" id="step"></span><button id="next">下一句 ▶</button></div>
+    </div>
+  </div>
+</div>
+
+
+<nav id="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="hall">🎸 逛展間</button>
+  <button role="tab" aria-selected="false" data-tab="tech">🛠 技術解說</button>
+</nav>
+
+<section id="tech" role="tabpanel" aria-label="技術解說">
+ <div class="wrap">
+  <h1>🛠 這間展間是怎麼蓋的</h1>
+  <p class="lead">3D 場景沒有用任何模型檔或貼圖檔——吉他、店長、招牌、地板，全部是 three.js 用程式即時生成的。資料一改，造型、價格牌、店長台詞會跟著改。2D 的部分放真實素材：規格卡附大鼻子吉他商品頁連結，對話框與插畫卡是波特人羅伊的原畫。</p>
+
+  <h2><span class="dot"></span>資料怎麼變成展間</h2>
+  <div class="flow">
+    <div class="st"><span class="ic" style="background:#fff2c9"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg></span><b>① 規格資料</b><code>GUITARS[]</code> 型號、價格、桶型、音階、重量、台詞</div>
+    <div class="ar">→</div>
+    <div class="st"><span class="ic" style="background:#dff0ea"><svg viewBox="0 0 24 24"><circle cx="8" cy="16" r="5"/><circle cx="11.5" cy="11.8" r="3.2"/><circle cx="8.6" cy="15.4" r="1.2"/><path d="M13.4 10.2 20 3.6M18.4 2.4l3.2 3.2"/></svg></span><b>② 造型函式</b><code>makeGuitar()</code> 輪廓擠出＋貼圖＋琴頭＋弦</div>
+    <div class="ar">→</div>
+    <div class="st"><span class="ic" style="background:#ffe3cf"><svg viewBox="0 0 24 24"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg></span><b>③ 擺進展間</b>掛木吉他牆、上電吉他舞台、價格牌自動生成</div>
+    <div class="ar">→</div>
+    <div class="st"><span class="ic" style="background:#dcecfb"><svg viewBox="0 0 24 24"><path d="M9 9l5 12 1.8-5.2L21 14z"/><path d="M7.2 2.2 8 5.1M5.1 8l-2.9-.8M14 4.1 12 6M6 12l-1.9 2"/></svg></span><b>④ 點擊互動</b><code>Raycaster</code> 判斷點到哪把琴，鏡頭飛過去</div>
+    <div class="ar">→</div>
+    <div class="st"><span class="ic" style="background:#e6e0f5"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="16" rx="4.6" ry="4"/><circle cx="5.6" cy="10" r="2"/><circle cx="9.6" cy="5.8" r="2"/><circle cx="14.4" cy="5.8" r="2"/><circle cx="18.4" cy="10" r="2"/></svg></span><b>⑤ 店長講解</b>羅伊走到琴旁、說台詞、跳出規格卡</div>
+  </div>
+
+  <h2><span class="dot"></span>用到的 three.js 技術</h2>
+  <div class="tgrid">
+<div class="tc"><div class="hd"><span class="ic" style="background:#ffe3cf"><svg viewBox="0 0 24 24"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg></span><h3>場景基礎</h3></div><p>Scene ＋ 透視相機 ＋ WebGL 渲染器，搭出 16 × 12 公尺、挑高 4.2 公尺的展間。地板木紋、木條牆、招牌都是用 Canvas 即時畫好再貼上去。</p><div class="chips2"><code>Scene</code><code>PerspectiveCamera</code><code>WebGLRenderer</code><code>PlaneGeometry</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#dff0ea"><svg viewBox="0 0 24 24"><circle cx="8" cy="16" r="5"/><circle cx="11.5" cy="11.8" r="3.2"/><circle cx="8.6" cy="15.4" r="1.2"/><path d="M13.4 10.2 20 3.6M18.4 2.4l3.2 3.2"/></svg></span><h3>吉他造型：輪廓點 → 擠出</h3></div><p>每把琴用 20～30 個輪廓點（單位：公分）描外型，<code>Shape.splineThru</code> 連成平滑曲線，再用 <code>ExtrudeGeometry</code> 擠出琴身厚度並加倒角。D 桶、000、GP 缺角、Strat 雙切、Les Paul 單切、PRS 單切，各一組輪廓。</p><div class="chips2"><code>Shape</code><code>splineThru</code><code>ExtrudeGeometry</code><code>bevel</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#fde8dd"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></span><h3>貼圖全用程式畫</h3></div><p>面板漸層（Sunburst）、虎紋、音孔環、玳瑁護板、F 孔、指板都用 Canvas 2D 畫，零圖片檔。品絲位置照十二平均律計算：第 n 格距上弦枕 ＝ S − S ÷ 2<sup>n/12</sup>（S＝音階長）。</p><div class="chips2"><code>CanvasTexture</code><code>平面 UV 投影</code><code>SRGBColorSpace</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#fff2c9"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg></span><h3>燈光與陰影</h3></div><p>半球光打底、平行光投陰影、暖色點光源補氛圍。每把琴背後的「聚光燈」其實是加法混合的光暈貼片：看起來像打光，卻不用多開真實光源，MacBook Air 也跑得順。</p><div class="chips2"><code>HemisphereLight</code><code>DirectionalLight＋shadow</code><code>PointLight</code><code>AdditiveBlending</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#e6e0f5"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="16" rx="4.6" ry="4"/><circle cx="5.6" cy="10" r="2"/><circle cx="9.6" cy="5.8" r="2"/><circle cx="14.4" cy="5.8" r="2"/><circle cx="18.4" cy="10" r="2"/></svg></span><h3>店長羅伊（台灣黑熊大叔）</h3></div><p>全部用球、圓柱、圓環、方塊拼成：黑熊頭、米色口鼻、金框飛行員墨鏡、豹紋圍巾、皮夾克、胸前白 V，右手端咖啡。走路是雙腿 sin 擺動加身體上下彈；說話時點頭，頭上冒泡泡。</p><div class="chips2"><code>Group</code><code>SphereGeometry</code><code>TorusGeometry</code><code>Sprite</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#dcecfb"><svg viewBox="0 0 24 24"><path d="M9 9l5 12 1.8-5.2L21 14z"/><path d="M7.2 2.2 8 5.1M5.1 8l-2.9-.8M14 4.1 12 6M6 12l-1.9 2"/></svg></span><h3>互動與鏡頭</h3></div><p><code>Raycaster</code> 判斷滑鼠點到哪把吉他；第一人稱相機用 YXZ 尤拉角，搭配自製的拖曳轉頭、WASD 走路與牆邊碰撞限制。前往展位時用 easeInOutCubic 補間「飛」過去。</p><div class="why">💡 評估過官方的 <b>PointerLockControls</b>：它會鎖住並隱藏滑鼠，這樣就點不到吉他，手機也不支援，所以改成自製拖曳視角。</div><div class="chips2"><code>Raycaster</code><code>rotation.order = YXZ</code><code>補間動畫</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#ffe3dc"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg></span><h3>把資料做成 3D 圖表</h3></div><p>重量對決台的柱子從 0 公斤起算、不截斷；實心段是最低重量，半透明段是重量區間。標籤用 Sprite，不管從哪個角度看都面向你。</p><div class="chips2"><code>CylinderGeometry</code><code>Sprite</code><code>transparent</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#e8f3df"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg></span><h3>店長語音</h3></div><p>右上角 🔊 打開後，用瀏覽器內建的 Web Speech API 朗讀台詞，音調調低成大叔聲。不需要 API Key；實際音色取決於系統安裝的中文語音。</p><div class="chips2"><code>speechSynthesis</code><code>zh-TW</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#f4ead8"><svg viewBox="0 0 24 24"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/></svg></span><h3>離線可開</h3></div><p>three.js r160 已放進 <code>vendor/</code>，雙擊 HTML 就能逛，不需要伺服器。只有標題字型走 Google Fonts，離線時會自動換成系統字型。</p><div class="chips2"><code>UMD build</code><code>file://</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#ffe3dc"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></span><h3>3D 造型 ＋ 真實素材</h3></div><p>3D 場景負責「逛」的感覺，2D 疊層放真實素材：規格卡附店家商品頁連結，對話框頭像與站點插畫卡用波特人羅伊的吉卜力風原畫（入口肖像、練團室彈 Strat、咖啡廳駐唱）。點任何一張圖都能放大。</p><div class="why">💡 公開版不放店家商品照（版權屬店家），改成商品頁連結；有照片的完整版留在私有研究資料夾。</div><div class="chips2"><code>HTML 疊層</code><code>object-fit</code><code>Lightbox</code></div></div>
+<div class="tc"><div class="hd"><span class="ic" style="background:#e8f3df"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span><h3>ref-data 證據庫</h3></div><p>這次研究用到的 32 個店家頁面都存了<b>純文字快照</b>與<b>原始 HTML</b>（私有研究資料夾，未公開），每筆價格寫進 <code>guitars.json</code> 時都附上對應快照，回查時能直接看到「哪家店、哪一天、第幾行」。重抓之後還因此抓到 3 個先前寫錯的規格。</p><div class="chips2"><code>guitars.json</code><code>pages/*.txt</code><code>raw-html/*.gz</code><code>核對紀錄.md</code></div></div>
+  </div>
+
+  <h2><span class="dot"></span>為什麼不直接用現成的 3D 模型</h2>
+  <div class="box">
+    three.js 官方範例裡沒有吉他模型。另外查了 TurboSquid、CGTrader、RenderHub、Coohom：有付費的（US$19～22）、有只給 OBJ／FBX 的，也有標示「免費」卻沒註明 CC0 的。沒有一個同時滿足「授權乾淨、glTF 格式、型號對得上 Martin／Strat／Les Paul／PRS」。改用程式生成有四個好處：
+    <ul>
+      <li><b>型號對得上</b>：每把琴照真實輪廓比例與音階長畫，D 桶跟 000 一眼看得出大小差</li>
+      <li><b>檔案極小</b>：3D 場景本身不到 100 KB（另加 three.js），沒有模型檔要載</li>
+      <li><b>離線可開</b>：雙擊就跑，不怕外部模型連結失效</li>
+      <li><b>資料驅動</b>：規格一改，造型和價格牌跟著改</li>
+    </ul>
+    之後如果找到喜歡的 glTF 模型，加 <code>GLTFLoader</code> 把 <code>makeGuitar()</code> 換掉就好，其他互動都不用動。
+  </div>
+
+  <h2><span class="dot"></span>這次搜尋過的資源網站</h2>
+  <div class="res">
+<div class="box"><h3><span class="ic" style="background:#dcecfb"><svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8M7.5 5.5l9 5"/></svg></span>three.js 技術文件</h3><ul><li><a href="https://threejs.org/docs/pages/PointerLockControls.html" target="_blank" rel="noopener">three.js 官方文件：PointerLockControls</a> <span class=meh>— 評估後未採用</span></li><li><a href="https://sbcode.net/threejs/pointerlock-controls/" target="_blank" rel="noopener">SBCODE：PointerLock Controls 教學</a></li><li><a href="https://discourse.threejs.org/t/what-are-the-differences-between-pointerlockcontrols-and-firstpersoncontrols/16151" target="_blank" rel="noopener">three.js 論壇：PointerLock 與 FirstPerson 的差別</a></li><li><a href="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" target="_blank" rel="noopener">cdnjs：three.js r160（已下載到 vendor/）</a></li></ul></div>
+<div class="box"><h3><span class="ic" style="background:#ffe3cf"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>找過的 3D 吉他模型（最後沒採用）</h3><ul><li><a href="https://www.turbosquid.com/it/3d-models/3d-model-lowpoly-electric-guitar-tl-2551045" target="_blank" rel="noopener">TurboSquid：low-poly TL</a> <span class=meh>— US$19 標準授權</span></li><li><a href="https://www.cgtrader.com/3d-models/industrial/tool/electric-guitar-telecaster-pbr-low-poly-game-ready" target="_blank" rel="noopener">CGTrader：Telecaster low poly</a> <span class=meh>— US$22，無 glTF</span></li><li><a href="https://www.renderhub.com/gsommer/explorer-electric-guitar-02-white" target="_blank" rel="noopener">RenderHub：Explorer／Star 系列</a> <span class=meh>— OBJ／FBX，授權需確認</span></li><li><a href="https://www.coohom.com/in/3d-models/-/low-poly-3d-guitar-model-for-creative-projects-mdtl~3FO46MFHLC2D" target="_blank" rel="noopener">Coohom：low-poly guitar</a> <span class=meh>— 標示可免費使用，但未註明 CC0</span></li></ul></div>
+<div class="box"><h3><span class="ic" style="background:#ffe3dc"><svg viewBox="0 0 24 24"><circle cx="8" cy="16" r="5"/><circle cx="11.5" cy="11.8" r="3.2"/><circle cx="8.6" cy="15.4" r="1.2"/><path d="M13.4 10.2 20 3.6M18.4 2.4l3.2 3.2"/></svg></span>吉他規格與價格</h3><ul><li><b>🎸 主要來源：大鼻子吉他（市價＋產品照）</b></li><li><a href="https://www.bignose-guitar.com.tw/products/martin-d-x2e-02" target="_blank" rel="noopener">大鼻子：Martin D-X2E 02</a> <span class=meh>— NT$30,100</span></li><li><a href="https://www.bignose-guitar.com.tw/products/martin-d10e-02" target="_blank" rel="noopener">大鼻子：Martin D10E-02（雲杉面）</a> <span class=meh>— NT$39,400</span></li><li><a href="https://www.bignose-guitar.com.tw/products/martin-d10e-01" target="_blank" rel="noopener">大鼻子：Martin D10E-01（沙比利面）</a> <span class=meh>— NT$35,700</span></li><li><a href="https://www.bignose-guitar.com.tw/products/martin-00010e" target="_blank" rel="noopener">大鼻子：Martin 000-10E</a> <span class=meh>— NT$35,700</span></li><li><a href="https://www.bignose-guitar.com.tw/products/fender-player-ii-stratocaster-hss-rw-3ts-0140540500" target="_blank" rel="noopener">大鼻子：Player II Strat HSS RW 3TS</a> <span class=meh>— NT$31,800</span></li><li><a href="https://www.bignose-guitar.com.tw/products/gibson-les-paul-standard-50s-figured-top-heritage-cherry-sunburst" target="_blank" rel="noopener">大鼻子：Les Paul Standard '50s HCS</a> <span class=meh>— NT$98,500</span></li><li><a href="https://www.bignose-guitar.com.tw/products/prs-se-zach-myers" target="_blank" rel="noopener">大鼻子：PRS SE Zach Myers</a> <span class=meh>— NT$38,000</span></li><li><b>比價參考</b></li><li><a href="https://www.fender.com/products/player-ii-stratocaster" target="_blank" rel="noopener">Fender 官網：Player II Stratocaster</a> <span class=meh>— 規格、美國售價</span></li><li><a href="https://www.haikuo.com.tw/c1cntpage-c1_44704-c1-101097-672018-.html" target="_blank" rel="noopener">海國樂器：Player II Strat</a> <span class=meh>— NT$34,800</span></li><li><a href="https://shop.cyuncai.com/fender-electric-guitar-and-bass-guitar" target="_blank" rel="noopener">群彩文創：Fender</a> <span class=meh>— NT$30,800</span></li><li><a href="https://wanlingmusic.shoplineapp.com/products/fender-player-ii-stratocaster-sss-rosewoodmaple-alder" target="_blank" rel="noopener">萬菱音樂：Player II Strat</a> <span class=meh>— NT$30,800</span></li><li><a href="https://www.sianhong.com/products/gibson-les-paul-standard50s-gd" target="_blank" rel="noopener">弦宏樂器：Les Paul Standard '50s</a> <span class=meh>— 建議售價 NT$98,500</span></li><li><a href="https://www.minfon.com.tw/products/gibson-lespaul-standard-50s-60s-cherry" target="_blank" rel="noopener">民風樂府：Les Paul Standard '60s</a> <span class=meh>— NT$98,500</span></li><li><a href="https://www.listenmusical.com/products/gibson-electric-guitar-les-paul-standard-50s" target="_blank" rel="noopener">listenmusical：Les Paul Standard '50s</a> <span class=meh>— NT$89,900</span></li><li><a href="https://prsguitars.com/electrics/model/se_zach_myers_2021" target="_blank" rel="noopener">PRS 官網：SE Zach Myers</a> <span class=meh>— 規格</span></li><li><a href="https://guitarshoptaiwan.com/products/prs-se-zach-myers" target="_blank" rel="noopener">Guitar Shop Taiwan：SE Zach Myers</a> <span class=meh>— NT$31,500</span></li><li><a href="https://www.risemusicgear.com/products/prs-se-zach-myers" target="_blank" rel="noopener">又昇樂器：SE Zach Myers</a> <span class=meh>— NT$32,800</span></li></ul></div>
+<div class="box"><h3><span class="ic" style="background:#dff0ea"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>木吉他與其他</h3><ul><li><a href="https://www.minfon.com.tw/products/martin-dx2e-mahgonay" target="_blank" rel="noopener">民風樂府：Martin D-X2E Mahogany</a> <span class=meh>— 核對：西卡雲杉單板、Martin E-1</span></li><li>其餘 Martin 報價與店家連結 → <a href="./dashboard.html">📊 儀表板</a></li><li><a href="https://claude.com/resources/articles/dashboards-and-motion" target="_blank" rel="noopener">Anthropic：Dashboards and Motion（2026-10-08）</a> <span class=meh>— 這個系列 demo 的起點</span></li><li><a href="https://shop.cyuncai.com/martin-gpc-x2e-zir" target="_blank" rel="noopener">群彩文創：Martin GPC-X2E Ziricote</a> <span class=meh>— 核對：沙比利面板、NT$30,900</span></li><li><a href="https://www.minfon.com.tw/products/martin-gpcx2e-cocobolo" target="_blank" rel="noopener">民風樂府：Martin GPC-X2E Cocobolo</a> <span class=meh>— 雲杉面板、NT$34,100</span></li><li><a href="https://www.lubymusicshop.com/products/martin-d10e-01" target="_blank" rel="noopener">陸比音樂：Martin D10E-01</a> <span class=meh>— NT$36,600（比價）</span></li><li><a href="https://www.yourmusic.com.tw/Martin" target="_blank" rel="noopener">Your Music 愉耳樂器：Martin 列表</a> <span class=meh>— D10E 33,500／37,000 皆已完售</span></li><li><a href="https://shop.xz.com.tw/products/martin-dx2e-%E9%9D%A2%E5%96%AE%E6%9D%BF%E9%9B%BB%E6%9C%A8%E6%B0%91%E8%AC%A0%E5%90%89%E4%BB%96-%E5%A4%9A%E8%89%B2%E6%AC%BE" target="_blank" rel="noopener">敦煌樂器：Martin D-X2E</a> <span class=meh>— 優惠價 NT$25,900</span></li><li>📁 店家頁面快照與核對紀錄存於私有研究資料夾（未公開）</li><li>⚖️ 電吉他重量：<b>店長實秤平均值</b>（使用者提供）<span class=meh>— 搜尋沒找到 Gibson 官方重量數字</span></li></ul></div>
+  </div>
+  <div class="tfoot">價格以大鼻子吉他 2026-10-12 標價為市價，其他店家為比價參考，皆非代理商建議售價；3D 吉他是依比例繪製的簡化造型，不是原廠模型。</div>
+ </div>
+</section>
+
+<figure id="art" aria-hidden="true"><img id="artImg" alt=""><figcaption id="artCap"></figcaption></figure>
+<div id="lightbox" role="dialog" aria-label="放大檢視"><figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure></div>
+<div id="tip"></div>
+
+<div id="help"><div class="card">
+  <h3>🎸 怎麼逛</h3>
+  <div>🖱 <b>拖曳畫面</b>：轉頭看四周（手機用手指拖）</div>
+  <div>⌨️ <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 或 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd>：走路；滾輪：前進後退</div>
+  <div>👆 <b>點任何一把吉他</b>：走過去，羅伊店長會過來講解</div>
+  <div>📍 <b>底部站點</b>：直接傳送到展區；<b>▶ 跟羅伊逛一圈</b>：完整導覽</div>
+  <div>⏭ <kbd>空白鍵</kbd>／<kbd>Enter</kbd>：下一句　<kbd>Esc</kbd>：結束導覽</div>
+  <div class="note">
+    3D 吉他是依真實琴身比例畫的「簡化造型」；要看真實樣子，點規格卡裡的商品頁連結。價格為 2026-10-11 台灣零售店網頁標價；
+    電吉他重量為店長提供的實秤平均值，每把木頭密度不同，買之前請現場秤。完整來源見 📊 儀表板。
+  </div>
+  <div style="text-align:right;margin-top:12px"><button class="tb" id="helpClose">開始逛 ▶</button></div>
+</div></div>
+
+<div id="loading"><div class="b">🐻 羅伊正在開店…</div><div>擦吉他、開燈、泡咖啡中</div></div>
+
+<script src="./vendor/three.min.js"></script>
+<script>
+(async () => {
+/* ================================================================
+   工具
+   ================================================================ */
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeIO = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const FONT = '"Noto Sans TC","PingFang TC","Heiti TC",system-ui,sans-serif';
+const FONT_EN = '"Baloo 2","Noto Sans TC","PingFang TC",system-ui,sans-serif';
+
+// 字型最多等 2.5 秒，離線就用系統字型
+await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 2500))]);
+
+function canvasTex(w, h, draw, { srgb = true, repeat = null } = {}) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  if (repeat) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat[0], repeat[1]); }
+  return t;
+}
+const std = (color, rough = .7, metal = 0, extra = {}) =>
+  new THREE.MeshStandardMaterial(Object.assign({ color, roughness: rough, metalness: metal }, extra));
+function rr(x, X, Y, W, H, R) { x.beginPath(); x.roundRect(X, Y, W, H, R); }
+
+/* ================================================================
+   資料（價格：2026-10-11 台灣零售店網頁標價；重量：店長實秤平均）
+   ================================================================ */
+const GUITARS = [
+  { id:'dx2e', zone:'ac', name:'Martin D-X2E', sub:'X 系列 ‧ D-X2E 02', price:'NT$30,100',
+    struct:['面單','#fde8dd'], body:'dread',
+    specs:[['桶型','Dreadnought（D 桶）'],['面板','西卡雲杉單板'],['側背','HPL 高壓合板（桃花心木紋）'],
+           ['音階','25.4"'],['拾音','Martin E-1（含調音器）'],['產地','墨西哥'],['市價','大鼻子吉他 NT$30,100（原價 35,800）'],['比價','敦煌樂器優惠 NT$25,900']],
+    verdict:'預算卡死 3 萬的首選：不怕濕、耐操；代價是音色不太會隨年份「開」。',
+    say:'這把 <b>D-X2E</b>，是唯一真的壓在 3 萬左右的 Martin——大鼻子市價 <b>NT$30,100</b>，敦煌樂器現在還有 <b>25,900</b> 的優惠。面板是<b>西卡雲杉單板</b>，側背是 HPL 高壓合板，不怕台灣的濕氣，丟車上也不心疼。拾音器是 Martin E-1，有內建調音器。缺點？音色不太會隨年份「開」。',
+    photo:{ shop:'大鼻子吉他', page:'https://www.bignose-guitar.com.tw/products/martin-d-x2e-02' },
+    look:{ top:'#e8c78c', side:'#6e3a20', neck:'#6a3f25', board:'#2e2019', head:'#1d1512', guard:'#3a1a0e' } },
+  { id:'gpc', zone:'ac', name:'Martin GPC-X2E', sub:'X 系列 ‧ Ziricote 紋（沙比利面板）', price:'NT$30,900 起',
+    struct:['HPL 側背','#fde8dd'], body:'gpc',
+    specs:[['桶型','Grand Performance 缺角'],['面板','沙比利（Ziricote 款）／雲杉單板（Cocobolo 款）'],['側背','HPL 高壓合板（Ziricote／Cocobolo 紋）'],
+           ['音階','25.4"'],['拾音','Martin E-1（含調音器）'],['產地','墨西哥'],['市價','群彩文創 NT$30,900（ZIR）'],['比價','民風樂府 NT$34,100（Cocobolo）‧ 大鼻子無此型號']],
+    verdict:'抱著最舒服、高把位好爬，適合自彈自唱；兩個花紋的面板木頭不一樣，挑之前要看清楚。',
+    say:'<b>GPC-X2E</b>，Grand Performance 桶身加<b>缺角</b>，NT$30,900 起。抱起來比 D 桶舒服很多，高把位好爬，自彈自唱很對味。注意：<b>Ziricote 款是沙比利面板</b>，聲音偏溫暖；要雲杉面板得選 Cocobolo 款，NT$34,100。',
+    photo:{ shop:'群彩文創', page:'https://shop.cyuncai.com/martin-gpc-x2e-zir', note:'Ziricote 款' },
+    look:{ top:'#9a5a32', side:'#3e2c20', neck:'#5a3a24', board:'#2a1d16', head:'#1d1512', guard:'#2a1a12' } },
+  { id:'d10e', zone:'ac', name:'Martin D-10E', sub:'Road 系列 ‧ 全實木 ‧ D10E-02 雲杉面板', price:'NT$39,400',
+    struct:['全單','#dff0ea'], body:'dread',
+    specs:[['桶型','Dreadnought（D 桶）'],['面板','西卡雲杉（D10E-02）／沙比利（D10E-01）'],['側背','沙比利實木'],['指板','Richlite'],
+           ['音階','25.4"'],['拾音','Fishman MX-T（含調音器）'],['產地','墨西哥'],['市價','大鼻子 NT$39,400（雲杉面，原價 43,000）'],['省一點','大鼻子 D10E-01 沙比利面 NT$35,700'],['比價','陸比音樂 36,600 ‧ Your Music 33,500（已完售）']],
+    verdict:'店長私心推薦：這價位唯一全實木，會越彈越開；沙比利面 3.6 萬、雲杉面 3.9 萬，台灣要控濕 45–55%。',
+    say:'店長私心推薦——<b>D-10E</b>，Road 系列<b>全實木</b>。這把是雲杉面板的 D10E-02，大鼻子市價 <b>NT$39,400</b>；想省一點，沙比利面板的 D10E-01 是 <b>35,700</b>。側背都是沙比利實木、Fishman MX-T 拾音。五年後它會比今天好聽，HPL 不會。代價是台灣要控濕，濕度抓 <b>45～55%</b>。',
+    photo:{ shop:'大鼻子吉他', page:'https://www.bignose-guitar.com.tw/products/martin-d10e-02', note:'D10E-02 雲杉面板' },
+    look:{ top:'#ecca8e', side:'#8a4a2a', neck:'#7a4a2c', board:'#2a1a12', head:'#1d1512', guard:'#3a1a0e' } },
+  { id:'000', zone:'ac', name:'Martin 000-10E', sub:'Road 系列 ‧ 全沙比利', price:'NT$35,700',
+    struct:['全單','#dff0ea'], body:'om',
+    specs:[['桶型','000（小桶身）'],['面板','沙比利實木'],['側背','沙比利實木'],
+           ['音階','25.4"'],['拾音','Fishman MX-T（含調音器）'],['產地','墨西哥'],['市價','大鼻子 NT$35,700（原價 41,000）'],['比價','2026 新款 39,700 起 ‧ Your Music 33,500（已完售）']],
+    verdict:'指彈、伴唱最均衡；音量與低頻輸 D 桶，但不會蓋掉人聲。',
+    say:'<b>000-10E</b>，小桶身、全沙比利實木，NT$35,700。指彈跟伴唱的平衡最好，抱著不壓胸。刷和弦的音量跟低頻會輸給 D 桶，但你的歌聲不會被蓋掉。',
+    photo:{ shop:'大鼻子吉他', page:'https://www.bignose-guitar.com.tw/products/martin-00010e' },
+    look:{ top:'#93552f', side:'#7a4426', neck:'#6a3d22', board:'#2a1a12', head:'#1d1512', guard:'#2a140a' } },
+
+  { id:'strat', zone:'el', name:'Fender Player II Stratocaster HSS', sub:'墨西哥製 ‧ 玫瑰木指板 ‧ 三色漸層', price:'NT$31,800',
+    struct:['實心','#ffe3dc'], body:'strat', kg:'3.5–3.8 kg',
+    specs:[['琴身','赤楊木（Alder）實心'],['音階','25.5"（長音階）'],['拾音','Alnico II 雙線圈（琴橋）＋ Alnico V 單線圈 × 2（HSS）'],
+           ['琴橋','2 點式同步搖座'],['琴頸','Modern C ‧ 9.5" 玫瑰木指板 ‧ 22 格'],['控制','總音量 ＋ 兩組音色（頸中／琴橋）'],['重量','3.5–3.8 kg（適中）'],['產地','墨西哥'],
+           ['市價','大鼻子 NT$31,800（原價 33,800）'],['比價','他店 SSS 款 NT$30,800']],
+    verdict:'頸段、中段是招牌的清脆玻璃感；琴橋換成雙線圈，破音更厚、玩搖滾更好用——一把吉他兩種個性。',
+    say:'<b>Fender Player II Stratocaster HSS</b>，大鼻子市價 <b>NT$31,800</b>。<b>HSS</b> 的意思是琴橋位置換成<b>雙線圈</b>，破音更厚、玩搖滾更好用；頸段跟中段還是 Strat 招牌的單線圈，清脆有玻璃感。玫瑰木指板、三色漸層，重量 <b>3.5～3.8 公斤</b>，中規中矩。',
+    photo:{ shop:'大鼻子吉他', page:'https://www.bignose-guitar.com.tw/products/fender-player-ii-stratocaster-hss-rw-3ts-0140540500', note:'HSS 玫瑰木 三色漸層' },
+    hss:true,
+    look:{ burst:['#f0b04a','#b8361c','#1a0b06'], side:'#2a120a', neck:'#e2b46c', board:'#3a2418', head:'#e2b46c', guard:'#f4efe4' } },
+  { id:'lp', zone:'el', name:'Gibson Les Paul Standard', sub:"'50s Figured Top ‧ 美國 Nashville", price:'NT$98,500',
+    struct:['實心','#ffe3dc'], body:'lp', kg:'4.1–4.5+ kg',
+    specs:[['琴身','桃花心木實心 ＋ 楓木面板（無減重）'],['音階','24.75"'],['拾音','Burstbucker 雙線圈 × 2'],
+           ['琴橋','Tune-o-matic ＋ 止弦尾件'],['重量','4.1–4.5+ kg（沉重）'],['產地','美國 Nashville'],['市價','大鼻子 NT$98,500（原價 115,000）'],['比價','listenmusical NT$89,900']],
+    verdict:'厚、暖、延音超長的經典搖滾聲；價格是 Strat 的 3 倍，肩膀也要有準備。',
+    say:'<b>Gibson Les Paul Standard</b>，大鼻子市價 <b>NT$98,500</b>——是 Strat 的三倍。實心桃花心木加楓木面板、兩顆 Burstbucker 雙線圈，聲音厚、暖、延音超長。代價是重：<b>4.1～4.5 公斤以上</b>，江湖人稱「碎肩琴」。',
+    photo:{ shop:'大鼻子吉他', page:'https://www.bignose-guitar.com.tw/products/gibson-les-paul-standard-50s-figured-top-heritage-cherry-sunburst', note:"'50s Heritage Cherry Sunburst" },
+    look:{ burst:['#f2b84e','#c2361a','#6a0f0c'], flame:true, side:'#4a120c', neck:'#5e2616', board:'#2e1d15', head:'#141010', guard:'#efe2c2' } },
+  { id:'zm', zone:'el', name:'PRS SE Zach Myers', sub:'單 F 孔半空心 ‧ Myers Blue ‧ 印尼製', price:'NT$38,000',
+    struct:['半空心','#dcecfb'], body:'zm', kg:'3.1–3.3 kg',
+    specs:[['琴身','單 F 孔半空心 ‧ 桃花心木琴身 ＋ 火焰楓木貼皮面'],['音階','24.5"（短音階）'],['拾音','SE 245 "S" 雙線圈 × 2'],
+           ['琴頸','Wide Fat ‧ 玫瑰木指板（鳥形鑲嵌）‧ 22 格'],['琴橋','PRS Adjustable Stoptail（固定式）'],['控制','每顆拾音器各一組音量／音色 ＋ 3 段切換'],
+           ['重量','3.1–3.3 kg（極輕盈）'],['產地','印尼'],['市價','大鼻子 NT$38,000（原價 43,800）'],['比價','Guitar Shop Taiwan 31,500 ‧ 又昇 32,800']],
+    verdict:'標準尺寸電吉他裡的羽量級，背整場演出肩膀無負擔；聲音比 LP 多一點空氣感。',
+    say:'<b>PRS SE Zach Myers</b>，大鼻子市價 <b>NT$38,000</b>（別家 3.2 萬左右，差 6,000，值得比價）。<b>單 F 孔半空心</b>，裡面大面積掏空，又沒有搖座的金屬塊，只有 <b>3.1～3.3 公斤</b>——標準尺寸電吉他裡的羽量級。24.5 吋短音階、Wide Fat 粗琴頸，聲音比 Les Paul 多一點空氣感。背整場演出肩膀都沒負擔。',
+    photo:{ shop:'大鼻子吉他', page:'https://www.bignose-guitar.com.tw/products/prs-se-zach-myers', note:'Myers Blue' },
+    look:{ burst:['#6cc4ea','#2a8fcc','#14507e'], flame:true, side:'#163f63', neck:'#7a4426', board:'#2a1a12', head:'#141010', guard:null } },
+];
+const G = Object.fromEntries(GUITARS.map(g => [g.id, g]));
+
+const WEIGHTS = [ // 店長實秤平均值
+  { name:'PRS SE\nZach Myers', lo:3.1, hi:3.3, c:'#2a8fcc', feel:'極輕盈' },
+  { name:'PRS SE\nCustom 24',  lo:3.5, hi:3.7, c:'#7a52b3', feel:'適中' },
+  { name:'Fender\nPlayer II Strat', lo:3.5, hi:3.8, c:'#c4412f', feel:'中規中矩' },
+  { name:'Fender\nTelecaster', lo:3.6, hi:3.9, c:'#d9a441', feel:'適中偏扎實' },
+  { name:'Gibson LP\nStandard', lo:4.1, hi:4.5, c:'#8e1c1c', feel:'沉重・碎肩' },
+];
+
+/* ================================================================
+   three.js 基本設定
+   ================================================================ */
+const cv = $('#cv');
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#2a2420');
+const camera = new THREE.PerspectiveCamera(58, 16 / 9, .05, 80);
+camera.rotation.order = 'YXZ';
+
+scene.add(new THREE.HemisphereLight(0xfff1de, 0x6b4f36, 1.15));
+const sun = new THREE.DirectionalLight(0xfff0dc, 1.05);
+sun.position.set(3.5, 9, 6); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -10, right: 10, top: 9, bottom: -9, near: 1, far: 26 });
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+scene.add(sun);
+[[-5.6, 3.4, 0, 26], [0, 3.4, -3.6, 30], [4, 3.4, 1.5, 18], [5.5, 3.2, 4, 12]].forEach(([x, y, z, i]) => {
+  const p = new THREE.PointLight(0xffd6a6, i, 9, 1.6); p.position.set(x, y, z); scene.add(p);
+});
+
+/* ================================================================
+   展間：地板、牆、天花板
+   ================================================================ */
+const R = { x0: -8, x1: 8, z0: -6, z1: 6, h: 4.2 };
+
+const woodTex = canvasTex(1024, 1024, (x, w, h) => {
+  const rows = 8, rh = h / rows;
+  for (let r = 0; r < rows; r++) {
+    let px = -(r * 173 % 300);
+    while (px < w) {
+      const len = 260 + ((r * 97 + px) % 220);
+      const t = .82 + ((r * 31 + px * 7) % 23) / 100;
+      x.fillStyle = `rgb(${Math.round(176 * t)},${Math.round(122 * t)},${Math.round(76 * t)})`;
+      x.fillRect(px, r * rh, len, rh);
+      x.strokeStyle = 'rgba(60,35,18,.18)'; x.lineWidth = 1.2;
+      for (let g = 0; g < 7; g++) {
+        const gy = r * rh + 8 + g * (rh - 16) / 6;
+        x.beginPath(); x.moveTo(px, gy);
+        x.bezierCurveTo(px + len * .3, gy + 3, px + len * .6, gy - 3, px + len, gy + 1); x.stroke();
+      }
+      x.fillStyle = 'rgba(40,22,10,.55)'; x.fillRect(px, r * rh, 3, rh);
+      px += len;
+    }
+    x.fillStyle = 'rgba(40,22,10,.5)'; x.fillRect(0, r * rh, w, 3);
+  }
+}, { repeat: [3.2, 2.4] });
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), std('#ffffff', .78, 0, { map: woodTex }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+
+function wall(w, h, color, pos, rotY, map) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), std(color, .92, 0, map ? { map } : {}));
+  m.position.set(...pos); m.rotation.y = rotY; m.receiveShadow = true; scene.add(m); return m;
+}
+wall(16, R.h, '#efe0c6', [0, R.h / 2, R.z0], 0);                     // 後牆
+wall(12, R.h, '#efe0c6', [R.x0, R.h / 2, 0], Math.PI / 2);           // 左牆
+wall(12, R.h, '#efe0c6', [R.x1, R.h / 2, 0], -Math.PI / 2);          // 右牆
+wall(16, R.h, '#e8d6b8', [0, R.h / 2, R.z1], Math.PI);               // 前牆
+const ceil = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), std('#2e2722', .95));
+ceil.rotation.x = Math.PI / 2; ceil.position.y = R.h; scene.add(ceil);
+// 牆腳踢腳板
+[[16, [0, .06, R.z0 + .02], 0], [12, [R.x0 + .02, .06, 0], Math.PI / 2], [12, [R.x1 - .02, .06, 0], -Math.PI / 2], [16, [0, .06, R.z1 - .02], Math.PI]]
+  .forEach(([w, p, r]) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, .12, .03), std('#4a2e1c', .7)); b.position.set(...p); b.rotation.y = r; scene.add(b); });
+
+// 左牆：木條牆板（木吉他牆背景）
+const slatTex = canvasTex(1024, 512, (x, w, h) => {
+  x.fillStyle = '#5a3a24'; x.fillRect(0, 0, w, h);
+  for (let i = 0; i < 40; i++) {
+    const sx = i * w / 40;
+    const t = .9 + (i * 37 % 17) / 100;
+    x.fillStyle = `rgb(${Math.round(158 * t)},${Math.round(106 * t)},${Math.round(64 * t)})`;
+    x.fillRect(sx + 3, 0, w / 40 - 6, h);
+  }
+});
+const slat = new THREE.Mesh(new THREE.PlaneGeometry(10.4, 3.0), std('#ffffff', .8, 0, { map: slatTex }));
+slat.position.set(R.x0 + .015, 1.75, 0); slat.rotation.y = Math.PI / 2; slat.receiveShadow = true; scene.add(slat);
+
+// 後牆：電吉他舞台背板（深色）
+const stageBack = new THREE.Mesh(new THREE.PlaneGeometry(9.6, 2.9), std('#2b2420', .85));
+stageBack.position.set(0, 1.7, R.z0 + .015); stageBack.receiveShadow = true; scene.add(stageBack);
+
+// 天花板軌道燈（裝飾）
+function trackLight(x, z, rotY) {
+  const g = new THREE.Group();
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(3.2, .05, .05), std('#141210', .5, .5)); g.add(rail);
+  for (let i = -1; i <= 1; i++) {
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(.06, .09, .2, 14), std('#161412', .4, .6));
+    head.position.set(i * 1.1, -.14, 0); head.rotation.x = .55; g.add(head);
+    const lens = new THREE.Mesh(new THREE.CircleGeometry(.08, 16), new THREE.MeshBasicMaterial({ color: 0xfff1d0 }));
+    lens.position.set(i * 1.1, -.24, .05); lens.rotation.x = -Math.PI / 2 + .55; g.add(lens);
+  }
+  g.position.set(x, R.h - .04, z); g.rotation.y = rotY; scene.add(g);
+}
+trackLight(-5.8, -2.4, Math.PI / 2); trackLight(-5.8, 2.4, Math.PI / 2); trackLight(0, -3.2, 0); trackLight(3.6, .8, 0);
+
+/* ================================================================
+   招牌／標示
+   ================================================================ */
+function signMesh(w, h, pxW, draw, { emissive = .35 } = {}) {
+  const tex = canvasTex(pxW, Math.round(pxW * h / w), draw);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h),
+    std('#ffffff', .75, 0, { map: tex, emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: emissive, transparent: true }));
+  return m;
+}
+function comicSign(title, sub, bg = '#fdf6e3', fg = '#1d1a16', accent = '#e8713a') {
+  return (x, w, h) => {
+    x.fillStyle = 'rgba(0,0,0,0)'; x.clearRect(0, 0, w, h);
+    rr(x, 10, 10, w - 20, h - 20, h * .16); x.fillStyle = '#1d1a16'; x.fill();
+    rr(x, 4, 4, w - 24, h - 24, h * .16); x.fillStyle = bg; x.fill();
+    x.lineWidth = Math.max(6, h * .035); x.strokeStyle = '#1d1a16'; x.stroke();
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillStyle = fg; x.font = `900 ${h * (sub ? .36 : .46)}px ${FONT_EN}`;
+    x.fillText(title, w / 2 - 10, h * (sub ? .4 : .5) - 6);
+    if (sub) { x.fillStyle = accent; x.font = `800 ${h * .2}px ${FONT}`; x.fillText(sub, w / 2 - 10, h * .74 - 6); }
+  };
+}
+const mainSign = signMesh(6.2, 1.0, 2048, comicSign('波特人樂器行  BOTROY GUITAR LAB', '3 萬級 Martin 木吉他 ✕ 電吉他三巨頭 ‧ 店長親自導覽'), { emissive: .55 });
+mainSign.position.set(0, 3.55, R.z0 + .03); scene.add(mainSign);
+const acSign = signMesh(4.6, .62, 1600, comicSign('ACOUSTIC ‧ 木吉他牆', null, '#fdf6e3'), { emissive: .5 });
+acSign.position.set(R.x0 + .03, 3.45, 0); acSign.rotation.y = Math.PI / 2; scene.add(acSign);
+const elSign = signMesh(3.4, .5, 1400, comicSign('⚡ ELECTRIC 電吉他三巨頭', null, '#1d1a16', '#ffb485'), { emissive: .7 });
+elSign.material.color.set('#ffffff');
+elSign.position.set(0, 2.72, R.z0 + .04); scene.add(elSign);
+// 電吉他舞台背板的「霓虹」線
+const neon = new THREE.Mesh(new THREE.BoxGeometry(9.0, .03, .02), new THREE.MeshBasicMaterial({ color: 0xff9a52 }));
+neon.position.set(0, 3.08, R.z0 + .04); scene.add(neon);
+
+// 前牆：入口門
+const doorSign = signMesh(2.2, 2.7, 700, (x, w, h) => {
+  x.fillStyle = '#3a2a1e'; x.fillRect(0, 0, w, h);
+  x.fillStyle = '#9ec7d6'; x.fillRect(40, 40, w - 80, h * .62);
+  x.fillStyle = 'rgba(255,255,255,.35)'; x.beginPath(); x.moveTo(60, 60); x.lineTo(200, 60); x.lineTo(80, h * .55); x.closePath(); x.fill();
+  x.fillStyle = '#fdf6e3'; x.font = `900 ${w * .11}px ${FONT_EN}`; x.textAlign = 'center'; x.fillText('ENTRANCE', w / 2, h * .8);
+  x.font = `700 ${w * .075}px ${FONT}`; x.fillText('營業中 ‧ 歡迎試彈', w / 2, h * .9);
+}, { emissive: .3 });
+doorSign.position.set(0, 1.35, R.z1 - .03); doorSign.rotation.y = Math.PI; scene.add(doorSign);
+
+/* ================================================================
+   光暈貼圖（假聚光燈）
+   ================================================================ */
+const glowTex = canvasTex(256, 256, (x, w, h) => {
+  const g = x.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+  g.addColorStop(0, 'rgba(255,214,160,.85)'); g.addColorStop(.45, 'rgba(255,190,120,.35)'); g.addColorStop(1, 'rgba(255,170,100,0)');
+  x.fillStyle = g; x.fillRect(0, 0, w, h);
+});
+function glow(w, h) {
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, h),
+    new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .5 }));
+}
+
+/* ================================================================
+   吉他造型（單位：公分，最後整組縮放 0.01）
+   座標：x 往右＝高音弦側（正面看）、y 往上（琴頸方向）、z 往外（面板朝向觀眾）
+   ================================================================ */
+const mirrorHalf = half => half.concat(half.slice(1, -1).reverse().map(([x, y]) => [-x, y]));
+const DREAD = [[0,0],[7,.2],[12.2,-1.4],[14.4,-4.8],[14.6,-9.5],[13.6,-15],[13.3,-19.5],[15.6,-25.5],[18.9,-32.5],[19.8,-39.5],[18.2,-46],[12.5,-50.4],[0,-51.4]];
+const OOO   = [[0,0],[5.8,.2],[10.2,-1.6],[12.2,-5.6],[12.1,-10.6],[10.7,-16.2],[11.2,-20.8],[15.3,-27.6],[18.4,-34.6],[18.5,-41.2],[15.6,-45.8],[9.2,-48.4],[0,-48.9]];
+const GP    = [[0,0],[6.6,.2],[11.3,-1.7],[13.9,-5.8],[13.8,-10.8],[12.2,-16.6],[12.6,-21.4],[16.6,-28.4],[19.4,-35.6],[19.3,-42.2],[16,-47.2],[9.2,-49.9],[0,-50.4]];
+const GPC_R = [[0,0],[4.6,.1],[5.5,-2.6],[6.3,-7.2],[8.5,-11.2],[11.8,-13.6],[12.6,-17],[12.6,-21.4],[16.6,-28.4],[19.4,-35.6],[19.3,-42.2],[16,-47.2],[9.2,-49.9],[0,-50.4]];
+const OUTLINES = {
+  dread: mirrorHalf(DREAD),
+  om: mirrorHalf(OOO),
+  gpc: GPC_R.concat(GP.slice(1, -1).reverse().map(([x, y]) => [-x, y])),
+  strat: [[2.9,0],[3.4,3.2],[4.9,6.6],[7.3,7.9],[9.1,6.2],[10.4,1.6],[12.3,-4.4],[14.3,-8.8],[14.1,-13.2],[12.5,-17.4],[13.1,-22.4],[15.6,-28.2],[16.3,-34.2],[14.3,-40.2],[8.6,-44.6],[0,-45.6],[-8.6,-44.6],[-14.3,-40.2],[-16.3,-34.2],[-15.9,-28.2],[-13.6,-22.4],[-13,-17],[-14.5,-11.6],[-15.3,-5.6],[-14.3,.8],[-12.2,7.6],[-9.6,11.3],[-7,11.1],[-5.1,7.8],[-3.9,3.4],[-2.9,0]],
+  lp: [[2.7,0],[3.4,3.1],[5.5,4.9],[7.8,3.9],[9,.6],[10.3,-3.6],[12.6,-7.2],[13.3,-10.8],[12.8,-14.6],[14.7,-20.2],[16.4,-26.2],[16.4,-32.2],[14.2,-37.4],[9,-41.4],[0,-42.6],[-9,-41.4],[-14.2,-37.4],[-16.4,-32.2],[-16.4,-26.2],[-14.9,-20.2],[-12.9,-14.6],[-13.1,-10],[-12.4,-4.8],[-10,-.2],[-6.4,2.1],[-2.7,0]],
+  zm: [[2.7,0],[3.6,3.6],[5.9,5.6],[8.4,4.4],[9.6,.4],[11,-4.4],[13.2,-8.4],[13.6,-12.4],[13,-15.8],[14.9,-21],[16.5,-27],[16.3,-33],[13.9,-38.2],[8.6,-42],[0,-43.1],[-8.6,-42],[-13.9,-38.2],[-16.3,-33],[-16.5,-27],[-15.2,-21],[-13.4,-15.8],[-13.8,-11],[-13,-5.6],[-10.4,-.8],[-6.6,1.6],[-2.7,0]],
+};
+const BODYCFG = {
+  dread: { depth: 11,  scale: 64.5, neckJoinFret: 14, y0: -7, wB: 5.8, wN: 4.4, head: 'martin', hole: [0, -12.5, 5.0], acoustic: true },
+  om:    { depth: 9.6, scale: 64.5, neckJoinFret: 14, y0: -7, wB: 5.8, wN: 4.4, head: 'martin', hole: [0, -11.8, 4.7], acoustic: true },
+  gpc:   { depth: 10.4,scale: 64.5, neckJoinFret: 14, y0: -7, wB: 5.8, wN: 4.4, head: 'martin', hole: [0, -12.2, 4.9], acoustic: true },
+  strat: { depth: 4.5, scale: 64.8, neckJoinFret: 16, y0: -6, wB: 5.6, wN: 4.3, head: 'fender' },
+  lp:    { depth: 5.4, scale: 62.9, neckJoinFret: 16, y0: -4, wB: 5.6, wN: 4.3, head: 'gibson' },
+  zm:    { depth: 4.8, scale: 62.2, neckJoinFret: 16, y0: -4, wB: 5.6, wN: 4.4, head: 'prs' },
+};
+const HEADS = {
+  martin: { pts: [[-3.9,0],[-4.2,6],[-4.5,12],[-4.4,17.6],[0,18.2],[4.4,17.6],[4.5,12],[4.2,6],[3.9,0]],
+            posts: [[-2.9,4.6],[-2.9,9.1],[-2.9,13.6],[2.9,4.6],[2.9,9.1],[2.9,13.6]], keyX: 5.9 },
+  fender: { pts: [[-2.1,0],[-2.6,2.4],[-3.8,5],[-4.6,8.6],[-4.7,12.6],[-4.3,16.2],[-3.1,18.6],[-1.2,19.8],[.9,19.4],[1.9,17.5],[1.6,15.2],[2.3,12.6],[3.5,10.4],[3.8,7.6],[2.9,4.6],[2.3,2],[2.1,0]],
+            posts: [[-2.4,3.6],[-2.6,6.2],[-2.8,8.8],[-2.9,11.4],[-2.9,14],[-2.7,16.6]], keyX: -6.4, inline: true },
+  gibson: { pts: [[-3.9,0],[-4.6,5],[-5.1,10],[-5.4,15.4],[-3.2,17.4],[-1.2,16.4],[0,17.4],[1.2,16.4],[3.2,17.4],[5.4,15.4],[5.1,10],[4.6,5],[3.9,0]],
+            posts: [[-3.3,4.8],[-3.5,9.4],[-3.7,14],[3.3,4.8],[3.5,9.4],[3.7,14]], keyX: 6.6 },
+  prs:    { pts: [[-3.8,0],[-4.6,5],[-4.8,10],[-4.2,15.2],[-2.2,17],[0,16.4],[2.2,17],[4.2,15.2],[4.8,10],[4.6,5],[3.8,0]],
+            posts: [[-3.1,4.4],[-3.3,8.8],[-3.3,13.1],[3.1,4.4],[3.3,8.8],[3.3,13.1]], keyX: 6.2 },
+};
+
+function smoothShape(pts) {
+  const s = new THREE.Shape(); s.moveTo(pts[0][0], pts[0][1]);
+  s.splineThru(pts.slice(1).concat([pts[0]]).map(p => new THREE.Vector2(p[0], p[1])));
+  return s;
+}
+function polyShape(pts) {
+  const s = new THREE.Shape(); s.moveTo(pts[0][0], pts[0][1]);
+  pts.slice(1).forEach(p => s.lineTo(p[0], p[1])); s.closePath(); return s;
+}
+function planarUV(geo) {
+  geo.computeBoundingBox();
+  const b = geo.boundingBox, p = geo.attributes.position, uv = geo.attributes.uv;
+  const w = b.max.x - b.min.x, h = b.max.y - b.min.y;
+  for (let i = 0; i < p.count; i++) uv.setXY(i, (p.getX(i) - b.min.x) / w, (p.getY(i) - b.min.y) / h);
+  uv.needsUpdate = true; return b;
+}
+function surfaceTex(bb, k, draw) {
+  const W = Math.round((bb.max.x - bb.min.x) * k), H = Math.round((bb.max.y - bb.min.y) * k);
+  return canvasTex(W, H, x => draw(x, (X, Y) => [(X - bb.min.x) * k, (bb.max.y - Y) * k], k, W, H));
+}
+function smoothPoly(x, M, pts) {
+  const P = pts.map(p => M(p[0], p[1])), n = P.length, mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  x.beginPath(); const m0 = mid(P[n - 1], P[0]); x.moveTo(m0[0], m0[1]);
+  for (let i = 0; i < n; i++) { const m = mid(P[i], P[(i + 1) % n]); x.quadraticCurveTo(P[i][0], P[i][1], m[0], m[1]); }
+  x.closePath();
+}
+const fretY = (L, S, n) => L - (S - S / Math.pow(2, n / 12));
+
+function makeGuitar(def) {
+  const cfg = BODYCFG[def.body], look = def.look, S = cfg.scale;
+  const L = S * (1 - Math.pow(2, -cfg.neckJoinFret / 12));  // 琴頸接合處到上弦枕
+  const D = cfg.depth, TOP = D + .5;
+  const g = new THREE.Group(); // 單位：公分
+  const pick = [];
+
+  /* --- 琴身 --- */
+  const bodyGeo = new THREE.ExtrudeGeometry(smoothShape(OUTLINES[def.body]),
+    { depth: D, bevelEnabled: true, bevelThickness: .5, bevelSize: .45, bevelSegments: 3, curveSegments: 10 });
+  const bb = planarUV(bodyGeo);
+  const topTex = surfaceTex(bb, 13, (x, M, k, W, H) => {
+    const c = M(0, cfg.acoustic ? -30 : -27);
+    if (cfg.acoustic) {
+      x.fillStyle = look.top; x.fillRect(0, 0, W, H);
+      for (let i = 0; i < W; i += 3 + (i * 7 % 5)) {           // 木紋
+        x.strokeStyle = `rgba(90,55,25,${.05 + (i * 13 % 9) / 100})`; x.lineWidth = 1 + (i % 3);
+        x.beginPath(); x.moveTo(i, 0); x.lineTo(i + 2, H); x.stroke();
+      }
+      const vg = x.createRadialGradient(c[0], c[1], H * .1, c[0], c[1], H * .75);   // 邊緣微微深色
+      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(60,30,10,.28)');
+      x.fillStyle = vg; x.fillRect(0, 0, W, H);
+      const [hx, hy, hr] = cfg.hole, ctr = M(hx, hy);
+      // 護板（玳瑁紋）
+      const gx = hr + .4;
+      smoothPoly(x, M, [[gx, hy + 5.2], [gx + 4.6, hy + 4.8], [gx + 7.4, hy + 1.8], [gx + 7.8, hy - 3.6], [gx + 6, hy - 8.4], [gx + 2.6, hy - 9.4], [gx, hy - 5.6], [gx + .6, hy]]);
+      x.fillStyle = look.guard; x.fill();
+      for (let i = 0; i < 40; i++) { x.fillStyle = `rgba(150,70,20,${.15 + (i % 5) / 20})`; const p = M(gx + 1 + (i * 37 % 60) / 10, hy + 4 - (i * 53 % 120) / 10); x.beginPath(); x.ellipse(p[0], p[1], k * .5, k * .25, i, 0, 7); x.fill(); }
+      // 音孔環
+      [[hr + 1.3, '#2a1a10', 4], [hr + .9, '#f3e7cf', 2], [hr + .55, '#2a1a10', 3]].forEach(([r, c2, lw]) => {
+        x.strokeStyle = c2; x.lineWidth = lw * k / 10; x.beginPath(); x.arc(ctr[0], ctr[1], r * k, 0, 7); x.stroke();
+      });
+      const hg = x.createRadialGradient(ctr[0], ctr[1], 0, ctr[0], ctr[1], hr * k);
+      hg.addColorStop(0, '#000'); hg.addColorStop(.85, '#0b0604'); hg.addColorStop(1, '#2a1a10');
+      x.fillStyle = hg; x.beginPath(); x.arc(ctr[0], ctr[1], hr * k, 0, 7); x.fill();
+    } else {
+      const [c1, c2, c3] = look.burst;
+      const gr = x.createRadialGradient(c[0], c[1], k * 3, c[0], c[1], k * 25);
+      gr.addColorStop(0, c1); gr.addColorStop(.62, c2); gr.addColorStop(1, c3);
+      x.fillStyle = gr; x.fillRect(0, 0, W, H);
+      if (look.flame) {                                         // 虎紋
+        for (let i = 0; i < 46; i++) {
+          const y = (i / 46) * H, a = .05 + (i % 4) * .025;
+          x.strokeStyle = `rgba(255,240,210,${a})`; x.lineWidth = k * (.35 + (i % 3) * .2);
+          x.beginPath(); x.moveTo(0, y);
+          for (let px = 0; px <= W; px += W / 8) x.lineTo(px, y + Math.sin(px / W * 9 + i) * k * .9);
+          x.stroke();
+        }
+      }
+      if (def.body === 'strat') {
+        smoothPoly(x, M, [[-2.9, 1], [-2.9, -4.5], [-9.5, -3.5], [-11.3, -10], [-10.4, -17.5], [-12.2, -24.5], [-9.6, -30.5], [-4.2, -31.6], [1.5, -29.4], [4.6, -30.6], [9, -33.4], [11.4, -30.8], [10.6, -25], [8.6, -20], [9.5, -12], [8.8, -4.5], [6.2, .8], [2.9, 1]]);
+        x.fillStyle = look.guard; x.fill(); x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; x.stroke();
+      }
+      if (def.body === 'lp') {
+        smoothPoly(x, M, [[3.2, -3.6], [7.2, -4.4], [10.6, -8], [11.8, -14], [10.6, -20.6], [7.6, -22.4], [5.4, -18], [4.6, -10]]);
+        x.fillStyle = look.guard; x.fill(); x.strokeStyle = 'rgba(0,0,0,.25)'; x.lineWidth = 2; x.stroke();
+      }
+      if (def.body === 'zm') {                                  // 單 F 孔
+        const a = M(-8.4, -3.4), b = M(-10.6, -15.4);
+        x.strokeStyle = '#0a0806'; x.lineWidth = k * .75; x.lineCap = 'round';
+        x.beginPath(); x.moveTo(a[0], a[1]);
+        x.bezierCurveTo(a[0] - k * 3.2, a[1] + k * 2.5, b[0] + k * 3.2, b[1] - k * 3.4, b[0], b[1]); x.stroke();
+        x.fillStyle = '#0a0806';
+        [a, b].forEach(p => { x.beginPath(); x.arc(p[0], p[1], k * .75, 0, 7); x.fill(); });
+        const m1 = M(-10.4, -8.6), m2 = M(-8.4, -9.8);
+        x.lineWidth = k * .35; x.beginPath(); x.moveTo(m1[0], m1[1]); x.lineTo(m2[0], m2[1]); x.stroke();
+      }
+    }
+  });
+  const body = new THREE.Mesh(bodyGeo, [
+    std('#ffffff', cfg.acoustic ? .55 : .3, 0, { map: topTex }),
+    std(look.side, cfg.acoustic ? .55 : .35),
+  ]);
+  body.castShadow = true; body.receiveShadow = true; g.add(body); pick.push(body);
+
+  /* --- 琴頸 ＋ 指板 --- */
+  const nGeo = new THREE.ExtrudeGeometry(polyShape([[-cfg.wB / 2, cfg.y0], [cfg.wB / 2, cfg.y0], [cfg.wN / 2, L], [-cfg.wN / 2, L]]),
+    { depth: 1.9, bevelEnabled: true, bevelThickness: .3, bevelSize: .25, bevelSegments: 2 });
+  const nbb = planarUV(nGeo);
+  const boardTex = surfaceTex(nbb, 16, (x, M, k, W, H) => {
+    x.fillStyle = look.board; x.fillRect(0, 0, W, H);
+    for (let i = 0; i < W; i += 2) { x.fillStyle = `rgba(0,0,0,${(i * 7 % 5) / 60})`; x.fillRect(i, 0, 1, H); }
+    for (let n = 1; n <= 24; n++) {
+      const y = fretY(L, S, n); if (y < cfg.y0 + .5) break;
+      const p = M(0, y); x.fillStyle = '#d9d6cf'; x.fillRect(0, p[1] - k * .1, W, k * .2);
+    }
+    const nut = M(0, L); x.fillStyle = '#f3ecd9'; x.fillRect(0, nut[1], W, k * .55);
+    const inlay = look.boardMaple ? '#141010' : '#efe7d6';
+    [3, 5, 7, 9, 12, 15, 17, 19, 21].forEach(n => {
+      const y = (fretY(L, S, n - 1) + fretY(L, S, n)) / 2; if (y < cfg.y0 + 1) return;
+      const p = M(0, y); x.fillStyle = inlay;
+      if (def.body === 'lp') { x.fillRect(p[0] - k * 1.7, p[1] - k * .7, k * 3.4, k * 1.4); }
+      else if (def.body === 'zm') {                              // 鳥形鑲嵌（簡化）
+        x.beginPath(); x.moveTo(p[0] - k * 1.4, p[1] + k * .3); x.quadraticCurveTo(p[0], p[1] - k * 1.1, p[0] + k * 1.4, p[1] + k * .3);
+        x.quadraticCurveTo(p[0], p[1] - k * .2, p[0] - k * 1.4, p[1] + k * .3); x.fill();
+      } else if (n === 12) { [-1, 1].forEach(s => { x.beginPath(); x.arc(p[0] + s * k * 1.1, p[1], k * .38, 0, 7); x.fill(); }); }
+      else { x.beginPath(); x.arc(p[0], p[1], k * .38, 0, 7); x.fill(); }
+    });
+  });
+  const neck = new THREE.Mesh(nGeo, [std('#ffffff', .5, 0, { map: boardTex }), std(look.neck, .55)]);
+  neck.position.z = TOP - 1.2; neck.castShadow = true; g.add(neck); pick.push(neck);
+  const FB = TOP - 1.2 + 1.9 + .3;   // 指板表面高度
+
+  /* --- 琴頭 ＋ 弦鈕 --- */
+  const H = HEADS[cfg.head];
+  const hGeo = new THREE.ExtrudeGeometry(polyShape(H.pts.map(([x, y]) => [x, y + L])),
+    { depth: 1.5, bevelEnabled: true, bevelThickness: .25, bevelSize: .2, bevelSegments: 2 });
+  const head = new THREE.Mesh(hGeo, std(look.head, .45));
+  head.position.z = TOP - 1.0; head.castShadow = true; g.add(head); pick.push(head);
+  const chrome = std('#d8d6d0', .25, .9);
+  const postZ = TOP - 1.0 + 1.5 + .25;
+  H.posts.forEach(([px, py]) => {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(.32, .38, 1.2, 10), chrome);
+    post.rotation.x = Math.PI / 2; post.position.set(px, py + L, postZ + .5); g.add(post);
+    const keyX = H.inline ? H.keyX : Math.sign(px) * H.keyX;
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(.18, .18, Math.abs(keyX - px), 8), chrome);
+    shaft.rotation.z = Math.PI / 2; shaft.position.set((px + keyX) / 2, py + L, TOP - 1.0 + .75); g.add(shaft);
+    const btn = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.5, .5), cfg.acoustic ? std('#1a1210', .4, .3) : chrome);
+    btn.position.set(keyX, py + L, TOP - 1.0 + .75); g.add(btn);
+  });
+
+  /* --- 琴橋 ＋ 拾音器 ＋ 旋鈕 --- */
+  const saddleY = L - S;
+  const black = std('#16110e', .45), cream = std('#efe6cf', .5), nickel = std('#c9c8c2', .28, .85);
+  const add = (geo, mat, x, y, z, rz = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.z = rz; m.castShadow = true; g.add(m); return m; };
+  let bridgeZ;
+  if (cfg.acoustic) {
+    add(new THREE.BoxGeometry(15.5, 3.2, .9), std('#22140d', .5), 0, saddleY - .6, TOP + .45);
+    add(new THREE.BoxGeometry(7.4, .32, .5), cream, 0, saddleY, TOP + 1.1, -.04);
+    for (let i = 0; i < 6; i++) { const p = add(new THREE.CylinderGeometry(.32, .32, .3, 10), cream, -2.75 + i * 1.1, saddleY - 1.5, TOP + .95); p.rotation.x = Math.PI / 2; }
+    bridgeZ = TOP + 1.3;
+  } else {
+    if (def.body === 'strat') {
+      add(new THREE.BoxGeometry(7.2, 4.4, .35), nickel, 0, saddleY - 1.2, TOP + .2);
+      add(new THREE.BoxGeometry(6.4, .9, .55), nickel, 0, saddleY, TOP + .5);
+      const singles = def.hss ? [[-9.2, 0], [-15.2, 0]] : [[-9.2, 0], [-15.2, 0], [-21.2, -.12]];
+      singles.forEach(([y, rz]) => add(new THREE.BoxGeometry(7.4, 1.9, .85), cream, 0, y, TOP + .45, rz));
+      if (def.hss) [.95, -.95].forEach(dy => add(new THREE.BoxGeometry(7.0, 1.7, .9), cream, 0, -21.6 + dy, TOP + .45));   // 琴橋雙線圈
+      // 金屬極柱：讓白色拾音器在白色護板上看得出來（單線圈一排、雙線圈兩排）
+      const poleRows = singles.map(([y]) => y).concat(def.hss ? [-21.6 + .95, -21.6 - .95] : []);
+      const poleGeo = new THREE.CylinderGeometry(.3, .3, .3, 10);
+      poleRows.forEach(y => { for (let i = 0; i < 6; i++) { const pm = add(poleGeo, nickel, -2.6 + i * 1.04, y, TOP + .92); pm.rotation.x = Math.PI / 2; } });
+      [[6.9, -27.4], [8.7, -30.2], [10.2, -32.2]].forEach(([x, y]) => { const k = add(new THREE.CylinderGeometry(.9, 1.0, 1.3, 16), cream, x, y, TOP + .65); k.rotation.x = Math.PI / 2; });
+      add(new THREE.BoxGeometry(.5, 1.4, .8), cream, 9.4, -22.2, TOP + .4, -.6);
+    } else {
+      const humb = def.body === 'lp'
+        ? (y) => { add(new THREE.BoxGeometry(7.6, 4.2, .4), cream, 0, y, TOP + .2); add(new THREE.BoxGeometry(7.0, 3.6, .9), nickel, 0, y, TOP + .6); }
+        : (y) => { add(new THREE.BoxGeometry(7.0, 1.7, .9), black, 0, y + .95, TOP + .45); add(new THREE.BoxGeometry(7.0, 1.7, .9), black, 0, y - .95, TOP + .45); };
+      humb(L - S + 16.5 + (def.body === 'lp' ? .8 : 0)); humb(L - S + 4.2);
+      add(new THREE.BoxGeometry(8.0, 1.1, 1.1), nickel, 0, saddleY, TOP + .7);                  // 琴橋
+      if (def.body === 'lp') add(new THREE.BoxGeometry(8.4, 1.2, 1.3), nickel, 0, saddleY - 4.4, TOP + .75);  // 止弦尾件
+      const kc = def.body === 'lp' ? std('#d9a43a', .35, .1, { transparent: true, opacity: .92 }) : std('#c8a24a', .35, .6);
+      const knobs = def.body === 'lp' ? [[9.2, -27.4], [13.2, -24.6], [10.4, -32.6], [14.2, -29.8]] : [[9.8, -27.4], [12.8, -25.2], [10.8, -32.2], [13.8, -30.0]];   // PRS：每顆拾音器各一組音量／音色
+      knobs.forEach(([x, y]) => { const k = add(new THREE.CylinderGeometry(1.0, 1.1, 1.5, 16), kc, x, y, TOP + .75); k.rotation.x = Math.PI / 2; });
+      const tog = def.body === 'lp' ? [-9.6, -2.6] : [14.6, -20.6];
+      const t = add(new THREE.CylinderGeometry(.18, .18, 2.0, 8), nickel, tog[0], tog[1], TOP + 1.0); t.rotation.x = Math.PI / 2 - .3;
+      add(new THREE.CylinderGeometry(.9, .9, .3, 16), cream, tog[0], tog[1], TOP + .15).rotation.x = Math.PI / 2;
+    }
+    bridgeZ = TOP + 1.3;
+  }
+
+  /* --- 弦 --- */
+  const strMat = new THREE.LineBasicMaterial({ color: cfg.acoustic ? 0xd9c9a6 : 0xd0d0d0, transparent: true, opacity: .9 });
+  const posts = H.posts.map(([px, py]) => new THREE.Vector3(px, py + L, postZ + .9));
+  const order = H.inline ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 5, 4, 3];   // 低音弦→左側弦鈕
+  for (let i = 0; i < 6; i++) {
+    const bx = -2.6 + i * 1.04, nx = -1.75 + i * .7;
+    const by = cfg.acoustic ? saddleY - 1.5 : (def.body === 'lp' ? saddleY - 4.4 : saddleY);
+    const pts = [new THREE.Vector3(bx, by, bridgeZ), new THREE.Vector3(bx, saddleY, bridgeZ + .1),
+                 new THREE.Vector3(nx, L, FB + .35), posts[order.indexOf(i)] || posts[i]];
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), strMat));
+  }
+
+  g.scale.setScalar(.01);
+  g.traverse(o => { if (o.isMesh) o.userData.gid = def.id; });
+  return { group: g, pick, height: { top: (L + 18) * .01, bottom: -(Math.abs(Math.min(...OUTLINES[def.body].map(p => p[1]))) + .5) * .01 }, depth: (TOP + 2) * .01 };
+}
+
+/* ================================================================
+   擺放：木吉他牆（左牆）＋ 電吉他舞台（後牆前）
+   ================================================================ */
+const placed = {};   // id -> { anchor, normal, root, glow }
+const pickables = [];
+
+function priceTag(def) {
+  return signMesh(.86, .44, 640, (x, w, h) => {
+    rr(x, 8, 8, w - 16, h - 16, 26); x.fillStyle = '#1d1a16'; x.fill();
+    rr(x, 2, 2, w - 16, h - 16, 26); x.fillStyle = '#fffaf2'; x.fill(); x.lineWidth = 5; x.strokeStyle = '#1d1a16'; x.stroke();
+    x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+    x.fillStyle = '#1d1a16'; x.font = `900 ${h * .17}px ${FONT_EN}`;
+    const nm = def.name.replace('Fender ', '').replace('Gibson ', '').replace(' Stratocaster', ' Strat');
+    x.fillText(nm, 26, h * .25);
+    x.fillStyle = '#7a7268'; x.font = `600 ${h * .1}px ${FONT}`; x.fillText(def.sub, 26, h * .42);
+    x.fillStyle = '#e8713a'; x.font = `900 ${h * .19}px ${FONT_EN}`; x.fillText(def.price, 26, h * .67);
+    const tagTxt = def.kg ? `${def.struct[0]} ‧ ${def.kg}` : def.struct[0];
+    x.font = `800 ${h * .1}px ${FONT}`; const tw = x.measureText(tagTxt).width + 30;
+    rr(x, 26, h * .75, tw, h * .14, h * .07); x.fillStyle = def.struct[1]; x.fill(); x.lineWidth = 3; x.strokeStyle = '#1d1a16'; x.stroke();
+    x.fillStyle = '#1d1a16'; x.fillText(tagTxt, 41, h * .855);
+    x.fillStyle = '#9a9086'; x.font = `600 ${h * .085}px ${FONT}`; x.textAlign = 'right'; x.fillText('點我聽介紹 ▶', w - 30, h * .855);
+  }, { emissive: .35 });
+}
+
+// 木吉他：掛在左牆，面朝 +x
+['dx2e', 'gpc', 'd10e', '000'].forEach((id, i) => {
+  const def = G[id], z = 3.9 - i * 2.6;
+  const gu = makeGuitar(def);
+  const root = new THREE.Group(); root.add(gu.group);
+  root.position.set(R.x0 + .05, 1.5, z); root.rotation.y = Math.PI / 2; scene.add(root);
+  const hook = new THREE.Mesh(new THREE.BoxGeometry(.06, .05, .16), std('#141210', .4, .5));
+  hook.position.set(R.x0 + .08, 1.5 + gu.height.top - .02, z); scene.add(hook);
+  const gl = glow(1.5, 2.1); gl.position.set(R.x0 + .03, 1.6, z); gl.rotation.y = Math.PI / 2; scene.add(gl);
+  const tag = priceTag(def); tag.position.set(R.x0 + .04, .62, z); tag.rotation.y = Math.PI / 2; scene.add(tag);
+  tag.userData.gid = id; pickables.push(tag);
+  pickables.push(...gu.pick);
+  placed[id] = { anchor: new THREE.Vector3(R.x0 + .05, 1.45, z), normal: new THREE.Vector3(1, 0, 0), root, glow: gl };
+});
+
+// 電吉他舞台
+const stage = new THREE.Mesh(new THREE.BoxGeometry(9.2, .26, 2.2), std('#3a2a20', .65));
+stage.position.set(0, .13, -4.9); stage.receiveShadow = true; stage.castShadow = true; scene.add(stage);
+const led = new THREE.Mesh(new THREE.BoxGeometry(9.2, .03, .02), new THREE.MeshBasicMaterial({ color: 0xffa25c }));
+led.position.set(0, .2, -3.79); scene.add(led);
+
+function guitarStand(x, z) {
+  const s = new THREE.Group(), m = std('#151312', .45, .5);
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(.013, .013, 1.12, 8), m); pole.position.set(0, .56, -.16); s.add(pole);
+  [0, 2.1, 4.2].forEach(a => {                                  // 三腳底座（在琴後方）
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(.011, .011, .34, 6), m);
+    foot.position.set(Math.sin(a) * .15, .03, -.16 + Math.cos(a) * .15); foot.rotation.set(Math.cos(a) * 1.4, 0, -Math.sin(a) * 1.4); s.add(foot);
+  });
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(.01, .01, .2, 6), m); arm.rotation.x = Math.PI / 2; arm.position.set(0, .3, -.07); s.add(arm);
+  const cradle = new THREE.Mesh(new THREE.BoxGeometry(.38, .025, .07), std('#2a2220', .7)); cradle.position.set(0, .3, .02); s.add(cradle);
+  const yoke = new THREE.Mesh(new THREE.TorusGeometry(.035, .008, 6, 12, Math.PI), std('#2a2220', .7)); yoke.position.set(0, 1.12, -.12); s.add(yoke);
+  s.position.set(x, .26, z); scene.add(s);
+}
+['strat', 'lp', 'zm'].forEach((id, i) => {
+  const def = G[id], x = -2.9 + i * 2.9, z = -4.95;
+  guitarStand(x, z);
+  const gu = makeGuitar(def);
+  const root = new THREE.Group(); root.add(gu.group);
+  root.position.set(x, .56 - gu.height.bottom, z - .02); root.rotation.x = -.12; scene.add(root);
+  const gl = glow(2.0, 2.4); gl.position.set(x, 1.45, R.z0 + .03); scene.add(gl);
+  const floorGlow = glow(1.6, 1.0); floorGlow.rotation.x = -Math.PI / 2; floorGlow.position.set(x, .265, -4.7); floorGlow.material.opacity = .35; scene.add(floorGlow);
+  // 前方小立牌
+  const tag = priceTag(def); tag.scale.setScalar(.82); tag.position.set(x, .62, -3.72); tag.rotation.x = -.35; scene.add(tag);
+  const tagPole = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, .42, 6), std('#151312', .4, .5)); tagPole.position.set(x, .21, -3.66); scene.add(tagPole);
+  tag.userData.gid = id; pickables.push(tag, ...gu.pick);
+  placed[id] = { anchor: new THREE.Vector3(x, .56 - gu.height.bottom, z), normal: new THREE.Vector3(0, 0, 1), root, glow: gl };
+});
+
+/* ================================================================
+   重量對決台
+   ================================================================ */
+const POD = new THREE.Vector3(3.6, 0, .5);
+const podium = new THREE.Mesh(new THREE.CylinderGeometry(1.75, 1.85, .16, 48), std('#fdf6e3', .6));
+podium.position.set(POD.x, .08, POD.z); podium.receiveShadow = true; podium.castShadow = true; scene.add(podium);
+const podRing = new THREE.Mesh(new THREE.TorusGeometry(1.8, .03, 8, 64), std('#1d1a16', .5));
+podRing.rotation.x = Math.PI / 2; podRing.position.set(POD.x, .16, POD.z); scene.add(podRing);
+const KG = .3;   // 每公斤 0.3 公尺，0 起算不截斷
+function floatLabel(lines, color, w = 360, h = 190) {
+  const tex = canvasTex(w, h, (x) => {
+    rr(x, 6, 6, w - 12, h - 12, 22); x.fillStyle = '#fffaf2'; x.fill(); x.lineWidth = 5; x.strokeStyle = '#1d1a16'; x.stroke();
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    lines.forEach((ln, i) => {
+      x.fillStyle = i === lines.length - 1 ? color : '#1d1a16';
+      x.font = `${i === lines.length - 1 ? 900 : 800} ${i === lines.length - 1 ? 42 : 33}px ${FONT_EN}`;
+      x.fillText(ln, w / 2, h / 2 + (i - (lines.length - 1) / 2) * 44);
+    });
+  });
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  s.scale.set(w / 560, h / 560, 1); return s;
+}
+WEIGHTS.forEach((wt, i) => {
+  const x = POD.x - 1.2 + i * .6, z = POD.z;
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(.17, .17, wt.lo * KG, 28), std(wt.c, .45, .05));
+  base.position.set(x, .16 + wt.lo * KG / 2, z); base.castShadow = true; scene.add(base);
+  const rng = new THREE.Mesh(new THREE.CylinderGeometry(.17, .17, (wt.hi - wt.lo) * KG, 28),
+    std(wt.c, .45, 0, { transparent: true, opacity: .38 }));
+  rng.position.set(x, .16 + wt.lo * KG + (wt.hi - wt.lo) * KG / 2, z); scene.add(rng);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(.185, .185, .03, 28), std('#1d1a16', .5));
+  cap.position.set(x, .16 + wt.hi * KG + .015, z); scene.add(cap);
+  const lab = floatLabel([...wt.name.split('\n'), `${wt.lo}–${wt.hi} kg`], wt.c);
+  lab.position.set(x, .16 + wt.hi * KG + .36 + (i % 2) * .34, z); scene.add(lab);
+});
+const podSign = signMesh(2.6, .56, 1300, comicSign('⚖️ 重量對決：誰會碎肩？', '資料：店長實秤平均值 ‧ 柱高 0 起算', '#fdf6e3', '#1d1a16', '#b4552a'), { emissive: .45 });
+podSign.position.set(POD.x, .5, POD.z + 1.9); podSign.rotation.x = -.5; scene.add(podSign);
+const podSignStand = new THREE.Mesh(new THREE.BoxGeometry(2.4, .36, .05), std('#1d1a16', .6));
+podSignStand.position.set(POD.x, .2, POD.z + 1.96); scene.add(podSignStand);
+
+/* ================================================================
+   道具：音箱、櫃台、植物、地毯
+   ================================================================ */
+const grillTex = canvasTex(256, 256, (x, w, h) => {
+  x.fillStyle = '#1b1715'; x.fillRect(0, 0, w, h);
+  x.strokeStyle = 'rgba(120,100,80,.35)'; x.lineWidth = 2;
+  for (let i = -h; i < w; i += 9) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + h, h); x.stroke(); x.beginPath(); x.moveTo(i + h, 0); x.lineTo(i, h); x.stroke(); }
+});
+function amp(x, z, w, h, d, tolex, rotY = 0, withHead = false) {
+  const g = new THREE.Group();
+  const box = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), std(tolex, .8)); box.position.y = h / 2; box.castShadow = true; g.add(box);
+  const gr = new THREE.Mesh(new THREE.PlaneGeometry(w * .86, h * .74), std('#ffffff', .9, 0, { map: grillTex }));
+  gr.position.set(0, h * .46, d / 2 + .002); g.add(gr);
+  const pipe = new THREE.Mesh(new THREE.BoxGeometry(w * .88, .012, .01), std('#d9b26a', .4, .4)); pipe.position.set(0, h * .84, d / 2 + .004); g.add(pipe);
+  if (withHead) {
+    const hd = new THREE.Mesh(new THREE.BoxGeometry(w, .26, d * .9), std('#16120f', .7)); hd.position.y = h + .13; hd.castShadow = true; g.add(hd);
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(w * .9, .08, .01), std('#c9a24a', .35, .7)); panel.position.set(0, h + .12, d * .45 + .006); g.add(panel);
+    for (let k = 0; k < 8; k++) { const kn = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, .03, 10), std('#141210', .4)); kn.rotation.x = Math.PI / 2; kn.position.set(-w * .38 + k * w * .108, h + .12, d * .45 + .02); g.add(kn); }
+  }
+  g.position.set(x, 0, z); g.rotation.y = rotY; scene.add(g);
+}
+amp(6.9, -4.6, .8, .8, .38, '#1b1715', -Math.PI / 2 + .3, true);
+amp(6.9, -4.6 + .05, .8, .8, .38, '#1b1715', -Math.PI / 2 + .3);
+amp(7.2, -2.7, .62, .5, .26, '#e9dcc0', -Math.PI / 2 + .1);
+amp(-6.9, 5.0, .5, .42, .24, '#2c4f6b', Math.PI / 2 + .6);
+
+// 櫃台
+const counter = new THREE.Group();
+const cBody = new THREE.Mesh(new THREE.BoxGeometry(.8, 1.0, 2.6), std('#6a4428', .7)); cBody.position.y = .5; cBody.castShadow = true; cBody.receiveShadow = true; counter.add(cBody);
+const cTop = new THREE.Mesh(new THREE.BoxGeometry(.95, .06, 2.75), std('#c9955c', .5)); cTop.position.y = 1.03; cTop.castShadow = true; counter.add(cTop);
+const reg = new THREE.Mesh(new THREE.BoxGeometry(.32, .14, .36), std('#1d1a16', .5)); reg.position.set(.1, 1.13, .6); counter.add(reg);
+const scr = new THREE.Mesh(new THREE.BoxGeometry(.04, .2, .3), std('#2a3440', .3, .2)); scr.position.set(.1, 1.3, .6); scr.rotation.z = -.35; counter.add(scr);
+const mugC = new THREE.Mesh(new THREE.CylinderGeometry(.045, .04, .1, 16), std('#f4efe4', .5)); mugC.position.set(-.15, 1.11, -.5); counter.add(mugC);
+const cSign = signMesh(1.0, .42, 600, comicSign('結帳 ‧ 試彈', '請洽店長羅伊'), { emissive: .4 });
+cSign.position.set(-.41, .62, 0); cSign.rotation.y = -Math.PI / 2; counter.add(cSign);
+const step = new THREE.Mesh(new THREE.BoxGeometry(.9, .28, 2.2), std('#4a2e1c', .8)); step.position.set(.75, .14, 0); step.receiveShadow = true; counter.add(step);
+counter.position.set(6.5, 0, 3.6); scene.add(counter);
+
+function plant(x, z, s = 1) {
+  const g = new THREE.Group();
+  const pot = new THREE.Mesh(new THREE.CylinderGeometry(.24, .18, .42, 20), std('#d9825a', .8)); pot.position.y = .21; pot.castShadow = true; g.add(pot);
+  const leafM = std('#4f7d4a', .85);
+  [[0, .75, 0, .34], [.16, 1.0, .06, .26], [-.14, .98, -.05, .27], [.02, 1.22, 0, .2]].forEach(([lx, ly, lz, r]) => {
+    const l = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 1), leafM); l.position.set(lx, ly, lz); l.castShadow = true; g.add(l);
+  });
+  g.position.set(x, 0, z); g.scale.setScalar(s); scene.add(g);
+}
+plant(-7.3, 5.3); plant(7.3, 5.3, 1.1); plant(-7.3, -5.3, .9); plant(5.1, -5.4, .85);
+
+const rugTex = canvasTex(512, 512, (x, w, h) => {
+  x.clearRect(0, 0, w, h);
+  ['#c75c2e', '#f2d7a8', '#2f7d6f', '#f2d7a8', '#c75c2e', '#e9b45a'].forEach((c, i) => {
+    x.fillStyle = c; x.beginPath(); x.arc(w / 2, h / 2, w / 2 - i * 38, 0, 7); x.fill();
+  });
+  x.fillStyle = '#1d1a16'; x.font = `900 64px ${FONT_EN}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('🎸', w / 2, h / 2);
+});
+const rug = new THREE.Mesh(new THREE.CircleGeometry(1.9, 48), std('#ffffff', .95, 0, { map: rugTex, transparent: true }));
+rug.rotation.x = -Math.PI / 2; rug.position.set(-1.6, .006, 1.4); rug.receiveShadow = true; scene.add(rug);
+
+/* ================================================================
+   店長：波特人羅伊（台灣黑熊大叔）
+   ================================================================ */
+function makeBear() {
+  const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const fur = std('#1c1c1f', .9), furHi = std('#2b2b30', .85), muzzleM = std('#c9a27a', .8), jacket = std('#7b4a2b', .55, .05),
+        jeans = std('#2d3b54', .85), boot = std('#3e2616', .6), white = std('#f2efe8', .8),
+        gold = std('#d2ad55', .28, .85), lens = std('#4a2a12', .12, .5, { transparent: true, opacity: .93 });
+  const M = (geo, mat, x, y, z, parent = body) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; parent.add(m); return m; };
+
+  // 腿
+  const legs = [-1, 1].map(s => {
+    const leg = new THREE.Group(); leg.position.set(s * .15, .64, 0); body.add(leg);
+    M(new THREE.CylinderGeometry(.13, .12, .56, 14), jeans, 0, -.3, 0, leg);
+    const b = M(new THREE.SphereGeometry(.14, 16, 12), boot, 0, -.6, .05, leg); b.scale.set(1, .6, 1.4);
+    return leg;
+  });
+  // 身體（皮夾克＋大肚子）
+  const torso = new THREE.Group(); torso.position.y = 1.0; body.add(torso);
+  const belly = M(new THREE.SphereGeometry(.47, 28, 22), jacket, 0, 0, 0, torso); belly.scale.set(1, 1.1, .86);
+  const chest = M(new THREE.SphereGeometry(.3, 22, 16), fur, 0, .08, .25, torso); chest.scale.set(.75, 1.1, .5);
+  // 胸前白 V
+  const vShape = new THREE.Shape(); vShape.moveTo(-.13, .18); vShape.lineTo(0, -.04); vShape.lineTo(.13, .18); vShape.lineTo(.08, .2); vShape.lineTo(0, .07); vShape.lineTo(-.08, .2); vShape.closePath();
+  const vMesh = new THREE.Mesh(new THREE.ShapeGeometry(vShape), white); vMesh.position.set(0, .06, .405); torso.add(vMesh);
+  // 衣領
+  [-1, 1].forEach(s => { const c = M(new THREE.BoxGeometry(.18, .08, .2), jacket, s * .2, .4, .2, torso); c.rotation.set(-.5, s * .3, s * .5); });
+  // 拉鍊＋口袋
+  [-1, 1].forEach(s => { M(new THREE.BoxGeometry(.012, .55, .01), gold, s * .18, -.12, .4, torso).rotation.y = s * .45; });
+  // 名牌
+  const tagTex = canvasTex(256, 96, (x, w, h) => {
+    x.fillStyle = '#c9a24a'; rr(x, 2, 2, w - 4, h - 4, 10); x.fill();
+    x.fillStyle = '#3a2414'; rr(x, 8, 8, w - 16, h - 16, 8); x.fill();
+    x.fillStyle = '#f2e4c4'; x.font = `900 40px ${FONT}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('店長 羅伊', w / 2, h / 2 + 2);
+  });
+  const nameTag = new THREE.Mesh(new THREE.PlaneGeometry(.17, .064), new THREE.MeshStandardMaterial({ map: tagTex, roughness: .5 }));
+  nameTag.position.set(.27, -.2, .37); nameTag.rotation.y = .5; torso.add(nameTag);
+
+  // 手臂
+  const arms = [-1, 1].map(s => {
+    const arm = new THREE.Group(); arm.position.set(s * .44, 1.28, 0); body.add(arm);
+    const upper = M(new THREE.CylinderGeometry(.11, .1, .55, 14), jacket, 0, -.27, 0, arm);
+    const paw = M(new THREE.SphereGeometry(.105, 14, 12), fur, 0, -.58, .02, arm);
+    arm.rotation.z = s * .22;
+    return arm;
+  });
+  // 右手拿咖啡
+  const mug = new THREE.Group();
+  M(new THREE.CylinderGeometry(.05, .045, .1, 16), white, 0, 0, 0, mug);
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(.03, .01, 8, 14), white); handle.position.set(.055, 0, 0); mug.add(handle);
+  const coffee = new THREE.Mesh(new THREE.CircleGeometry(.044, 16), std('#3a2414', .3)); coffee.rotation.x = -Math.PI / 2; coffee.position.y = .051; mug.add(coffee);
+  mug.position.set(0, -.62, .1); arms[1].add(mug);
+
+  // 圍巾（豹紋）
+  const leoTex = canvasTex(512, 128, (x, w, h) => {
+    x.fillStyle = '#e8932e'; x.fillRect(0, 0, w, h);
+    for (let i = 0; i < 60; i++) {
+      const cx = (i * 73) % w, cy = (i * 41) % h;
+      x.fillStyle = '#3a2414'; x.beginPath(); x.ellipse(cx, cy, 11, 8, i, 0, 7); x.fill();
+      x.fillStyle = '#c9761e'; x.beginPath(); x.ellipse(cx, cy, 5, 3.5, i, 0, 7); x.fill();
+    }
+  }, { repeat: [2, 1] });
+  const leo = std('#ffffff', .85, 0, { map: leoTex });
+  const scarf = M(new THREE.TorusGeometry(.2, .075, 14, 28), leo, 0, 1.47, .02); scarf.rotation.x = Math.PI / 2 - .15; scarf.scale.set(1.15, 1, 1);
+  const tail = M(new THREE.BoxGeometry(.13, .4, .05), leo, .12, 1.22, .36); tail.rotation.set(-.25, 0, -.12);
+
+  // 頭
+  const head = new THREE.Group(); head.position.y = 1.72; body.add(head);
+  const skull = M(new THREE.SphereGeometry(.26, 30, 24), fur, 0, 0, 0, head); skull.scale.set(1.08, 1, 1);
+  const cheek = M(new THREE.SphereGeometry(.2, 20, 16), furHi, 0, -.1, .1, head); cheek.scale.set(1.25, .8, .9);
+  [-1, 1].forEach(s => {
+    M(new THREE.SphereGeometry(.088, 16, 12), fur, s * .2, .2, -.02, head);
+    const inner = M(new THREE.SphereGeometry(.05, 12, 10), std('#4a3a30', .9), s * .2, .2, .03, head); inner.scale.z = .5;
+  });
+  const muzzle = M(new THREE.SphereGeometry(.13, 22, 16), muzzleM, 0, -.07, .2, head); muzzle.scale.set(1.12, .82, 1);
+  const nose = M(new THREE.SphereGeometry(.05, 16, 12), std('#0e0e10', .25, .1), 0, -.02, .33, head); nose.scale.set(1.35, .85, 1);
+  // 鬍渣＋嘴
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(.05, .007, 6, 16, Math.PI * .8), std('#1d1a16', .8));
+  mouth.position.set(0, -.12, .305); mouth.rotation.z = Math.PI + .3; head.add(mouth);
+  // 墨鏡（金框飛行員）
+  [-1, 1].forEach(s => {
+    const lg = new THREE.Group(); lg.position.set(s * .108, .06, .245); lg.rotation.y = s * .18; head.add(lg);
+    const l = new THREE.Mesh(new THREE.CylinderGeometry(.078, .078, .014, 28), lens); l.rotation.x = Math.PI / 2; l.scale.set(1.3, 1, 1.12); l.position.set(s * .012, -.012, 0); l.rotation.y = s * .25; lg.add(l);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(.082, .0075, 8, 32), gold); rim.scale.set(1.3, 1.12, 1); rim.position.set(s * .012, -.012, 0); rim.rotation.z = s * .25; lg.add(rim);
+    const temple = new THREE.Mesh(new THREE.BoxGeometry(.008, .008, .26), gold); temple.position.set(s * .088, .02, -.12); temple.rotation.y = -s * .25; lg.add(temple);
+  });
+  const bridge = new THREE.Mesh(new THREE.TorusGeometry(.028, .006, 6, 12, Math.PI), gold); bridge.position.set(0, .075, .262); head.add(bridge);
+
+  // 說話中的對話泡泡
+  const bubbleTex = canvasTex(256, 200, (x, w, h) => {
+    x.fillStyle = '#fffaf2'; x.strokeStyle = '#1d1a16'; x.lineWidth = 10;
+    rr(x, 10, 10, w - 20, h - 60, 40); x.fill(); x.stroke();
+    x.beginPath(); x.moveTo(w * .42, h - 52); x.lineTo(w * .5, h - 10); x.lineTo(w * .6, h - 52); x.fill(); x.stroke();
+    x.fillStyle = '#e8713a'; [.3, .5, .7].forEach(p => { x.beginPath(); x.arc(w * p, (h - 50) / 2 + 5, 15, 0, 7); x.fill(); });
+  });
+  const bubble = new THREE.Sprite(new THREE.SpriteMaterial({ map: bubbleTex, transparent: true, depthWrite: false }));
+  bubble.scale.set(.36, .28, 1); bubble.position.set(.28, 2.2, 0); root.add(bubble);
+
+  root.scale.setScalar(.74);   // Q 版店長：約 1.3 公尺，站在吉他旁不會擋住展品
+  return { root, body, head, arms, legs, torso, bubble };
+}
+const bear = makeBear();
+scene.add(bear.root);
+const BEAR = { pos: new THREE.Vector3(1.3, 0, 3.4), target: new THREE.Vector3(1.3, 0, 3.4), yaw: 0, walkT: 0, talking: false, wave: 0, faceCam: true };
+bear.root.position.copy(BEAR.pos);
+
+/* ================================================================
+   相機：第一人稱 ＋ 補間
+   ================================================================ */
+const CAM = { pos: new THREE.Vector3(0, 1.6, 5.3), yaw: 0, pitch: -.04, tween: null };
+const BOUNDS = { x0: -7.2, x1: 7.2, z0: -3.6, z1: 5.6 };
+function lookToAngles(from, to) {
+  const d = to.clone().sub(from);
+  return { yaw: Math.atan2(-d.x, -d.z), pitch: Math.atan2(d.y, Math.hypot(d.x, d.z)) };
+}
+function flyTo(pos, look, dur = 1.4) {
+  const a = lookToAngles(pos, look);
+  let dy = a.yaw - CAM.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+  CAM.tween = { t: 0, dur, p0: CAM.pos.clone(), p1: pos.clone(), y0: CAM.yaw, y1: CAM.yaw + dy, q0: CAM.pitch, q1: a.pitch };
+}
+function camRight() { return new THREE.Vector3(Math.cos(CAM.yaw), 0, -Math.sin(CAM.yaw)); }
+
+/* ================================================================
+   站點與導覽腳本
+   ================================================================ */
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const STATIONS = {
+  entrance: { label: '🚪 入口', cam: V(0, 1.6, 5.3), look: V(0, 1.3, -2), bear: V(2.0, 0, 2.1),
+    say: '歡迎光臨<b>波特人樂器行</b>～我是店長羅伊。左邊那面牆是 <b>3 萬級的 Martin 木吉他</b>，後面舞台是<b>電吉他三巨頭</b>，右邊那台秤，等一下讓你看看哪把會「碎肩」。點任何一把吉他，我就過去講給你聽。' },
+  acoustic: { label: '🪵 木吉他牆', cam: V(-1.6, 1.6, 0), look: V(-8, 1.3, 0), bear: V(-6.85, 0, 0),
+    say: '這面牆都是 <b>3 萬上下的 Martin</b>。重點只有一個：<b>側背是不是實木</b>。左邊兩把 X 系列，側背是 HPL 高壓合板，面板依款式是雲杉或沙比利；右邊兩把 Road 系列，整把都是實木。' },
+  electric: { label: '⚡ 電吉他舞台', cam: V(0, 1.6, -.4), look: V(0, .9, -4.9), bear: V(-1.45, .26, -4.45),
+    say: '舞台上是三巨頭的代表：<b>Fender Strat、Gibson Les Paul、PRS</b>。先講價錢——Strat HSS <b>31,800</b>、PRS Zach Myers <b>38,000</b>，Les Paul 是將近 <b>10 萬</b>的另一個級距。（以大鼻子吉他市價為準）' },
+  weight: { label: '⚖️ 重量對決', cam: V(3.6, 1.85, 4.9), look: V(3.6, .72, .5), bear: V(5.7, 0, .25),
+    say: '來，上秤。<b>PRS Zach Myers 3.1～3.3 公斤</b>最輕；Strat、SE Custom 24 在 3.5～3.8 中段班；<b>Les Paul Standard 4.1～4.5 以上</b>墊底。差 1.2 公斤聽起來不多，背兩小時你肩膀就知道。每把木頭密度不同，買之前還是要現場秤。' },
+  counter: { label: '🧾 櫃台總結', cam: V(4.1, 1.6, 4.5), look: V(6.8, 1.15, 3.5), bear: V(7.25, .28, 3.25),
+    say: '總結一下：<b>木吉他</b>——能拉到 <b>3.6 萬</b>就 D-10E（沙比利面；雲杉面要 3.9 萬），卡死 3 萬就 D-X2E。<b>電吉他</b>——要輕、要好背選 PRS Zach Myers；要經典清脆選 Strat；預算夠、要那個厚到不行的 Les Paul 味，就準備好你的肩膀。要試彈跟我說，咖啡我請。' },
+};
+const ART = {
+  entrance: ['portrait.jpg', '店長 波特人羅伊 ‧ 台灣黑熊大叔'],
+  electric: ['strat-studio.jpg', '羅伊的練團室：白色 Strat'],
+  counter:  ['cafe-stage.jpg', '週末咖啡廳駐唱中 🎸'],
+};
+const TOUR = [
+  { s: 'entrance' }, { s: 'acoustic' }, { g: 'dx2e' }, { g: 'gpc' }, { g: 'd10e' }, { g: '000' },
+  { s: 'electric' }, { g: 'strat' }, { g: 'lp' }, { g: 'zm' }, { s: 'weight' }, { s: 'counter' },
+];
+let tourIdx = -1;
+
+function guitarView(id) {
+  const P = placed[id], n = P.normal, right = new THREE.Vector3(-n.z, 0, n.x).negate();   // 面向吉他時的右手邊
+  const isAc = G[id].zone === 'ac';
+  // 鏡頭退到 2.6m 左右：太近的話，站在琴旁 1.7m 高的羅伊會塞滿畫面
+  const cam = P.anchor.clone().add(n.clone().multiplyScalar(isAc ? 3.0 : 2.85)); cam.y = 1.5;
+  const look = P.anchor.clone(); look.y = isAc ? 1.32 : .9;
+  // 羅伊站在吉他左手邊、靠近展示面；右側留給規格卡
+  const bp = P.anchor.clone().add(n.clone().multiplyScalar(isAc ? .42 : -.1)).add(right.multiplyScalar(isAc ? -1.15 : -1.25));
+  bp.y = isAc ? 0 : .26;
+  return { cam, look, bear: bp };
+}
+
+/* ================================================================
+   對話框 ＋ 語音
+   ================================================================ */
+const dlgText = $('#dlgText'), stepEl = $('#step'), nextBtn = $('#next');
+let typing = null, fullHTML = '', voiceOn = false;
+function plain(html) { const d = document.createElement('div'); d.innerHTML = html; return d.textContent; }
+function say(html) {
+  fullHTML = html; clearInterval(typing);
+  const txt = plain(html); let i = 0;
+  BEAR.talking = true;
+  typing = setInterval(() => {
+    i += 2;
+    if (i >= txt.length) { clearInterval(typing); typing = null; dlgText.innerHTML = fullHTML; BEAR.talking = false; return; }
+    dlgText.textContent = txt.slice(0, i);
+  }, 28);
+  if (voiceOn && 'speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt.replace(/～/g, '，'));
+    const vs = speechSynthesis.getVoices();
+    u.voice = vs.find(v => /zh[-_]TW/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null;
+    u.lang = 'zh-TW'; u.rate = 1.05; u.pitch = .7;
+    speechSynthesis.speak(u);
+  }
+}
+function finishTyping() { if (typing) { clearInterval(typing); typing = null; dlgText.innerHTML = fullHTML; BEAR.talking = false; return true; } return false; }
+
+/* ================================================================
+   規格卡
+   ================================================================ */
+const specEl = $('#spec');
+function showSpec(id) {
+  if (!id) { specEl.classList.remove('on'); return; }
+  const d = G[id];
+  specEl.innerHTML = `
+    <button class="x" aria-label="關閉">✕</button>
+    <span class="zone" style="background:${d.zone === 'ac' ? '#f6e3c4' : '#ffe0cf'}">${d.zone === 'ac' ? '🪵 木吉他' : '⚡ 電吉他'}</span>
+    <h3>${d.name}</h3><div class="sub">${d.sub}</div>
+    ${d.photo ? `<a class="photolink" href="${d.photo.page}" target="_blank" rel="noopener">📷 看 ${d.photo.shop} 商品照${d.photo.note ? '（' + d.photo.note + '）' : ''} ↗</a>` : ''}
+    <div class="price">${d.price}</div>
+    <span class="pill" style="background:${d.struct[1]}">${d.struct[0]}</span>${d.kg ? ` <span class="pill" style="background:#fff">⚖️ ${d.kg}</span>` : ''}
+    <table>${d.specs.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>
+    <div class="verdict">🐻 ${d.verdict}</div>`;
+  specEl.classList.add('on');
+  specEl.querySelector('.x').onclick = () => showSpec(null);
+  const im = specEl.querySelector('figure img'); if (im) im.onclick = () => openLB(im.src, im.dataset.cap);
+}
+
+/* ================================================================
+   行動：前往站點 / 前往吉他
+   ================================================================ */
+let focusId = null;
+function setGlow(id) {
+  Object.entries(placed).forEach(([k, P]) => { P.glow.material.opacity = (k === id) ? .95 : (k === hoverId ? .75 : .5); });
+}
+const artEl = $('#art');
+function showArt(key) {
+  const a = ART[key];
+  if (!a) { artEl.classList.remove('on'); return; }
+  $('#artImg').src = './assets/botroy/' + a[0]; $('#artImg').alt = a[1]; $('#artCap').textContent = a[1];
+  artEl.classList.remove('on'); void artEl.offsetWidth; artEl.classList.add('on');
+  clearTimeout(showArt.t); showArt.t = setTimeout(() => artEl.classList.remove('on'), 7000);   // 適時出現一下就收起，不擋展品
+}
+function openLB(src, cap) { $('#lbImg').src = src; $('#lbCap').textContent = cap || ''; $('#lightbox').classList.add('on'); }
+$('#lightbox').onclick = () => $('#lightbox').classList.remove('on');
+$('#artImg').onclick = () => openLB($('#artImg').src, $('#artCap').textContent);
+$('#avatarImg').onclick = () => openLB('./assets/botroy/portrait.jpg', '店長 波特人羅伊 ‧ 台灣黑熊大叔');
+function goStation(key, speak = true) {
+  const S = STATIONS[key];
+  showArt(key);
+  flyTo(S.cam, S.look); BEAR.target.copy(S.bear); BEAR.faceCam = true; BEAR.wave = key === 'entrance' ? 2.4 : 0;
+  focusId = null; showSpec(null); setGlow(null);
+  if (speak) say(S.say);
+  document.querySelectorAll('.chip[data-s]').forEach(c => c.setAttribute('aria-current', c.dataset.s === key));
+}
+function goGuitar(id, speak = true) {
+  const v = guitarView(id);
+  showArt(null);
+  flyTo(v.cam, v.look); BEAR.target.copy(v.bear); BEAR.faceCam = true;
+  focusId = id; showSpec(id); setGlow(id);
+  if (speak) say(G[id].say);
+  document.querySelectorAll('.chip[data-s]').forEach(c => c.setAttribute('aria-current', 'false'));
+}
+function runTour(i) {
+  tourIdx = i;
+  if (i < 0 || i >= TOUR.length) { tourIdx = -1; stepEl.textContent = '自由逛逛中 ‧ 點吉他聽介紹'; nextBtn.textContent = '▶ 跟羅伊逛一圈'; return; }
+  const st = TOUR[i];
+  st.s ? goStation(st.s) : goGuitar(st.g);
+  stepEl.textContent = `導覽 ${i + 1} / ${TOUR.length}`;
+  nextBtn.textContent = i === TOUR.length - 1 ? '結束導覽 ✓' : '下一句 ▶';
+}
+function next() {
+  if (finishTyping()) return;
+  runTour(tourIdx < 0 ? 0 : tourIdx + 1);
+}
+nextBtn.onclick = next;
+
+// 站點按鈕
+const chips = $('#chips');
+chips.innerHTML = `<button class="chip go" id="tourBtn">▶ 跟羅伊逛一圈</button>` +
+  Object.entries(STATIONS).map(([k, s]) => `<button class="chip" data-s="${k}">${s.label}</button>`).join('');
+$('#tourBtn').onclick = () => runTour(0);
+chips.querySelectorAll('.chip[data-s]').forEach(c => c.onclick = () => { tourIdx = -1; stepEl.textContent = '自由逛逛中 ‧ 點吉他聽介紹'; nextBtn.textContent = '▶ 跟羅伊逛一圈'; goStation(c.dataset.s); });
+
+/* ================================================================
+   輸入：拖曳轉頭、WASD 走路、點擊選吉他
+   ================================================================ */
+const keys = {};
+addEventListener('keydown', e => {
+  if (techOpen) return;
+  if (e.target.closest && e.target.closest('button,a')) { if (e.code === 'Space' || e.code === 'Enter') return; }
+  keys[e.code] = true;
+  if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); next(); }
+  if (e.code === 'Escape') { runTour(-1); $('#help').classList.remove('on'); $('#lightbox').classList.remove('on'); }
+});
+addEventListener('keyup', e => keys[e.code] = false);
+
+let down = null, hoverId = null;
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), tip = $('#tip');
+function pickAt(cx, cy) {
+  const r = cv.getBoundingClientRect();
+  ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  return hit && hit.distance < 9 ? hit.object.userData.gid : null;
+}
+cv.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, yaw: CAM.yaw, pitch: CAM.pitch, moved: false }; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e => {
+  if (down) {
+    const dx = e.clientX - down.x, dy = e.clientY - down.y;
+    if (!down.moved && Math.hypot(dx, dy) > 5) { down.moved = true; cv.classList.add('dragging'); CAM.tween = null; }
+    if (down.moved) { CAM.yaw = down.yaw + dx * .0042; CAM.pitch = clamp(down.pitch + dy * .0032, -1.1, 1.0); }
+    return;
+  }
+  const id = pickAt(e.clientX, e.clientY);
+  if (id !== hoverId) { hoverId = id; setGlow(focusId); }
+  cv.classList.toggle('hovering', !!id);
+  if (id) { tip.textContent = `${G[id].name}　點我聽介紹`; tip.style.left = e.clientX + 14 + 'px'; tip.style.top = e.clientY + 12 + 'px'; tip.style.opacity = 1; }
+  else tip.style.opacity = 0;
+});
+addEventListener('pointerup', e => {
+  if (!down) return;
+  const wasClick = !down.moved; down = null; cv.classList.remove('dragging');
+  if (wasClick && e.target === cv) {
+    const id = pickAt(e.clientX, e.clientY);
+    if (id) { tourIdx = -1; stepEl.textContent = '自由逛逛中 ‧ 點其他吉他繼續'; nextBtn.textContent = '▶ 跟羅伊逛一圈'; goGuitar(id); }
+  }
+});
+cv.addEventListener('wheel', e => {
+  e.preventDefault(); CAM.tween = null;
+  const f = new THREE.Vector3(-Math.sin(CAM.yaw), 0, -Math.cos(CAM.yaw));
+  CAM.pos.addScaledVector(f, -Math.sign(e.deltaY) * .35); clampCam();
+}, { passive: false });
+function clampCam() { CAM.pos.x = clamp(CAM.pos.x, BOUNDS.x0, BOUNDS.x1); CAM.pos.z = clamp(CAM.pos.z, BOUNDS.z0, BOUNDS.z1); }
+
+$('#voiceBtn').onclick = e => {
+  voiceOn = !voiceOn; e.currentTarget.setAttribute('aria-pressed', voiceOn);
+  if (!voiceOn && 'speechSynthesis' in window) speechSynthesis.cancel();
+};
+$('#helpBtn').onclick = () => $('#help').classList.add('on');
+$('#helpClose').onclick = () => $('#help').classList.remove('on');
+
+
+/* ================================================================
+   分頁：逛展間 / 技術解說
+   ================================================================ */
+let techOpen = false;
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => {
+  techOpen = b.dataset.tab === 'tech';
+  document.querySelectorAll('#tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
+  $('#tech').classList.toggle('on', techOpen);
+  if (techOpen && 'speechSynthesis' in window) speechSynthesis.cancel();
+});
+
+/* ================================================================
+   主迴圈
+   ================================================================ */
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+let last = performance.now(), T = 0;
+function tick(now) {
+  const dt = Math.min((now - last) / 1000, .05); last = now; T += dt;
+
+  // 相機補間 / 走路
+  if (techOpen) { requestAnimationFrame(tick); return; }   // 技術頁開著就暫停渲染省電
+  if (CAM.tween) {
+    const tw = CAM.tween; tw.t += dt / tw.dur; const u = easeIO(clamp(tw.t, 0, 1));
+    CAM.pos.lerpVectors(tw.p0, tw.p1, u); CAM.yaw = lerp(tw.y0, tw.y1, u); CAM.pitch = lerp(tw.q0, tw.q1, u);
+    if (tw.t >= 1) CAM.tween = null;
+  } else {
+    const f = new THREE.Vector3(-Math.sin(CAM.yaw), 0, -Math.cos(CAM.yaw)), r = camRight();
+    let mv = new THREE.Vector3();
+    if (keys.KeyW || keys.ArrowUp) mv.add(f);
+    if (keys.KeyS || keys.ArrowDown) mv.sub(f);
+    if (keys.KeyD) mv.add(r);
+    if (keys.KeyA) mv.sub(r);
+    if (keys.ArrowLeft) CAM.yaw += dt * 1.6;
+    if (keys.ArrowRight) CAM.yaw -= dt * 1.6;
+    if (mv.lengthSq() > 0) { CAM.pos.addScaledVector(mv.normalize(), dt * 2.6); clampCam(); }
+  }
+  camera.position.copy(CAM.pos); camera.rotation.set(CAM.pitch, CAM.yaw, 0);
+
+  // 熊：走到目標、轉身、說話、揮手
+  const to = BEAR.target.clone().sub(BEAR.pos); to.y = 0;
+  const dist = to.length(), walking = dist > .05;
+  if (walking) {
+    BEAR.pos.addScaledVector(to.normalize(), Math.min(dist, dt * 2.1));
+    BEAR.walkT += dt * 9;
+    const want = Math.atan2(to.x, to.z);
+    let d = want - BEAR.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); BEAR.yaw += d * Math.min(1, dt * 8);
+  } else if (BEAR.faceCam) {
+    const c = CAM.pos.clone().sub(BEAR.pos);
+    const want = Math.atan2(c.x, c.z);
+    let d = want - BEAR.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); BEAR.yaw += d * Math.min(1, dt * 5);
+  }
+  BEAR.pos.y += (BEAR.target.y - BEAR.pos.y) * Math.min(1, dt * 7);
+  bear.root.position.copy(BEAR.pos); bear.root.rotation.y = BEAR.yaw;
+  const sw = walking ? Math.sin(BEAR.walkT) : 0;
+  bear.legs[0].rotation.x = sw * .5; bear.legs[1].rotation.x = -sw * .5;
+  bear.body.position.y = walking ? Math.abs(Math.sin(BEAR.walkT)) * .045 : 0;
+  bear.torso.scale.set(1, 1 + Math.sin(T * 2.2) * .015, 1);
+  if (BEAR.wave > 0) {
+    BEAR.wave -= dt;
+    bear.arms[0].rotation.z = -2.5 + Math.sin(T * 10) * .35; bear.arms[0].rotation.x = 0;
+  } else {
+    bear.arms[0].rotation.z = lerp(bear.arms[0].rotation.z, -.22, dt * 6);
+    bear.arms[0].rotation.x = -sw * .45 + (BEAR.talking ? Math.sin(T * 4) * .12 - .25 : 0);
+  }
+  bear.arms[1].rotation.x = sw * .45 - .55;   // 右手端咖啡
+  bear.arms[1].rotation.z = .22;
+  bear.head.rotation.x = BEAR.talking ? Math.sin(T * 7) * .06 : Math.sin(T * 1.3) * .03;
+  bear.head.rotation.y = Math.sin(T * .7) * .08;
+  bear.bubble.visible = BEAR.talking;
+  bear.bubble.position.y = 2.22 + Math.sin(T * 5) * .02;
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+
+/* 啟動 */
+CAM.pos.copy(STATIONS.entrance.cam);
+const a0 = lookToAngles(STATIONS.entrance.cam, STATIONS.entrance.look); CAM.yaw = a0.yaw; CAM.pitch = a0.pitch;
+BEAR.pos.copy(STATIONS.entrance.bear); BEAR.target.copy(STATIONS.entrance.bear);
+BEAR.yaw = Math.PI; BEAR.wave = 3;
+say(STATIONS.entrance.say); showArt('entrance');
+stepEl.textContent = '自由逛逛中 ‧ 點吉他聽介紹'; nextBtn.textContent = '▶ 跟羅伊逛一圈';
+document.querySelector('.chip[data-s="entrance"]').setAttribute('aria-current', 'true');
+$('#loading').style.opacity = 0; setTimeout(() => $('#loading').remove(), 600);
+requestAnimationFrame(tick);
+
+// 給自動化截圖用
+window.__showroom = { goStation, goGuitar, runTour, CAM, BEAR, finishTyping };
+})();
+</script>
+</body>
+</html>
